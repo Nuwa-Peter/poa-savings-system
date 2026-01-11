@@ -1,0 +1,15 @@
+{
+  "name": "poa-savings-system",
+  "version": "1.0.0",
+  "description": "A group savings system",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i assets/css/style.css -o assets/css/dist/style.css --minify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}
