@@ -20,6 +20,11 @@
                         $role_id = $_SESSION['role_id'];
                         // Roles: 1:Root, 2:Chairman, 3:Secretary, 4:Treasurer, 5:Member
 
+                        // Add User link (for Root, Chairman, Secretary)
+                        if (in_array($role_id, [1, 2, 3])) {
+                            echo '<a href="add_user.php" class="text-gray-600 hover:text-gray-800 px-3 py-2">Add User</a>';
+                        }
+
                         // Add Saving link (for Root, Chairman, Secretary)
                         if (in_array($role_id, [1, 2, 3])) {
                             echo '<a href="add_saving.php" class="text-gray-600 hover:text-gray-800 px-3 py-2">Add Saving</a>';

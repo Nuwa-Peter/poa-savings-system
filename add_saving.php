@@ -6,9 +6,9 @@ check_permissions([1, 2, 3]);
 require_once 'config/db_connect.php'; // Include db connection
 require_once 'templates/header.php';
 
-// Fetch all users to populate the dropdown
+// Fetch all users to populate the dropdown, excluding the root user
 try {
-    $stmt = $pdo->query("SELECT id, username, account_no FROM users ORDER BY username ASC");
+    $stmt = $pdo->query("SELECT id, username, account_no FROM users WHERE account_no != 'POA00000' ORDER BY username ASC");
     $users = $stmt->fetchAll();
 } catch (PDOException $e) {
     $users = [];
