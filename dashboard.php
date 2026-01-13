@@ -1,6 +1,7 @@
 <?php
 require_once 'includes/auth_check.php';
 check_permissions([1, 2, 3, 4, 5]);
+require_once 'config/app_config.php'; // Include currency config
 require_once 'templates/header.php';
 ?>
 
@@ -53,7 +54,8 @@ try {
         <!-- Total Savings Card -->
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Total Savings</h3>
-            <p class="text-4xl font-bold text-indigo-600">$<?php echo number_format($total_savings, 2); ?></p>
+            <p class="text-4xl font-bold text-indigo-600"><?php echo format_currency($total_savings, 'UGX'); ?></p>
+            <p class="text-lg text-gray-500 mt-1"><?php echo format_currency(convert_ugx_to_usd($total_savings), 'USD'); ?></p>
         </div>
 
         <!-- Savings Trend Chart -->
@@ -74,8 +76,13 @@ try {
                         <?php foreach (array_reverse($savings_history) as $saving): // Show latest first ?>
                             <tr class="border-b border-gray-200">
                                 <td class="py-3 px-4">
-                                    <p class="font-semibold">$<?php echo number_format($saving['amount'], 2); ?></p>
-                                    <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', strtotime($saving['created_at'])); ?></p>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-semibold"><?php echo format_currency($saving['amount'], 'UGX'); ?></p>
+                                            <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', strtotime($saving['created_at'])); ?></p>
+                                        </div>
+                                        <p class="text-sm text-gray-600"><?php echo format_currency(convert_ugx_to_usd($saving['amount']), 'USD'); ?></p>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -111,8 +118,23 @@ document.addEventListener('DOMContentLoaded', function () {
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        display: false
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    const ugxValue = context.parsed.y;
+                                    const usdValue = ugxValue * <?php echo EXCHANGE_RATE_UGX_TO_USD; ?>;
+                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'UGX', currencyDisplay: 'code' }).format(ugxValue);
+                                    label += ` (${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(usdValue)})`;
+                                }
+                                return label;
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -120,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return '$' + value;
+                                return 'UGX ' + value.toLocaleString();
                             }
                         }
                     }

@@ -34,14 +34,17 @@ try {
     // ... rest of the file remains the same
 ```
 
-**Step 3: Import Database and Create Initial Users**
-Run this single command from your terminal. It performs two critical actions:
-1.  `ddev import-db`: It imports the application's table structure from the `db.sql` file.
-2.  `ddev ssh ... mysql -e`: It connects to the database and runs a SQL command to create the two essential starting users: the hidden **root** user and a default **chairman**.
+**Step 3: Import Database Structure and Seed Initial Users**
+Run the following two commands from your terminal.
 
-```bash
-ddev import-db --file=db.sql && ddev mysql -e "INSERT INTO users (id, account_no, username, email, password, role_id) VALUES (1, 'POA00000', 'root', 'root@poa.dev', '\$2y\$10\$JA4iSiIs3dk/p3UK4fx5XefzABMZ9ccEIVzJ1jAYYuDCKs1Gww.tq', 1), (2, 'POA00001', 'chairman', 'chairman@poa.dev', '\$2y\$10\$JA4iSiIs3dk/p3UK4fx5XefzABMZ9ccEIVzJ1jAYYuDCKs1Gww.tq', 2);"
-```
+1.  **Import the database structure:**
+    ```bash
+    ddev import-db --file=db.sql
+    ```
+2.  **Seed the database with initial users:** This command runs our secure PHP seeding script to create the `root` and `chairman` users with correct passwords.
+    ```bash
+    ddev exec php db_seed.php
+    ```
 
 **Step 4: Launch the Application**
 Your system is now fully configured and ready to run. Use the following command to open the application in your default web browser:
@@ -52,15 +55,24 @@ ddev launch
 
 ### How to Log In
 
-You can log in with either of the two users created during setup. They both use the same default password.
+You can log in with either of the two users created during setup.
 
-**Root User (Superuser):**
--   **Username:** `root`
+-   **Username:** `root` or `chairman`
 -   **Password:** `password`
 
-**Chairman User:**
--   **Username:** `chairman`
--   **Password:** `password`
+### A Note on Manual SQL Inserts
+
+If you ever need to manually insert a user with a password hash directly via the command line, **you must wrap the SQL statement in single quotes (`'`)**. This prevents the shell from interpreting the `$` in the hash as a variable, which would corrupt the hash.
+
+**Correct Way:**
+```bash
+ddev mysql -e 'INSERT INTO users ... VALUES ("...", "$2y$10$...");'
+```
+
+**Incorrect Way (will fail):**
+```bash
+ddev mysql -e "INSERT INTO users ... VALUES ("...", "$2y$10$...");"
+```
 
 ### Useful DDEV Commands
 

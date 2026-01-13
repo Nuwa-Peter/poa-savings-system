@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 session_start();
 require_once 'config/db_connect.php';
 
@@ -18,18 +16,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute(['identifier' => $identifier]);
             $user = $stmt->fetch();
 
-            if ($user && password_verify($password, $user['password'])) {
-                // Password is correct, start session
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['username'];
-                $_SESSION['role_id'] = $user['role_id'];
+            // First, check if a user was found and if the stored hash is potentially valid
+            if ($user && !empty($user['password'])) {
+                // Now, verify the password against the hash
+                if (password_verify($password, $user['password'])) {
+                    // Password is correct, start session
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['username'] = $user['username'];
+                    $_SESSION['role_id'] = $user['role_id'];
 
-                // Redirect to dashboard
-                header('Location: dashboard.php');
-                exit;
-            } else {
-                $error = 'Invalid credentials. Please try again.';
+                    // Redirect to dashboard
+                    header('Location: dashboard.php');
+                    exit;
+                }
             }
+
+            // If we reach here, either the user was not found, the hash was empty, or the password was incorrect.
+            // In all cases, present a generic error to prevent user enumeration attacks.
+            $error = 'Invalid credentials. Please try again.';
+
         } catch (PDOException $e) {
             $error = 'Error: ' . $e->getMessage();
         }
