@@ -40,7 +40,7 @@ Run this single command from your terminal. It performs two critical actions:
 2.  `ddev ssh ... mysql -e`: It connects to the database and runs a SQL command to create the two essential starting users: the hidden **root** user and a default **chairman**.
 
 ```bash
-ddev import-db --file=db.sql && ddev ssh -s web --mysql -e "INSERT INTO users (id, account_no, username, email, password, role_id) VALUES (1, 'POA00000', 'root', 'root@poa.dev', '\$2y\$10\$JA4iSiIs3dk/p3UK4fx5XefzABMZ9ccEIVzJ1jAYYuDCKs1Gww.tq', 1), (2, 'POA00001', 'chairman', 'chairman@poa.dev', '\$2y\$10\$JA4iSiIs3dk/p3UK4fx5XefzABMZ9ccEIVzJ1jAYYuDCKs1Gww.tq', 2);"
+ddev import-db --file=db.sql && ddev mysql -e "INSERT INTO users (id, account_no, username, email, password, role_id) VALUES (1, 'POA00000', 'root', 'root@poa.dev', '\$2y\$10\$JA4iSiIs3dk/p3UK4fx5XefzABMZ9ccEIVzJ1jAYYuDCKs1Gww.tq', 1), (2, 'POA00001', 'chairman', 'chairman@poa.dev', '\$2y\$10\$JA4iSiIs3dk/p3UK4fx5XefzABMZ9ccEIVzJ1jAYYuDCKs1Gww.tq', 2);"
 ```
 
 **Step 4: Launch the Application**
