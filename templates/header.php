@@ -12,7 +12,7 @@
         <div class="container mx-auto px-6 py-3">
             <div class="flex items-center justify-between">
                 <div class="text-xl font-semibold text-gray-700">
-                    <a href="dashboard.php">POA Savings (Peter, Osbert, Alex)</a>
+                    <a href="dashboard.php">POA Savings (Swahili for 'Good & Safe')</a>
                 </div>
                 <div class="flex items-center">
                     <?php if (isset($_SESSION['role_id'])): ?>
