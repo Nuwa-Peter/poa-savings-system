@@ -80,6 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </div>
         </form>
+        <div class="text-sm text-center">
+            <a href="forgot_password.php" class="font-medium text-indigo-600 hover:text-indigo-500">
+                Forgot your password?
+            </a>
+        </div>
     </div>
 </body>
 </html>
