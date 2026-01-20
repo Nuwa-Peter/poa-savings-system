@@ -91,6 +91,25 @@ try {
         throw new Exception("Request may have already been processed by another admin.");
     }
 
+    // --- Create a notification for the user ---
+    $requester_user_id = null;
+    $request_amount = null;
+
+    $details_stmt = $pdo->prepare("SELECT user_id, amount FROM {$table_name} WHERE id = ?");
+    $details_stmt->execute([$request_id]);
+    $request_details = $details_stmt->fetch();
+
+    if ($request_details) {
+        $requester_user_id = $request_details['user_id'];
+        $request_amount = $request_details['amount'];
+
+        $action_past_tense = ($action === 'approve') ? 'approved' : 'rejected';
+        $notification_message = "Your {$request_type} request for " . number_format($request_amount, 2) . " UGX has been " . $action_past_tense . ".";
+
+        $notify_stmt = $pdo->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
+        $notify_stmt->execute([$requester_user_id, $notification_message]);
+    }
+
     // --- Log the administrative action ---
     $log_action = sprintf($log_action_template, $action, $request_type, $request_id);
     $log_stmt = $pdo->prepare("INSERT INTO logs (user_id, action) VALUES (?, ?)");

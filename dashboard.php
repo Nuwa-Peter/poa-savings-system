@@ -1,6 +1,14 @@
 <?php
 require_once 'includes/auth_check.php';
 check_permissions([1, 2, 3, 4, 5]);
+
+// --- Redirect administrators to the admin dashboard ---
+$user_role = $_SESSION['role_id'] ?? 0;
+if (in_array($user_role, [1, 2, 3, 4])) {
+    header('Location: admin_dashboard.php');
+    exit;
+}
+
 require_once 'config/app_config.php'; // Include currency config
 require_once 'templates/header.php';
 ?>

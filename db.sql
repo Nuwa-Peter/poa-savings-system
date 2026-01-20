@@ -78,6 +78,27 @@ ALTER TABLE `loans`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `loan_payments`
+--
+
+CREATE TABLE `loan_payments` (
+  `id` int(11) NOT NULL,
+  `loan_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `paid_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `loan_id` (`loan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- AUTO_INCREMENT for table `loan_payments`
+--
+ALTER TABLE `loan_payments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `logs`
 --
 

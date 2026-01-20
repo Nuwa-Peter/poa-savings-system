@@ -33,11 +33,41 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
         // In a real app, you would have this from the initial login query
         require_once 'config/db_connect.php';
         try {
+            $user_id = $_SESSION['user_id'];
+            // Fetch user avatar
             $stmt = $pdo->prepare("SELECT avatar FROM users WHERE id = ?");
-            $stmt->execute([$_SESSION['user_id']]);
+            $stmt->execute([$user_id]);
             $user_avatar = $stmt->fetchColumn();
+
+            // Fetch unread notification count
+            $notify_stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
+            $notify_stmt->execute([$user_id]);
+            $unread_notifications_count = $notify_stmt->fetchColumn();
+
+            // --- Check if interest needs to be run (for top-level admins) ---
+            $show_interest_alert = false;
+            if (in_array($role_id, [1, 2])) {
+                $interest_log_stmt = $pdo->prepare(
+                    "SELECT timestamp FROM logs WHERE action LIKE '%Admin ran interest script%' ORDER BY timestamp DESC LIMIT 1"
+                );
+                $interest_log_stmt->execute();
+                $last_run_timestamp = $interest_log_stmt->fetchColumn();
+
+                if ($last_run_timestamp) {
+                    $last_run_month = date('Y-m', strtotime($last_run_timestamp));
+                    $current_month = date('Y-m');
+                    if ($last_run_month !== $current_month) {
+                        $show_interest_alert = true;
+                    }
+                } else {
+                    // If it has never been run, show the alert
+                    $show_interest_alert = true;
+                }
+            }
+
         } catch (PDOException $e) {
             $user_avatar = null; // Default on error
+            $unread_notifications_count = 0;
         }
     }
     ?>
@@ -56,6 +86,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                 </li>
                 <li><a href="withdraw.php" class="block py-2 px-4 rounded hover:bg-gray-700">Request Withdrawal</a></li>
                 <li><a href="request_loan.php" class="block py-2 px-4 rounded hover:bg-gray-700">Request Loan</a></li>
+                <li><a href="repay_loan.php" class="block py-2 px-4 rounded hover:bg-gray-700">Repay Loan</a></li>
 
                 <?php if (in_array($role_id, [1, 2, 3])): // Admin-level actions ?>
                     <li class="pt-4">
@@ -110,12 +141,14 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                 </button>
 
                 <!-- Notification Bell -->
-                <?php if (check_payment_status($pdo, $_SESSION['user_id'])): ?>
                 <div class="relative">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                    <a href="#" class="relative">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                        <?php if ($unread_notifications_count > 0): ?>
+                            <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white"><?php echo $unread_notifications_count; ?></span>
+                        <?php endif; ?>
+                    </a>
                 </div>
-                <?php endif; ?>
 
                 <!-- User Avatar & Dropdown -->
                 <a href="settings.php" class="relative">
@@ -124,4 +157,17 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
             </div>
         </header>
         <main class="p-6">
+            <?php if ($show_interest_alert): ?>
+            <div id="interest-alert" class="relative mb-6 rounded-lg border-s-4 border-yellow-500 bg-yellow-50 p-4">
+                <div class="flex items-center gap-2 text-yellow-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
+                        <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
+                    </svg>
+                    <strong class="block font-medium"> Action Required </strong>
+                </div>
+                <p class="mt-2 text-sm text-yellow-700">The monthly loan interest has not been applied for the current month. Please run the script to ensure all loan balances are up to date.</p>
+                <a href="apply_interest.php" class="mt-2 inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 text-sm rounded">Apply Interest Now</a>
+                <button onclick="document.getElementById('interest-alert').style.display='none'" class="absolute top-2 right-2 text-yellow-800">&times;</button>
+            </div>
+            <?php endif; ?>
     <?php endif; ?>
