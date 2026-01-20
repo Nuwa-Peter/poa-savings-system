@@ -1,0 +1,49 @@
+/* assets/css/theme.css */
+
+/* Light Theme (Default) */
+body.light-theme {
+    --bg-color: #f3f4f6;
+    --text-color: #1f2937;
+    --sidebar-bg: #1f2937;
+    --sidebar-text: #ffffff;
+    --header-bg: #ffffff;
+    --card-bg: #ffffff;
+    --link-hover-bg: #374151;
+}
+
+/* Dark Theme */
+body.dark-theme {
+    --bg-color: #1f2937;
+    --text-color: #f3f4f6;
+    --sidebar-bg: #111827;
+    --sidebar-text: #ffffff;
+    --header-bg: #1f2937;
+    --card-bg: #374151;
+    --link-hover-bg: #4b5563;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.sidebar {
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+}
+
+.sidebar a:hover {
+    background-color: var(--link-hover-bg);
+}
+
+.main-content header {
+    background-color: var(--header-bg);
+}
+
+.bg-white {
+    background-color: var(--card-bg);
+}
+
+.text-gray-800 {
+    color: var(--text-color);
+}

@@ -31,6 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare('INSERT INTO users (account_no, username, email, phone, password, role_id) VALUES (?, ?, ?, ?, ?, ?)');
             $stmt->execute([$account_no, $username, $email, $phone, $hashed_password, $role_id]);
 
+            // Log the action
+            require_once 'includes/logging.php';
+            $new_user_id = $pdo->lastInsertId();
+            log_action($pdo, $_SESSION['user_id'], "Created new user: $username (ID: $new_user_id)");
+
             $success = "User created successfully with account number: $account_no";
 
         } catch (Exception $e) {

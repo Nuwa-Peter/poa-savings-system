@@ -35,6 +35,18 @@ try {
 } catch (PDOException $e) {
     $db_error = "Database error: " . $e->getMessage();
 }
+
+// Fetch user's own logs
+$user_logs = [];
+try {
+    $log_stmt = $pdo->prepare(
+        "SELECT action, created_at FROM logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 10"
+    );
+    $log_stmt->execute([$user_id]);
+    $user_logs = $log_stmt->fetchAll();
+} catch (PDOException $e) {
+    $db_error = "Database error: " . $e->getMessage();
+}
 ?>
 
 <h2 class="text-3xl font-bold mb-6 text-gray-800">Dashboard</h2>
@@ -97,6 +109,25 @@ try {
     </div>
 </div>
 
+<!-- User Activity Log -->
+<div class="bg-white p-6 rounded-lg shadow-md mt-6">
+    <h3 class="text-xl font-semibold text-gray-700 mb-4">Your Recent Activity</h3>
+    <div class="overflow-auto max-h-96">
+        <ul>
+            <?php if (count($user_logs) > 0): ?>
+                <?php foreach ($user_logs as $log): ?>
+                    <li class="border-b border-gray-200 py-2">
+                        <p class="text-sm text-gray-800"><?php echo htmlspecialchars($log['action']); ?></p>
+                        <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', strtotime($log['created_at'])); ?></p>
+                    </li>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <li class="py-2 text-center text-gray-500">No recent activity.</li>
+            <?php endif; ?>
+        </ul>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // --- Line Chart for Savings Trend ---
@@ -151,7 +182,37 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+// --- FullCalendar for Savings Reminders ---
+const calendarEl = document.getElementById('calendar');
+if (calendarEl) {
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,listWeek'
+        },
+        events: [
+            {
+                title: 'Weekly Savings Reminder (10,000 UGX)',
+                daysOfWeek: [0], // 0 = Sunday
+                startRecur: new Date().toISOString().slice(0,10), // Start from today
+                allDay: true,
+                backgroundColor: '#DC2626', // Red-600
+                borderColor: '#DC2626'
+            }
+        ]
+    });
+    calendar.render();
+}
 </script>
+
+<!-- Calendar Card -->
+<div class="bg-white p-6 rounded-lg shadow-md mt-6">
+    <h3 class="text-xl font-semibold text-gray-700 mb-4">Savings Calendar</h3>
+    <div id="calendar"></div>
+</div>
 
 <?php
 require_once 'templates/footer.php';
