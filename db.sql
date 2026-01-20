@@ -99,6 +99,29 @@ ALTER TABLE `loan_payments`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `loan_guarantors`
+--
+
+CREATE TABLE `loan_guarantors` (
+  `id` int(11) NOT NULL,
+  `loan_id` int(11) NOT NULL,
+  `guarantor_id` int(11) NOT NULL,
+  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `responded_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `loan_guarantor_unique` (`loan_id`,`guarantor_id`),
+  KEY `guarantor_id` (`guarantor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- AUTO_INCREMENT for table `loan_guarantors`
+--
+ALTER TABLE `loan_guarantors`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `logs`
 --
 

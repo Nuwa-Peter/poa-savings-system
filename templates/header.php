@@ -87,6 +87,8 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                 <li><a href="withdraw.php" class="block py-2 px-4 rounded hover:bg-gray-700">Request Withdrawal</a></li>
                 <li><a href="request_loan.php" class="block py-2 px-4 rounded hover:bg-gray-700">Request Loan</a></li>
                 <li><a href="repay_loan.php" class="block py-2 px-4 rounded hover:bg-gray-700">Repay Loan</a></li>
+                <li><a href="guarantor_requests.php" class="block py-2 px-4 rounded hover:bg-gray-700">Guarantor Requests</a></li>
+                <li><a href="generate_statement.php" class="block py-2 px-4 rounded hover:bg-gray-700">Download Statement</a></li>
 
                 <?php if (in_array($role_id, [1, 2, 3])): // Admin-level actions ?>
                     <li class="pt-4">
@@ -105,6 +107,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                         <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Reports & Logs</span>
                     </li>
                     <li><a href="system_report.php" class="block py-2 px-4 rounded hover:bg-gray-700">System Report</a></li>
+                    <li><a href="reports.php" class="block py-2 px-4 rounded hover:bg-gray-700">Detailed Reports</a></li>
                 <?php endif; ?>
 
                 <?php if (in_array($role_id, [1, 2])): ?>
@@ -142,7 +145,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
 
                 <!-- Notification Bell -->
                 <div class="relative">
-                    <a href="#" class="relative">
+                    <a href="notifications.php" class="relative">
                         <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                         <?php if ($unread_notifications_count > 0): ?>
                             <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs text-white"><?php echo $unread_notifications_count; ?></span>

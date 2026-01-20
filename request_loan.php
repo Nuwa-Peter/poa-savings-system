@@ -3,7 +3,18 @@ require_once 'includes/auth_check.php';
 // All authenticated users can request a loan
 check_permissions([1, 2, 3, 4, 5]);
 
+require_once 'config/db_connect.php';
 require_once 'templates/header.php';
+
+// Fetch other members to be potential guarantors
+$other_members = [];
+try {
+    $stmt = $pdo->prepare("SELECT id, username FROM users WHERE id != ? AND role_id = 5 ORDER BY username ASC");
+    $stmt->execute([$_SESSION['user_id']]);
+    $other_members = $stmt->fetchAll();
+} catch (PDOException $e) {
+    $db_error = "Could not fetch members: " . $e->getMessage();
+}
 ?>
 
 <div class="container mx-auto mt-10">
@@ -34,6 +45,18 @@ require_once 'templates/header.php';
         <div class="mb-4">
             <label for="amount" class="block text-gray-700 text-sm font-bold mb-2">Loan Amount:</label>
             <input type="number" step="0.01" name="amount" id="amount" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div class="mb-6">
+            <label for="guarantor_id" class="block text-gray-700 text-sm font-bold mb-2">Select a Guarantor:</label>
+            <select name="guarantor_id" id="guarantor_id" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option value="" disabled selected>Select a member to guarantee your loan</option>
+                <?php foreach ($other_members as $member): ?>
+                    <option value="<?php echo htmlspecialchars($member['id']); ?>">
+                        <?php echo htmlspecialchars($member['username']); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="text-xs text-gray-600 mt-2">The member you select will be sent a request to approve guaranteeing your loan. Your loan cannot be approved by an admin until your guarantor approves.</p>
         </div>
         <div class="flex items-center justify-between">
             <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">

@@ -13,10 +13,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $user_id = $_SESSION['user_id'];
 $amount = $_POST['amount'] ?? 0;
+$guarantor_id = $_POST['guarantor_id'] ?? null;
 
 // --- Basic Validation ---
 if (!is_numeric($amount) || $amount <= 0) {
     header('Location: request_loan.php?error=' . urlencode('Invalid loan amount specified.'));
+    exit;
+}
+
+if (!$guarantor_id || !is_numeric($guarantor_id) || $guarantor_id == $user_id) {
+    header('Location: request_loan.php?error=' . urlencode('Invalid guarantor selected.'));
     exit;
 }
 
@@ -60,14 +66,30 @@ try {
     // --- Process the Loan Request ---
     $pdo->beginTransaction();
 
-    // Insert the loan request with a 'pending' status.
-    $insert_stmt = $pdo->prepare(
+    // 1. Insert the loan request with a 'pending' status.
+    $insert_loan_stmt = $pdo->prepare(
         "INSERT INTO loans (user_id, amount, balance, status, requested_at) VALUES (?, ?, ?, 'pending', NOW())"
     );
-    $insert_stmt->execute([$user_id, $amount, $amount]);
+    $insert_loan_stmt->execute([$user_id, $amount, $amount]);
+    $loan_id = $pdo->lastInsertId();
 
-    // Log the action for audit purposes.
-    $log_action = "User requested a loan of " . number_format($amount, 2);
+    // 2. Create the pending guarantor request.
+    $insert_guarantor_stmt = $pdo->prepare(
+        "INSERT INTO loan_guarantors (loan_id, guarantor_id, status) VALUES (?, ?, 'pending')"
+    );
+    $insert_guarantor_stmt->execute([$loan_id, $guarantor_id]);
+
+    // 3. Create a notification for the guarantor.
+    $borrower_stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
+    $borrower_stmt->execute([$user_id]);
+    $borrower_username = $borrower_stmt->fetchColumn();
+
+    $notification_message = htmlspecialchars($borrower_username) . " has requested you to be a guarantor for a loan of " . number_format($amount, 2) . " UGX. Please review this request.";
+    $notify_stmt = $pdo->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
+    $notify_stmt->execute([$guarantor_id, $notification_message]);
+
+    // 4. Log the action for audit purposes.
+    $log_action = "User requested a loan of " . number_format($amount, 2) . " with guarantor ID " . $guarantor_id;
     $log_stmt = $pdo->prepare("INSERT INTO logs (user_id, action) VALUES (?, ?)");
     $log_stmt->execute([$user_id, $log_action]);
 
