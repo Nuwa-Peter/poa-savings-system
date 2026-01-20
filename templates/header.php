@@ -77,7 +77,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
         <div class="p-4 border-b border-gray-700 flex justify-center items-center">
             <img id="logo" src="assets/images/poa_light.png" alt="POA Savings Logo" class="h-10">
         </div>
-        <nav class="flex-grow p-4">
+        <nav class="flex-grow p-4 overflow-y-auto">
             <ul class="space-y-2">
                 <li><a href="dashboard.php" class="block py-2 px-4 rounded hover:bg-gray-700">Dashboard</a></li>
 
