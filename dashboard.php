@@ -40,7 +40,7 @@ try {
 $user_logs = [];
 try {
     $log_stmt = $pdo->prepare(
-        "SELECT action, created_at FROM logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 10"
+        "SELECT action, timestamp FROM logs WHERE user_id = ? ORDER BY timestamp DESC LIMIT 10"
     );
     $log_stmt->execute([$user_id]);
     $user_logs = $log_stmt->fetchAll();
@@ -118,7 +118,7 @@ try {
                 <?php foreach ($user_logs as $log): ?>
                     <li class="border-b border-gray-200 py-2">
                         <p class="text-sm text-gray-800"><?php echo htmlspecialchars($log['action']); ?></p>
-                        <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', strtotime($log['created_at'])); ?></p>
+                        <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', strtotime($log['timestamp'])); ?></p>
                     </li>
                 <?php endforeach; ?>
             <?php else: ?>

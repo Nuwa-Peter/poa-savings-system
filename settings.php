@@ -163,14 +163,14 @@ try {
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h3 class="text-xl font-semibold text-gray-700 mb-4">Update Profile Information</h3>
 
-        <?php if ($success_message): ?>
+        <?php if ($profile_success): ?>
             <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-                <?php echo htmlspecialchars($success_message); ?>
+                <?php echo htmlspecialchars($profile_success); ?>
             </div>
         <?php endif; ?>
-        <?php if ($error_message): ?>
+        <?php if ($profile_error): ?>
             <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-                <?php echo htmlspecialchars($error_message); ?>
+                <?php echo htmlspecialchars($profile_error); ?>
             </div>
         <?php endif; ?>
 
@@ -185,7 +185,7 @@ try {
             </div>
             <div class="mb-6">
                 <label for="phone" class="block text-gray-700 text-sm font-bold mb-2">Phone:</label>
-                <input type="text" name="phone" id="phone" value="<?php echo htmlspecialchars($user['phone']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <input type="text" name="phone" id="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
             </div>
             <div class="flex items-center justify-end">
                 <button type="submit" name="update_profile" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
