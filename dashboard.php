@@ -21,16 +21,45 @@ try {
     $total_result = $total_stmt->fetch();
     $total_savings = $total_result['total'] ?? 0;
 
-    // Fetch savings history for table and chart
-    $history_stmt = $pdo->prepare("SELECT amount, created_at FROM savings WHERE user_id = ? ORDER BY created_at ASC");
-    $history_stmt->execute([$user_id]);
-    $savings_history = $history_stmt->fetchAll();
+    // Fetch savings history for the chart
+    $chart_stmt = $pdo->prepare("SELECT amount, created_at FROM savings WHERE user_id = ? ORDER BY created_at ASC");
+    $chart_stmt->execute([$user_id]);
+    $savings_for_chart = $chart_stmt->fetchAll();
 
-    // Prepare data for the line chart
-    foreach ($savings_history as $saving) {
+    foreach ($savings_for_chart as $saving) {
         $savings_dates[] = date('M j, Y', strtotime($saving['created_at']));
         $savings_amounts[] = $saving['amount'];
     }
+
+    // --- Fetch all transaction types for the history list ---
+    $transactions = [];
+
+    // 1. Savings
+    $savings_records = $pdo->prepare("SELECT amount, created_at FROM savings WHERE user_id = ?");
+    $savings_records->execute([$user_id]);
+    foreach ($savings_records->fetchAll() as $row) {
+        $transactions[] = ['date' => strtotime($row['created_at']), 'type' => 'Saving', 'amount' => $row['amount'], 'status' => 'Approved'];
+    }
+
+    // 2. Withdrawals
+    $withdrawal_records = $pdo->prepare("SELECT amount, status, requested_at FROM withdrawals WHERE user_id = ?");
+    $withdrawal_records->execute([$user_id]);
+    foreach ($withdrawal_records->fetchAll() as $row) {
+        $transactions[] = ['date' => strtotime($row['requested_at']), 'type' => 'Withdrawal', 'amount' => $row['amount'], 'status' => $row['status']];
+    }
+
+    // 3. Loans
+    $loan_records = $pdo->prepare("SELECT amount, status, requested_at FROM loans WHERE user_id = ?");
+    $loan_records->execute([$user_id]);
+    foreach ($loan_records->fetchAll() as $row) {
+        $transactions[] = ['date' => strtotime($row['requested_at']), 'type' => 'Loan', 'amount' => $row['amount'], 'status' => $row['status']];
+    }
+
+    // Sort transactions by date descending
+    usort($transactions, function($a, $b) {
+        return $b['date'] - $a['date'];
+    });
+
 
 } catch (PDOException $e) {
     $db_error = "Database error: " . $e->getMessage();
@@ -84,16 +113,35 @@ try {
         <div class="overflow-auto max-h-96">
             <table class="min-w-full leading-normal">
                 <tbody class="text-gray-600 text-sm">
-                    <?php if (count($savings_history) > 0): ?>
-                        <?php foreach (array_reverse($savings_history) as $saving): // Show latest first ?>
+                    <?php if (count($transactions) > 0): ?>
+                        <?php foreach ($transactions as $transaction): ?>
                             <tr class="border-b border-gray-200">
                                 <td class="py-3 px-4">
                                     <div class="flex justify-between items-center">
                                         <div>
-                                            <p class="font-semibold"><?php echo format_currency($saving['amount'], 'UGX'); ?></p>
-                                            <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', strtotime($saving['created_at'])); ?></p>
+                                            <p class="font-semibold text-gray-800"><?php echo htmlspecialchars($transaction['type']); ?></p>
+                                            <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', $transaction['date']); ?></p>
                                         </div>
-                                        <p class="text-sm text-gray-600"><?php echo format_currency(convert_ugx_to_usd($saving['amount']), 'USD'); ?></p>
+                                        <div class="text-right">
+                                            <p class="font-semibold">
+                                                <?php if ($transaction['type'] === 'Saving'): ?>
+                                                    <span class="text-green-600">+<?php echo format_currency($transaction['amount'], 'UGX'); ?></span>
+                                                <?php else: ?>
+                                                    <span class="text-red-600">-<?php echo format_currency($transaction['amount'], 'UGX'); ?></span>
+                                                <?php endif; ?>
+                                            </p>
+                                            <p class="text-xs capitalize <?php
+                                                switch (strtolower($transaction['status'])) {
+                                                    case 'approved': echo 'text-green-500'; break;
+                                                    case 'pending': echo 'text-yellow-500'; break;
+                                                    case 'rejected': echo 'text-red-500'; break;
+                                                    case 'paid': echo 'text-blue-500'; break;
+                                                    default: echo 'text-gray-500';
+                                                }
+                                            ?>">
+                                                <?php echo htmlspecialchars($transaction['status']); ?>
+                                            </p>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

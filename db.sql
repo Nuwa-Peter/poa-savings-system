@@ -24,6 +24,60 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `withdrawals`
+--
+
+CREATE TABLE `withdrawals` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `processed_at` timestamp NULL DEFAULT NULL,
+  `processed_by_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `processed_by_user_id` (`processed_by_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- AUTO_INCREMENT for table `withdrawals`
+--
+ALTER TABLE `withdrawals`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `loans`
+--
+
+CREATE TABLE `loans` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `balance` decimal(10,2) NOT NULL,
+  `interest_rate` decimal(4,2) NOT NULL DEFAULT 2.00,
+  `status` enum('pending','approved','rejected','paid') NOT NULL DEFAULT 'pending',
+  `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `approved_at` timestamp NULL DEFAULT NULL,
+  `approved_by_user_id` int(11) DEFAULT NULL,
+  `due_date` date DEFAULT NULL,
+  `last_interest_applied_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `approved_by_user_id` (`approved_by_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- AUTO_INCREMENT for table `loans`
+--
+ALTER TABLE `loans`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `logs`
 --
 

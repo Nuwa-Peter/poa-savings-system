@@ -12,6 +12,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>POA Savings Management System</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
@@ -50,12 +51,28 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
             <ul class="space-y-2">
                 <li><a href="dashboard.php" class="block py-2 px-4 rounded hover:bg-gray-700">Dashboard</a></li>
 
-                <?php if (in_array($role_id, [1, 2, 3])): ?>
+                <li class="pt-4">
+                    <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Member Actions</span>
+                </li>
+                <li><a href="withdraw.php" class="block py-2 px-4 rounded hover:bg-gray-700">Request Withdrawal</a></li>
+                <li><a href="request_loan.php" class="block py-2 px-4 rounded hover:bg-gray-700">Request Loan</a></li>
+
+                <?php if (in_array($role_id, [1, 2, 3])): // Admin-level actions ?>
+                    <li class="pt-4">
+                        <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Admin Controls</span>
+                    </li>
                     <li><a href="add_user.php" class="block py-2 px-4 rounded hover:bg-gray-700">Add User</a></li>
                     <li><a href="add_saving.php" class="block py-2 px-4 rounded hover:bg-gray-700">Add Saving</a></li>
+                    <li><a href="manage_requests.php" class="block py-2 px-4 rounded hover:bg-gray-700">Manage Requests</a></li>
+                     <?php if (in_array($role_id, [1, 2])): ?>
+                        <li><a href="apply_interest.php" class="block py-2 px-4 rounded hover:bg-gray-700">Apply Interest</a></li>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <?php if (in_array($role_id, [1, 2, 3, 4])): ?>
+                    <li class="pt-4">
+                        <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Reports & Logs</span>
+                    </li>
                     <li><a href="system_report.php" class="block py-2 px-4 rounded hover:bg-gray-700">System Report</a></li>
                 <?php endif; ?>
 
