@@ -18,7 +18,8 @@ require_once 'config/db_connect.php';
 
 $user_id = $_SESSION['user_id'];
 $total_savings = 0;
-$savings_history = [];
+$active_loan_balance = 0;
+$next_loan_payment = 'N/A';
 $savings_dates = [];
 $savings_amounts = [];
 
@@ -26,8 +27,16 @@ try {
     // Fetch total savings
     $total_stmt = $pdo->prepare("SELECT SUM(amount) as total FROM savings WHERE user_id = ?");
     $total_stmt->execute([$user_id]);
-    $total_result = $total_stmt->fetch();
-    $total_savings = $total_result['total'] ?? 0;
+    $total_savings = $total_stmt->fetchColumn() ?: 0;
+
+    // Fetch active loan details
+    $loan_stmt = $pdo->prepare("SELECT balance, due_date FROM loans WHERE user_id = ? AND status = 'approved'");
+    $loan_stmt->execute([$user_id]);
+    $active_loan = $loan_stmt->fetch();
+    if ($active_loan) {
+        $active_loan_balance = $active_loan['balance'];
+        $next_loan_payment = date('M j, Y', strtotime($active_loan['due_date']));
+    }
 
     // Fetch savings history for the chart
     $chart_stmt = $pdo->prepare("SELECT amount, created_at FROM savings WHERE user_id = ? ORDER BY created_at ASC");
@@ -95,92 +104,87 @@ try {
 <?php endif; ?>
 
 <!-- Main content grid -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-    <!-- Left Column: Total Savings & Charts -->
-    <div class="md:col-span-2 space-y-6">
-
-        <!-- Total Savings Card -->
+<div class="space-y-6">
+    <!-- Quick Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Total Savings</h3>
             <p class="text-4xl font-bold text-indigo-600"><?php echo format_currency($total_savings, 'UGX'); ?></p>
             <p class="text-lg text-gray-500 mt-1"><?php echo format_currency(convert_ugx_to_usd($total_savings), 'USD'); ?></p>
         </div>
-
-        <!-- Savings Trend Chart -->
         <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Active Loan Balance</h3>
+            <p class="text-4xl font-bold text-red-600"><?php echo number_format($active_loan_balance, 2); ?> <span class="text-2xl">UGX</span></p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">Next Loan Payment</h3>
+            <p class="text-4xl font-bold text-gray-600"><?php echo $next_loan_payment; ?></p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+     <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Quick Actions</h3>
+        <div class="flex flex-wrap gap-4">
+            <a href="withdraw.php" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Request Withdrawal</a>
+            <a href="request_loan.php" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Apply for Loan</a>
+            <a href="repay_loan.php" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Repay Loan</a>
+        </div>
+    </div>
+
+    <!-- Charts and History -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-4">Savings Trend</h3>
             <canvas id="savingsLineChart"></canvas>
         </div>
-
-    </div>
-
-    <!-- Right Column: Transaction History -->
-    <div class="bg-white p-6 rounded-lg shadow-md md:col-span-1">
-        <h3 class="text-xl font-semibold text-gray-700 mb-4">Transaction History</h3>
-        <div class="overflow-auto max-h-96">
-            <table class="min-w-full leading-normal">
-                <tbody class="text-gray-600 text-sm">
-                    <?php if (count($transactions) > 0): ?>
-                        <?php foreach ($transactions as $transaction): ?>
-                            <tr class="border-b border-gray-200">
-                                <td class="py-3 px-4">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="font-semibold text-gray-800"><?php echo htmlspecialchars($transaction['type']); ?></p>
-                                            <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', $transaction['date']); ?></p>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Transaction History</h3>
+            <div class="overflow-auto max-h-96">
+                <table class="min-w-full leading-normal">
+                    <tbody class="text-gray-600 text-sm">
+                        <?php if (count($transactions) > 0): ?>
+                            <?php foreach ($transactions as $transaction): ?>
+                                <tr class="border-b border-gray-200">
+                                    <td class="py-3 px-4">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <p class="font-semibold text-gray-800"><?php echo htmlspecialchars($transaction['type']); ?></p>
+                                                <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', $transaction['date']); ?></p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="font-semibold">
+                                                    <?php if ($transaction['type'] === 'Saving'): ?>
+                                                        <span class="text-green-600">+<?php echo format_currency($transaction['amount'], 'UGX'); ?></span>
+                                                    <?php else: ?>
+                                                        <span class="text-red-600">-<?php echo format_currency($transaction['amount'], 'UGX'); ?></span>
+                                                    <?php endif; ?>
+                                                </p>
+                                                <p class="text-xs capitalize <?php
+                                                    switch (strtolower($transaction['status'])) {
+                                                        case 'approved': echo 'text-green-500'; break;
+                                                        case 'pending': echo 'text-yellow-500'; break;
+                                                        case 'rejected': echo 'text-red-500'; break;
+                                                        case 'paid': echo 'text-blue-500'; break;
+                                                        default: echo 'text-gray-500';
+                                                    }
+                                                ?>">
+                                                    <?php echo htmlspecialchars($transaction['status']); ?>
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div class="text-right">
-                                            <p class="font-semibold">
-                                                <?php if ($transaction['type'] === 'Saving'): ?>
-                                                    <span class="text-green-600">+<?php echo format_currency($transaction['amount'], 'UGX'); ?></span>
-                                                <?php else: ?>
-                                                    <span class="text-red-600">-<?php echo format_currency($transaction['amount'], 'UGX'); ?></span>
-                                                <?php endif; ?>
-                                            </p>
-                                            <p class="text-xs capitalize <?php
-                                                switch (strtolower($transaction['status'])) {
-                                                    case 'approved': echo 'text-green-500'; break;
-                                                    case 'pending': echo 'text-yellow-500'; break;
-                                                    case 'rejected': echo 'text-red-500'; break;
-                                                    case 'paid': echo 'text-blue-500'; break;
-                                                    default: echo 'text-gray-500';
-                                                }
-                                            ?>">
-                                                <?php echo htmlspecialchars($transaction['status']); ?>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </td>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td class="py-4 text-center text-gray-500">No transactions yet.</td>
                             </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td class="py-4 text-center text-gray-500">No transactions yet.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-</div>
-
-<!-- User Activity Log -->
-<div class="bg-white p-6 rounded-lg shadow-md mt-6">
-    <h3 class="text-xl font-semibold text-gray-700 mb-4">Your Recent Activity</h3>
-    <div class="overflow-auto max-h-96">
-        <ul>
-            <?php if (count($user_logs) > 0): ?>
-                <?php foreach ($user_logs as $log): ?>
-                    <li class="border-b border-gray-200 py-2">
-                        <p class="text-sm text-gray-800"><?php echo htmlspecialchars($log['action']); ?></p>
-                        <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', strtotime($log['timestamp'])); ?></p>
-                    </li>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <li class="py-2 text-center text-gray-500">No recent activity.</li>
-            <?php endif; ?>
-        </ul>
     </div>
 </div>
 
@@ -238,37 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-
-// --- FullCalendar for Savings Reminders ---
-const calendarEl = document.getElementById('calendar');
-if (calendarEl) {
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,listWeek'
-        },
-        events: [
-            {
-                title: 'Weekly Savings Reminder (10,000 UGX)',
-                daysOfWeek: [0], // 0 = Sunday
-                startRecur: new Date().toISOString().slice(0,10), // Start from today
-                allDay: true,
-                backgroundColor: '#DC2626', // Red-600
-                borderColor: '#DC2626'
-            }
-        ]
-    });
-    calendar.render();
-}
 </script>
-
-<!-- Calendar Card -->
-<div class="bg-white p-6 rounded-lg shadow-md mt-6">
-    <h3 class="text-xl font-semibold text-gray-700 mb-4">Savings Calendar</h3>
-    <div id="calendar"></div>
-</div>
 
 <?php
 require_once 'templates/footer.php';
