@@ -97,11 +97,24 @@ try {
     $html .= "<hr>";
 
     // --- Balance Calculation ---
-    // Get balance before the start date
-    $savings_before_stmt = $pdo->prepare("SELECT SUM(amount) FROM savings WHERE user_id = ? AND created_at < ?");
-    $savings_before_stmt->execute([$user_id, $start_date]);
-    $opening_balance = $savings_before_stmt->fetchColumn() ?: 0;
-    // (A more complete calculation would also include withdrawals, etc., before the start date)
+    // A more complete calculation that includes all credits and debits before the start date.
+    $credits_before_stmt = $pdo->prepare(
+        "(SELECT SUM(amount) FROM savings WHERE user_id = ? AND created_at < ?)
+         UNION ALL
+         (SELECT SUM(lp.amount) FROM loan_payments lp JOIN loans l ON lp.loan_id = l.id WHERE l.user_id = ? AND lp.paid_at < ?)"
+    );
+    $credits_before_stmt->execute([$user_id, $start_date, $user_id, $start_date]);
+    $total_credits_before = array_sum($credits_before_stmt->fetchAll(PDO::FETCH_COLUMN));
+
+    $debits_before_stmt = $pdo->prepare(
+        "(SELECT SUM(amount) FROM withdrawals WHERE user_id = ? AND status = 'approved' AND processed_at < ?)
+         UNION ALL
+         (SELECT SUM(amount) FROM loans WHERE user_id = ? AND status = 'approved' AND approved_at < ?)"
+    );
+    $debits_before_stmt->execute([$user_id, $start_date, $user_id, $start_date]);
+    $total_debits_before = array_sum($debits_before_stmt->fetchAll(PDO::FETCH_COLUMN));
+
+    $opening_balance = $total_credits_before - $total_debits_before;
 
     $html .= '<table border="1" cellpadding="4">
                 <thead>
