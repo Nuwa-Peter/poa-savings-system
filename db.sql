@@ -239,30 +239,6 @@ ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `password_resets`
---
-
-CREATE TABLE `password_resets` (
-  `id` int(11) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `token` varchar(255) NOT NULL,
-  `expires_at` datetime NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Indexes for table `password_resets`
---
-ALTER TABLE `password_resets`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT for table `password_resets`
---
-ALTER TABLE `password_resets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
