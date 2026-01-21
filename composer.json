@@ -2,8 +2,7 @@
     "name": "poa/savings-system",
     "description": "A PHP-based management system for a savings and credit society.",
     "require": {
-        "tecnickcom/tcpdf": "^6.6",
-        "phpoffice/phpspreadsheet": "^1.29"
+        "tecnickcom/tcpdf": "^6.6"
     },
     "authors": [
         {

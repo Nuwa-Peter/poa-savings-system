@@ -106,8 +106,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                     <li class="pt-4">
                         <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Reports & Logs</span>
                     </li>
-                    <li><a href="system_report.php" class="block py-2 px-4 rounded hover:bg-gray-700">System Report</a></li>
-                    <li><a href="reports.php" class="block py-2 px-4 rounded hover:bg-gray-700">Detailed Reports</a></li>
+                    <li><a href="reports.php" class="block py-2 px-4 rounded hover:bg-gray-700">System Reports</a></li>
                 <?php endif; ?>
 
                 <?php if (in_array($role_id, [1, 2])): ?>
