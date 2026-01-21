@@ -170,6 +170,8 @@ CREATE TABLE `savings` (
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `account_no` varchar(255) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `surname` varchar(100) NOT NULL,
   `username` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,

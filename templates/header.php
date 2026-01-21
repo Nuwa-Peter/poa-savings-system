@@ -34,10 +34,10 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
         require_once 'config/db_connect.php';
         try {
             $user_id = $_SESSION['user_id'];
-            // Fetch user avatar
-            $stmt = $pdo->prepare("SELECT avatar FROM users WHERE id = ?");
+            // Fetch user details for avatar and display
+            $stmt = $pdo->prepare("SELECT username, first_name, surname, avatar FROM users WHERE id = ?");
             $stmt->execute([$user_id]);
-            $user_avatar = $stmt->fetchColumn();
+            $user_details = $stmt->fetch(PDO::FETCH_ASSOC);
 
             // Fetch unread notification count
             $notify_stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
@@ -161,7 +161,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
 
                 <!-- User Avatar & Dropdown -->
                 <a href="settings.php" class="relative">
-                     <?php display_avatar($user_avatar, $_SESSION['username']); ?>
+                     <?php display_avatar($user_details['avatar'], $user_details['username'], $user_details['first_name'], $user_details['surname']); ?>
                 </a>
             </div>
         </header>

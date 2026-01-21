@@ -11,13 +11,15 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
+    $first_name = trim($_POST['first_name']);
+    $surname = trim($_POST['surname']);
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $phone = trim($_POST['phone']);
     $password = $_POST['password'];
     $role_id = $_POST['role_id'];
 
-    if (empty($username) || empty($email) || empty($password) || empty($role_id)) {
+    if (empty($first_name) || empty($surname) || empty($username) || empty($email) || empty($password) || empty($role_id)) {
         $error = 'Please fill in all required fields.';
     } else {
         try {
@@ -28,8 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
             // Insert the new user into the database
-            $stmt = $pdo->prepare('INSERT INTO users (account_no, username, email, phone, password, role_id) VALUES (?, ?, ?, ?, ?, ?)');
-            $stmt->execute([$account_no, $username, $email, $phone, $hashed_password, $role_id]);
+            $sql = "INSERT INTO users (account_no, first_name, surname, username, email, phone, password, role_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$account_no, $first_name, $surname, $username, $email, $phone, $hashed_password, $role_id]);
 
             // Log the action
             require_once 'includes/logging.php';
@@ -60,15 +63,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     <?php endif; ?>
 
-    <form method="POST" action="add_user.php" class="bg-white p-6 rounded-lg shadow-md">
-        <div class="mb-4">
-            <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Username:</label>
-            <input type="text" name="username" id="username" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-        </div>
-        <div class="mb-4">
-            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-            <input type="email" name="email" id="email" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-        </div>
+    <form method="POST" action="add_user.php" class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-1">
+                <label for="first_name" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">First Name:</label>
+                <input type="text" name="first_name" id="first_name" required class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="md:col-span-1">
+                <label for="surname" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Surname:</label>
+                <input type="text" name="surname" id="surname" required class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="md:col-span-2">
+                <label for="username" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Username:</label>
+                <input type="text" name="username" id="username" required class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="md:col-span-2">
+                <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Email:</label>
+                <input type="email" name="email" id="email" required class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
         <div class="mb-4">
             <label for="phone" class="block text-gray-700 text-sm font-bold mb-2">Phone:</label>
             <input type="text" name="phone" id="phone" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
