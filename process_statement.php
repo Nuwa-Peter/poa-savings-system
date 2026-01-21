@@ -23,82 +23,88 @@ if (!$start_date || !$end_date) {
 
 $end_date_time = $end_date . ' 23:59:59';
 
-// --- Custom PDF Class for Professional Statement ---
+// --- Custom PDF Class for A4 Financial Statement ---
 class StatementPDF extends TCPDF {
     private $userName;
     private $accountNumber;
     private $statementPeriod;
+    private $generatedDate;
 
-    public function setUserDetails($name, $acc, $period) {
+    public function setUserDetails($name, $acc, $period, $generated) {
         $this->userName = $name;
         $this->accountNumber = $acc;
         $this->statementPeriod = $period;
+        $this->generatedDate = $generated;
     }
 
     public function Header() {
-        // Use modern, clean fonts
+        // Set Font
         $this->SetFont('helvetica', '', 10);
 
-        // Logo
-        $this->Image('assets/images/poa_light.png', 15, 10, 30, 0, 'PNG');
+        // Center Logo
+        $this->Image('assets/images/poa_light.png', '', 10, 35, 0, 'PNG', '', 'T', false, 300, 'C', false, false, 0, false, false, false);
+        $this->Ln(5);
 
-        // Member Details (aligned to the right)
-        $this->SetXY(120, 12);
-        $this->SetFont('helvetica', 'B', 11);
-        $this->Cell(0, 6, $this->userName, 0, 1, 'R');
-        $this->SetFont('helvetica', '', 10);
-        $this->Cell(0, 6, 'Account: ' . $this->accountNumber, 0, 1, 'R');
+        // Center Company Name
+        $this->SetFont('helvetica', 'B', 12);
+        $this->Cell(0, 10, 'POA Savings and Credit Society', 0, 1, 'C');
 
-        // Statement Title and Period
-        $this->SetXY(15, 35);
-        $this->SetFont('helvetica', 'B', 18);
-        $this->Cell(0, 10, 'Account Statement', 0, 1, 'L');
-        $this->SetFont('helvetica', '', 10);
-        $this->Cell(0, 6, 'Period: ' . $this->statementPeriod, 0, 1, 'L');
+        // Center Document Title
+        $this->SetFont('helvetica', 'B', 16);
+        $this->Cell(0, 12, 'ACCOUNT STATEMENT', 0, 1, 'C');
+        $this->Ln(5);
 
-        // Header bottom border
-        $this->Line(15, 55, $this->getPageWidth() - 15, 55);
+        // Account Information Section
+        $this->SetFont('helvetica', '', 9);
+        $html = '
+<table border="0" cellpadding="2" cellspacing="0" width="100%">
+    <tr>
+        <td width="50%" align="left"><b>Account Name:</b> ' . $this->userName . '<br><b>Account Number:</b> ' . $this->accountNumber . '</td>
+        <td width="50%" align="right"><b>Statement Period:</b> ' . $this->statementPeriod . '<br><b>Generated Date:</b> ' . $this->generatedDate . '</td>
+    </tr>
+</table>';
+        $this->writeHTML($html, true, false, true, false, '');
+        $this->Line(15, $this->GetY() + 2, $this->getPageWidth() - 15, $this->GetY() + 2);
     }
 
     public function Footer() {
-        $this->SetY(-20);
-        // Footer top border
+        $this->SetY(-18);
+        // Thin horizontal line
         $this->Line(15, $this->GetY(), $this->getPageWidth() - 15, $this->GetY());
         $this->SetY(-15);
         $this->SetFont('helvetica', 'I', 8);
         $this->SetTextColor(128);
 
-        // Generated On Timestamp
-        $this->Cell(0, 10, 'Generated on ' . date('M j, Y, g:i a'), 0, 0, 'L');
+        // Generated On Timestamp (from user details for consistency)
+        $this->Cell(0, 10, 'Generated on: ' . $this->generatedDate, 0, 0, 'L');
 
         // Page Number
         $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages(), 0, 0, 'R');
     }
 
     public function FancyTransactionTable($header, $data, $openingBalance) {
-        // Set colors
-        $this->SetFillColor(33, 37, 41); // Dark grey for header
-        $this->SetTextColor(255);
-        $this->SetDrawColor(222, 226, 230); // Light grey for borders
+        $this->SetFillColor(229, 231, 235); // Light grey for header
+        $this->SetTextColor(0);
+        $this->SetDrawColor(209, 213, 219);
         $this->SetFont('helvetica', 'B', 10);
-        $this->SetLineWidth(0.3);
+        $this->SetLineWidth(0.2);
 
         // Header
-        $w = array(30, 75, 25, 25, 30); // Column widths
+        // 40% for Description, remaining 60% for others
+        $w = array(30, 74, 28, 28, 25);
         for($i = 0; $i < count($header); $i++) {
             $this->Cell($w[$i], 10, $header[$i], 1, 0, 'C', 1);
         }
         $this->Ln();
 
         // Color and font restoration
-        $this->SetTextColor(0);
         $this->SetFont('helvetica', '', 9);
 
         // Data
         $fill = false; // For zebra-striping
         $balance = $openingBalance;
         if (empty($data)) {
-            $this->Cell(array_sum($w), 15, 'No transactions in this period.', 'LRB', 0, 'C', $fill);
+            $this->Cell(array_sum($w), 15, 'No transactions recorded for this period', 'LRB', 0, 'C', $fill);
             $this->Ln();
         } else {
             foreach($data as $row) {
@@ -106,7 +112,7 @@ class StatementPDF extends TCPDF {
                 $credit = is_numeric($row['credit']) ? $row['credit'] : 0;
                 $balance += $credit - $debit;
 
-                $this->SetFillColor(248, 249, 250); // Zebra-stripe color
+                $this->SetFillColor(248, 249, 250);
                 $this->Cell($w[0], 9, date('Y-m-d', strtotime($row['date'])), 'LR', 0, 'L', $fill);
                 $this->Cell($w[1], 9, htmlspecialchars($row['type']), 'R', 0, 'L', $fill);
                 $this->Cell($w[2], 9, ($debit > 0) ? number_format($debit, 2) : '-', 'R', 0, 'R', $fill);
@@ -129,24 +135,16 @@ try {
     $transactions = [];
     $savings_stmt = $pdo->prepare("SELECT 'Saving (Deposit)' as type, amount, created_at as date FROM savings WHERE user_id = ? AND created_at BETWEEN ? AND ?");
     $savings_stmt->execute([$user_id, $start_date, $end_date_time]);
-    foreach ($savings_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $row['debit'] = ''; $row['credit'] = $row['amount']; $transactions[] = $row;
-    }
+    foreach ($savings_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) { $row['debit'] = ''; $row['credit'] = $row['amount']; $transactions[] = $row; }
     $withdrawal_stmt = $pdo->prepare("SELECT 'Withdrawal' as type, amount, processed_at as date FROM withdrawals WHERE user_id = ? AND status = 'approved' AND processed_at BETWEEN ? AND ?");
     $withdrawal_stmt->execute([$user_id, $start_date, $end_date_time]);
-    foreach ($withdrawal_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $row['debit'] = $row['amount']; $row['credit'] = ''; $transactions[] = $row;
-    }
+    foreach ($withdrawal_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) { $row['debit'] = $row['amount']; $row['credit'] = ''; $transactions[] = $row; }
     $loans_stmt = $pdo->prepare("SELECT 'Loan Disbursed' as type, amount, approved_at as date FROM loans WHERE user_id = ? AND status = 'approved' AND approved_at BETWEEN ? AND ?");
     $loans_stmt->execute([$user_id, $start_date, $end_date_time]);
-     foreach ($loans_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $row['debit'] = $row['amount']; $row['credit'] = ''; $transactions[] = $row;
-    }
+    foreach ($loans_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) { $row['debit'] = $row['amount']; $row['credit'] = ''; $transactions[] = $row; }
     $repayment_stmt = $pdo->prepare("SELECT 'Loan Repayment' as type, lp.amount, lp.paid_at as date FROM loan_payments lp JOIN loans l ON lp.loan_id = l.id WHERE l.user_id = ? AND lp.paid_at BETWEEN ? AND ?");
     $repayment_stmt->execute([$user_id, $start_date, $end_date_time]);
-    foreach ($repayment_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $row['debit'] = ''; $row['credit'] = $row['amount']; $transactions[] = $row;
-    }
+    foreach ($repayment_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) { $row['debit'] = ''; $row['credit'] = $row['amount']; $transactions[] = $row; }
     usort($transactions, fn($a, $b) => strtotime($a['date']) <=> strtotime($b['date']));
 
     $credits_before_stmt = $pdo->prepare("(SELECT SUM(amount) FROM savings WHERE user_id = ? AND created_at < ?) UNION ALL (SELECT SUM(lp.amount) FROM loan_payments lp JOIN loans l ON lp.loan_id = l.id WHERE l.user_id = ? AND lp.paid_at < ?)");
@@ -162,78 +160,50 @@ try {
     // --- PDF Generation ---
     $pdf = new StatementPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
-    // Set document information
     $pdf->SetCreator(PDF_CREATOR);
     $pdf->SetAuthor('POA Savings and Credit Society');
     $pdf->SetTitle('Account Statement for ' . $user['username']);
     $pdf->setUserDetails(
         htmlspecialchars($user['username']),
         htmlspecialchars($user['account_no']),
-        date('M j, Y', strtotime($start_date)) . " to " . date('M j, Y', strtotime($end_date))
+        date('M j, Y', strtotime($start_date)) . " to " . date('M j, Y', strtotime($end_date)),
+        date('M j, Y, g:i a')
     );
 
-    // Set margins and add a page
     $pdf->SetMargins(15, 60, 15);
-    $pdf->SetHeaderMargin(10);
+    $pdf->SetHeaderMargin(15);
     $pdf->SetFooterMargin(20);
     $pdf->SetAutoPageBreak(TRUE, 25);
     $pdf->AddPage();
 
-    // Draw main content frame
-    $pdf->SetDrawColor(222, 226, 230);
-    $pdf->Rect(15, 60, $pdf->getPageWidth() - 30, $pdf->getPageHeight() - 85, 'D');
+    // --- Balance Summary Box ---
+    $formatted_opening_balance = "<b>Opening Balance:</b> " . number_format($opening_balance, 2) . " UGX";
+    $formatted_closing_balance = "<b>Closing Balance:</b> " . number_format($closing_balance, 2) . " UGX";
 
-
-    // --- Balance Summary Cards ---
-    $formatted_opening_balance = number_format($opening_balance, 2) . " UGX";
-    $formatted_closing_balance = number_format($closing_balance, 2) . " UGX";
-
-    $balance_cards_html = <<<EOD
+    $summary_html = <<<EOD
 <style>
-    .card {
-        border: 1px solid #e9ecef;
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: 4px;
-    }
-    .card-title {
-        font-size: 11pt;
-        font-weight: bold;
-        color: #495057;
-    }
-    .card-value {
-        font-size: 15pt;
-        font-weight: bold;
-        color: #212529;
+    .summary-box {
+        background-color: #f1f3f5;
+        border: 1px solid #dee2e6;
+        padding: 10px;
+        font-size: 10pt;
     }
 </style>
-<table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
+<table class="summary-box" width="100%" cellpadding="5">
     <tr>
-        <td style="width: 48%;">
-            <div class="card" style="border-left: 4px solid #0d6efd;">
-                <div class="card-title">Opening Balance</div>
-                <div class="card-value">{$formatted_opening_balance}</div>
-            </div>
-        </td>
-        <td style="width: 4%;"></td> <!-- Spacer -->
-        <td style="width: 48%;">
-            <div class="card" style="border-left: 4px solid #198754;">
-                <div class="card-title">Closing Balance</div>
-                <div class="card-value">{$formatted_closing_balance}</div>
-            </div>
-        </td>
+        <td width="50%" align="center">{$formatted_opening_balance}</td>
+        <td width="50%" align="center">{$formatted_closing_balance}</td>
     </tr>
 </table>
 EOD;
     $pdf->SetY(65);
-    $pdf->writeHTML($balance_cards_html, true, false, true, false, '');
+    $pdf->writeHTML($summary_html, true, false, true, false, '');
 
     // --- Transaction Table ---
-    $pdf->SetY($pdf->GetY() + 10);
-    $table_header = ['Date', 'Description', 'Debit', 'Credit', 'Balance (UGX)'];
+    $pdf->SetY($pdf->GetY() + 5);
+    $table_header = ['Date', 'Description', 'Debit', 'Credit', 'Balance'];
     $pdf->FancyTransactionTable($table_header, $transactions, $opening_balance);
 
-    // --- Output PDF ---
     $pdf->Output('Account_Statement_' . $user['username'] . '.pdf', 'I');
 
 } catch (Exception $e) {
