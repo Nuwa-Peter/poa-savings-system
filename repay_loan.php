@@ -68,17 +68,19 @@ try {
 
                 <hr class="my-6">
 
-                <h3 class="text-xl font-semibold text-gray-700 mb-4">Make a Payment</h3>
-                <form action="process_repayment.php" method="POST">
+                <h3 class="text-xl font-semibold text-gray-700 dark:text-white mb-4">Make a Payment</h3>
+                <form action="process_repayment.php" method="POST" class="space-y-6">
                     <input type="hidden" name="loan_id" value="<?php echo $active_loan['id']; ?>">
                     <input type="hidden" name="current_balance" value="<?php echo $active_loan['balance']; ?>">
-                    <div class="mb-4">
-                        <label for="amount" class="block text-gray-700 text-sm font-bold mb-2">Payment Amount:</label>
-                        <input type="number" step="0.01" name="amount" id="amount" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <div>
+                        <label for="amount" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Payment Amount: <span class="text-red-500">*</span></label>
+                        <input type="number" step="0.01" name="amount" id="amount" required class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        Submit Payment
-                    </button>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                            Submit Payment
+                        </button>
+                    </div>
                 </form>
             </div>
 

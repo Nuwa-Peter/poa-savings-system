@@ -9,7 +9,6 @@ if (in_array($user_role, [1, 2, 3, 4])) {
     exit;
 }
 
-require_once 'config/app_config.php'; // Include currency config
 require_once 'templates/header.php';
 ?>
 
@@ -109,8 +108,7 @@ try {
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Total Savings</h3>
-            <p class="text-4xl font-bold text-indigo-600"><?php echo format_currency($total_savings, 'UGX'); ?></p>
-            <p class="text-lg text-gray-500 mt-1"><?php echo format_currency(convert_ugx_to_usd($total_savings), 'USD'); ?></p>
+            <p class="text-4xl font-bold text-indigo-600"><?php echo number_format($total_savings, 2); ?> <span class="text-2xl">UGX</span></p>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Active Loan Balance</h3>
@@ -155,9 +153,9 @@ try {
                                             <div class="text-right">
                                                 <p class="font-semibold">
                                                     <?php if ($transaction['type'] === 'Saving'): ?>
-                                                        <span class="text-green-600">+<?php echo format_currency($transaction['amount'], 'UGX'); ?></span>
+                                                        <span class="text-green-600">+<?php echo number_format($transaction['amount'], 2); ?> UGX</span>
                                                     <?php else: ?>
-                                                        <span class="text-red-600">-<?php echo format_currency($transaction['amount'], 'UGX'); ?></span>
+                                                        <span class="text-red-600">-<?php echo number_format($transaction['amount'], 2); ?> UGX</span>
                                                     <?php endif; ?>
                                                 </p>
                                                 <p class="text-xs capitalize <?php
@@ -219,9 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                                 if (context.parsed.y !== null) {
                                     const ugxValue = context.parsed.y;
-                                    const usdValue = ugxValue * <?php echo EXCHANGE_RATE_UGX_TO_USD; ?>;
-                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'UGX', currencyDisplay: 'code' }).format(ugxValue);
-                                    label += ` (${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(usdValue)})`;
+                                    label += 'UGX ' + ugxValue.toLocaleString();
                                 }
                                 return label;
                             }
