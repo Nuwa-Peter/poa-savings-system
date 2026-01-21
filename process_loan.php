@@ -28,24 +28,19 @@ if (!$guarantor_id || !is_numeric($guarantor_id) || $guarantor_id == $user_id) {
 
 try {
     // --- Eligibility Check 1: Savings Frequency ---
-    // This query checks if the user has saved at least 3 times a week for the last 4 weeks.
-    // It does this by counting how many of the past 4 weekly groups have 3 or more savings.
+    // You must have saved at least three weeks out of the four weeks.
     $four_weeks_ago = date('Y-m-d H:i:s', strtotime('-4 weeks'));
 
     $freq_stmt = $pdo->prepare(
-        "SELECT COUNT(*) FROM (
-            SELECT COUNT(id)
-            FROM savings
-            WHERE user_id = ? AND created_at >= ?
-            GROUP BY YEAR(created_at), WEEK(created_at, 1)
-            HAVING COUNT(id) >= 3
-        ) as qualifying_weeks_count"
+        "SELECT COUNT(DISTINCT WEEK(created_at, 1))
+         FROM savings
+         WHERE user_id = ? AND created_at >= ?"
     );
     $freq_stmt->execute([$user_id, $four_weeks_ago]);
     $qualifying_weeks = $freq_stmt->fetchColumn();
 
-    if ($qualifying_weeks < 4) {
-        header('Location: request_loan.php?error=' . urlencode('Eligibility failed: You must save at least 3 times per week for the last 4 consecutive weeks.'));
+    if ($qualifying_weeks < 3) {
+        header('Location: request_loan.php?error=' . urlencode('Loan Eligibility Criteria: You must have saved at least three weeks out of the four weeks.'));
         exit;
     }
 

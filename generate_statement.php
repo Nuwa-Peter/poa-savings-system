@@ -3,12 +3,19 @@ require_once 'includes/auth_check.php';
 check_permissions([1, 2, 3, 4, 5]);
 require_once 'templates/header.php';
 ?>
-
+<style>
+    .statement-title {
+        color: var(--text-primary);
+    }
+    .statement-subtitle {
+        color: var(--text-secondary);
+    }
+</style>
 <div class="container mx-auto mt-10 p-4">
     <div class="max-w-2xl mx-auto">
         <div class="text-center">
-            <h1 class="text-4xl font-bold text-gray-800 dark:text-white">Account Statement</h1>
-            <p class="mt-2 text-gray-600 dark:text-gray-400">Generate a detailed statement of your account activity for a selected period.</p>
+            <h1 class="text-4xl font-bold statement-title">Account Statement</h1>
+            <p class="mt-2 statement-subtitle">Generate a detailed statement of your account activity for a selected period.</p>
         </div>
 
         <?php if (isset($_GET['error'])): ?>

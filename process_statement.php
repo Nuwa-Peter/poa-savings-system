@@ -41,9 +41,9 @@ class StatementPDF extends TCPDF {
         // Set Font
         $this->SetFont('helvetica', '', 10);
 
-        // Center Logo
-        $this->Image('assets/images/poa_light.png', '', 10, 35, 0, 'PNG', '', 'T', false, 300, 'C', false, false, 0, false, false, false);
-        $this->Ln(5);
+        // Logo on its own line
+        $this->Image('assets/images/poa_light.png', '', 8, 30, 0, 'PNG', '', 'T', false, 300, 'C');
+        $this->Ln(18); // Add space after the logo
 
         // Center Company Name
         $this->SetFont('helvetica', 'B', 12);
@@ -65,6 +65,32 @@ class StatementPDF extends TCPDF {
 </table>';
         $this->writeHTML($html, true, false, true, false, '');
         $this->Line(15, $this->GetY() + 2, $this->getPageWidth() - 15, $this->GetY() + 2);
+    }
+
+    // Override AddPage to include the watermark on every new page
+    public function AddPage($orientation = '', $format = '', $keepmargins = false, $tocpage = false) {
+        parent::AddPage($orientation, $format, $keepmargins, $tocpage);
+        $this->addWatermark();
+    }
+
+    private function addWatermark() {
+        // Get the current page dimensions
+        $bMargin = $this->getBreakMargin();
+        $auto_page_break = $this->AutoPageBreak;
+        // Disable auto-page-break to avoid conflicts
+        $this->SetAutoPageBreak(false, 0);
+
+        // Set transparency
+        $this->SetAlpha(0.1);
+        // Add the watermark image
+        $this->Image('assets/images/poa_light.png', 50, 100, 110, 0, 'PNG', '', 'C', true, 300, 'C', false, false, 0);
+        // Restore transparency
+        $this->SetAlpha(1);
+
+        // Restore auto-page-break status
+        $this->SetAutoPageBreak($auto_page_break, $bMargin);
+        // Set the page mark back to the top-left corner
+        $this->setPageMark();
     }
 
     public function Footer() {
