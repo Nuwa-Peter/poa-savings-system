@@ -176,7 +176,7 @@ try {
         <td style="width: 48%;">
             <div style="border: 1px solid #e0e0e0; border-left: 5px solid {$navyBlue}; padding: 15px;">
                 <h3 style="font-size: 12pt; color: #666;">Closing Balance</h3>
-                <p style="font-size: 18pt; font-weight: bold; color: {$navyBlue};">{number_format($opening_balance + array_reduce($transactions, fn($sum, $t) => $sum + ($t['credit'] ?: 0) - ($t['debit'] ?: 0), 0), 2)} UGX</p>
+                <p style="font-size: 18pt; font-weight: bold; color: {$navyBlue};">{number_format($opening_balance + array_reduce($transactions, fn($sum, $t) => $sum + (is_numeric($t['credit']) ? $t['credit'] : 0) - (is_numeric($t['debit']) ? $t['debit'] : 0), 0), 2)} UGX</p>
             </div>
         </td>
     </tr>
