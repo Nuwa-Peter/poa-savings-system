@@ -3,7 +3,7 @@ require_once 'includes/auth_check.php';
 check_permissions([1, 2, 3, 4, 5]);
 
 require_once 'config/db_connect.php';
-// Use the modern Composer autoloader
+// Use the standard Composer autoloader as required
 require_once 'vendor/autoload.php';
 
 // --- Validation ---
@@ -26,32 +26,30 @@ $end_date_time = $end_date . ' 23:59:59';
 
 // --- Custom PDF Class for Branded Header ---
 class POAPDF extends TCPDF {
+    // Brand Colors
+    private $navyBlue = [25, 35, 45];
+
     public function Header() {
         // Logo
-        $this->Image('assets/images/poa_light.png', 10, 10, 25, 0, 'PNG');
-
-        // Colors from brand palette
-        $navyBlue = [25, 35, 45];
+        $this->Image('assets/images/poa_light.png', 10, 10, 30, 0, 'PNG');
 
         // Title
-        $this->SetFont('helvetica', 'B', 20);
-        $this->SetTextColor($navyBlue[0], $navyBlue[1], $navyBlue[2]);
+        $this->SetFont('helvetica', 'B', 22);
+        $this->SetTextColor($this->navyBlue[0], $this->navyBlue[1], $this->navyBlue[2]);
         $this->Cell(0, 15, 'Account Statement', 0, false, 'C', 0, '', 0, false, 'M', 'M');
-
-        // Line break
         $this->Ln(20);
     }
 
     public function Footer() {
         $this->SetY(-15);
         $this->SetFont('helvetica', 'I', 8);
+        $this->SetTextColor(128);
         $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().'/'.$this->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
     }
 }
 
-
 try {
-    // --- Data Fetching ---
+    // --- 1. Data Fetching ---
     $user_stmt = $pdo->prepare("SELECT username, account_no FROM users WHERE id = ?");
     $user_stmt->execute([$user_id]);
     $user = $user_stmt->fetch();
@@ -98,10 +96,14 @@ try {
         $transactions[] = $row;
     }
 
-    // Sort by date
+    // Sort transactions by date
     usort($transactions, fn($a, $b) => strtotime($a['date']) <=> strtotime($b['date']));
 
-    // --- Balance Calculation ---
+    // --- 2. Logic Extraction ---
+    $navyBlue = 'rgb(25, 35, 45)';
+    $leafGreen = 'rgb(46, 182, 125)';
+
+    // Calculate opening balance
     $credits_before_stmt = $pdo->prepare(
         "(SELECT SUM(amount) FROM savings WHERE user_id = ? AND created_at < ?)
          UNION ALL
@@ -120,112 +122,112 @@ try {
 
     $opening_balance = $total_credits_before - $total_debits_before;
 
+    // Calculate closing balance
+    $net_change = array_reduce($transactions, fn($sum, $t) => $sum + (is_numeric($t['credit']) ? $t['credit'] : 0) - (is_numeric($t['debit']) ? $t['debit'] : 0), 0);
+    $closing_balance = $opening_balance + $net_change;
 
-    // --- PDF Generation ---
+    // Format all dynamic data before the HTML block
+    $formatted_member = htmlspecialchars($user['username']);
+    $formatted_account_no = htmlspecialchars($user['account_no']);
+    $formatted_period = date('M j, Y', strtotime($start_date)) . " to " . date('M j, Y', strtotime($end_date));
+    $formatted_opening_balance = number_format($opening_balance, 2) . " UGX";
+    $formatted_closing_balance = number_format($closing_balance, 2) . " UGX";
+
+    // --- 3. PDF Generation ---
     $pdf = new POAPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-    // Metadata
     $pdf->SetCreator(PDF_CREATOR);
     $pdf->SetAuthor('POA Savings and Credit Society');
-    $pdf->SetTitle('Account Statement');
+    $pdf->SetTitle('Account Statement for ' . $formatted_member);
     $pdf->AddPage();
+    $pdf->SetFont('helvetica', '', 10);
 
-    // --- Modern HTML Layout ---
-    $navyBlue = 'rgb(25, 35, 45)';
-    $leafGreen = 'rgb(46, 182, 125)';
-
+    // --- 4. TCPDF-Compatible HTML Layout ---
     $html = <<<EOD
 <style>
-    body { font-family: helvetica, sans-serif; }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; }
-    .summary-cards { display: flex; justify-content: space-between; margin: 20px 0; }
-    .card { border: 1px solid #e0e0e0; border-left: 5px solid {$leafGreen}; padding: 15px; width: 48%; }
-    .card h3 { font-size: 12pt; color: #666; }
-    .card p { font-size: 18pt; font-weight: bold; color: {$navyBlue}; }
-    .styled-table { border-collapse: collapse; width: 100%; font-size: 9pt; }
-    .styled-table th { background-color: {$navyBlue}; color: white; font-weight: bold; padding: 10px; }
-    .styled-table td { padding: 8px; border-bottom: 1px solid #e0e0e0; }
-    .styled-table .even { background-color: #f9f9f9; }
-    .currency { text-align: right; }
+    .summary-card { border: 1px solid #e0e0e0; padding: 15px; }
+    .summary-card h3 { font-size: 12pt; color: #555; font-weight: bold; }
+    .summary-card p { font-size: 16pt; font-weight: bold; }
+    .transaction-table { border-collapse: collapse; width: 100%; font-size: 9pt; }
+    .transaction-table th { font-weight: bold; padding: 8px; }
+    .transaction-table td { padding: 8px; border-bottom: 1px solid #eeeeee; }
 </style>
 
-<!-- Member Info Section -->
-<table style="width: 100%;">
+<table border="0" cellpadding="5" cellspacing="0" style="width: 100%;">
     <tr>
         <td style="width: 50%;">
-            <b>Member:</b> {$user['username']}<br>
-            <b>Account Number:</b> {$user['account_no']}
+            <b>Member:</b> {$formatted_member}<br>
+            <b>Account Number:</b> {$formatted_account_no}
         </td>
         <td style="width: 50%; text-align: right;">
-            <b>Period:</b> {date('M j, Y', strtotime($start_date))} to {date('M j, Y', strtotime($end_date))}
+            <b>Period:</b> {$formatted_period}
         </td>
     </tr>
 </table>
-<br><br>
+<br><br><br>
 
-<!-- Summary Cards -->
-<table style="width: 100%;">
+<table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
     <tr>
         <td style="width: 48%;">
-            <div style="border: 1px solid #e0e0e0; border-left: 5px solid {$leafGreen}; padding: 15px;">
-                <h3 style="font-size: 12pt; color: #666;">Opening Balance</h3>
-                <p style="font-size: 18pt; font-weight: bold; color: {$navyBlue};">{number_format($opening_balance, 2)} UGX</p>
+            <div class="summary-card" style="border-left: 4px solid {$leafGreen};">
+                <h3>Opening Balance</h3>
+                <p style="color:{$navyBlue};">{$formatted_opening_balance}</p>
             </div>
         </td>
         <td style="width: 4%;"></td> <!-- Spacer -->
         <td style="width: 48%;">
-            <div style="border: 1px solid #e0e0e0; border-left: 5px solid {$navyBlue}; padding: 15px;">
-                <h3 style="font-size: 12pt; color: #666;">Closing Balance</h3>
-                <p style="font-size: 18pt; font-weight: bold; color: {$navyBlue};">{number_format($opening_balance + array_reduce($transactions, fn($sum, $t) => $sum + (is_numeric($t['credit']) ? $t['credit'] : 0) - (is_numeric($t['debit']) ? $t['debit'] : 0), 0), 2)} UGX</p>
+            <div class="summary-card" style="border-left: 4px solid {$navyBlue};">
+                <h3>Closing Balance</h3>
+                <p style="color:{$navyBlue};">{$formatted_closing_balance}</p>
             </div>
         </td>
     </tr>
 </table>
-<br><br>
+<br><br><br>
 
-<!-- Transaction Table -->
-<table class="styled-table" cellpadding="8">
+<table class="transaction-table" cellpadding="6">
     <thead>
         <tr style="background-color:{$navyBlue}; color:white;">
-            <th style="width: 15%;">Date</th>
-            <th style="width: 35%;">Description</th>
-            <th style="width: 15%;" align="right">Debit (UGX)</th>
-            <th style="width: 15%;" align="right">Credit (UGX)</th>
-            <th style="width: 20%;" align="right">Balance (UGX)</th>
+            <th style="width:15%;">Date</th>
+            <th style="width:35%;">Description</th>
+            <th style="width:15%; text-align:right;">Debit (UGX)</th>
+            <th style="width:15%; text-align:right;">Credit (UGX)</th>
+            <th style="width:20%; text-align:right;">Balance (UGX)</th>
         </tr>
     </thead>
     <tbody>
 EOD;
 
-$balance = $opening_balance;
 if (empty($transactions)) {
-    $html .= '<tr><td colspan="5" align="center" style="padding: 20px;">No transactions in this period.</td></tr>';
+    $html .= '<tr><td colspan="5" style="text-align:center; padding: 20px;">No transactions in this period.</td></tr>';
 } else {
-    foreach ($transactions as $i => $t) {
+    $balance = $opening_balance;
+    $is_even = false;
+    foreach ($transactions as $t) {
         $debit = is_numeric($t['debit']) ? $t['debit'] : 0;
         $credit = is_numeric($t['credit']) ? $t['credit'] : 0;
         $balance += $credit - $debit;
-        $rowClass = ($i % 2 === 0) ? '' : 'even';
+        $row_style = $is_even ? ' style="background-color:#f9f9f9;"' : '';
 
-        $html .= '<tr class="' . $rowClass . '">
+        $html .= '<tr' . $row_style . '>
                     <td>' . date('Y-m-d', strtotime($t['date'])) . '</td>
                     <td>' . htmlspecialchars($t['type']) . '</td>
-                    <td align="right">' . ($debit > 0 ? number_format($debit, 2) : '') . '</td>
-                    <td align="right">' . ($credit > 0 ? number_format($credit, 2) : '') . '</td>
-                    <td align="right">' . number_format($balance, 2) . '</td>
+                    <td style="text-align:right;">' . ($debit > 0 ? number_format($debit, 2) : '') . '</td>
+                    <td style="text-align:right;">' . ($credit > 0 ? number_format($credit, 2) : '') . '</td>
+                    <td style="text-align:right;">' . number_format($balance, 2) . '</td>
                   </tr>';
+        $is_even = !$is_even;
     }
 }
 
-$html .= <<<EOD
-    </tbody>
-</table>
-EOD;
+$html .= '</tbody></table>';
 
     $pdf->writeHTML($html, true, false, true, false, '');
-    $pdf->Output('statement.pdf', 'I');
+    $pdf->Output('Account_Statement.pdf', 'I');
 
 } catch (Exception $e) {
-    header('Location: generate_statement.php?error=' . urlencode('An error occurred during PDF generation: ' . $e->getMessage()));
+    // Log the actual error for debugging
+    error_log("PDF Generation Failed: " . $e->getMessage());
+    // Redirect with a generic error
+    header('Location: generate_statement.php?error=' . urlencode('An unexpected error occurred during PDF generation.'));
     exit;
 }
