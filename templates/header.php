@@ -110,7 +110,14 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                 <?php endif; ?>
 
                 <?php if (in_array($role_id, [1, 2])): ?>
-                    <li><a href="view_logs.php" class="block py-2 px-4 rounded hover:bg-gray-700">View Logs</a></li>
+                    <li class="pt-4">
+                        <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Advanced</span>
+                    </li>
+                    <li><a href="member_directory.php" class="block py-2 px-4 rounded hover:bg-gray-700">Member Directory</a></li>
+                    <li><a href="admin_reset_password.php" class="block py-2 px-4 rounded hover:bg-gray-700">Reset User Password</a></li>
+                    <li><a href="admin_audit_view.php" class="block py-2 px-4 rounded hover:bg-gray-700">Audit View</a></li>
+                    <li><a href="admin_analytics_view.php" class="block py-2 px-4 rounded hover:bg-gray-700">Analytics View</a></li>
+                    <li><a href="admin_tabular_view.php" class="block py-2 px-4 rounded hover:bg-gray-700">Tabular View</a></li>
                 <?php endif; ?>
 
                 <?php if ($role_id == 2): ?>

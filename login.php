@@ -51,8 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="bg-gray-100 flex items-center justify-center h-screen">
     <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold text-center text-gray-800">POA Savings Management System</h2>
-        <h3 class="text-xl font-semibold text-center text-gray-700">Login</h3>
+        <div class="text-center">
+            <img class="mx-auto h-20 w-auto" src="assets/images/poa_light.png" alt="POA Savings Logo">
+            <h2 class="mt-6 text-2xl font-bold text-gray-800">POA Savings Management System</h2>
+        </div>
+        <h3 class="text-xl font-semibold text-center text-gray-700">Sign in to your account</h3>
 
         <?php if ($error): ?>
             <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
