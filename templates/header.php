@@ -47,20 +47,9 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
             // --- Check if interest needs to be run (for top-level admins) ---
             $show_interest_alert = false;
             if (in_array($role_id, [1, 2])) {
-                $interest_log_stmt = $pdo->prepare(
-                    "SELECT timestamp FROM logs WHERE action LIKE '%Admin ran interest script%' ORDER BY timestamp DESC LIMIT 1"
-                );
-                $interest_log_stmt->execute();
-                $last_run_timestamp = $interest_log_stmt->fetchColumn();
-
-                if ($last_run_timestamp) {
-                    $last_run_month = date('Y-m', strtotime($last_run_timestamp));
-                    $current_month = date('Y-m');
-                    if ($last_run_month !== $current_month) {
-                        $show_interest_alert = true;
-                    }
-                } else {
-                    // If it has never been run, show the alert
+                $stmt = $pdo->query("SELECT setting_value FROM system_settings WHERE setting_key = 'last_interest_run'");
+                $last_run_timestamp = $stmt->fetchColumn();
+                if (!$last_run_timestamp || (new DateTime($last_run_timestamp))->format('Y-m') !== (new DateTime())->format('Y-m')) {
                     $show_interest_alert = true;
                 }
             }
