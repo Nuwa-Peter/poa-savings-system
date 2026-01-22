@@ -9,12 +9,12 @@ require_once 'templates/header.php';
 // Logic for sorting
 $sort_column = $_GET['sort'] ?? 'id';
 $sort_order = $_GET['order'] ?? 'asc';
-$valid_columns = ['id', 'username', 'email', 'phone', 'account_no', 'created_at'];
+$valid_columns = ['id', 'username', 'first_name', 'surname', 'email', 'phone', 'account_no', 'created_at'];
 $sort_column = in_array($sort_column, $valid_columns) ? $sort_column : 'id';
 $sort_order = strtolower($sort_order) === 'desc' ? 'DESC' : 'ASC';
 
 try {
-    $stmt = $pdo->prepare("SELECT id, username, email, phone, account_no, created_at FROM users ORDER BY {$sort_column} {$sort_order}");
+    $stmt = $pdo->prepare("SELECT id, username, first_name, surname, email, phone, account_no, avatar, created_at FROM users ORDER BY {$sort_column} {$sort_order}");
     $stmt->execute();
     $members = $stmt->fetchAll();
 } catch (PDOException $e) {
@@ -43,28 +43,40 @@ function sort_link($column, $text, $current_column, $current_order) {
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Avatar</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('id', 'ID', $sort_column, $sort_order); ?></th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('first_name', 'First Name', $sort_column, $sort_order); ?></th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('surname', 'Surname', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('username', 'Username', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('email', 'Email', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('phone', 'Phone', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('account_no', 'Account No.', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('created_at', 'Joined On', $sort_column, $sort_order); ?></th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         <?php if (empty($members)): ?>
                             <tr>
-                                <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">No members found.</td>
+                                <td colspan="10" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 text-center">No members found.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($members as $member): ?>
                                 <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                        <?php display_avatar($member['avatar'], $member['username'], $member['first_name'], $member['surname']); ?>
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white"><?php echo htmlspecialchars($member['id']); ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['first_name']); ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['surname']); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['username']); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['email']); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['phone']); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['account_no']); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo date('M j, Y', strtotime($member['created_at'])); ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <a href="edit_user.php?id=<?php echo $member['id']; ?>" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>

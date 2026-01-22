@@ -1,0 +1,112 @@
+<?php
+require_once 'includes/auth_check.php';
+// Only Root (1) and Chairman (2) can access this page
+check_permissions([1, 2]);
+
+require_once 'config/db_connect.php';
+require_once 'templates/header.php';
+
+$user_id_to_edit = $_GET['id'] ?? null;
+$error = '';
+$success = '';
+$user = null;
+
+if (!$user_id_to_edit) {
+    header('Location: member_directory.php');
+    exit;
+}
+
+try {
+    // Fetch user data
+    $stmt = $pdo->prepare("SELECT id, username, email, phone, role_id FROM users WHERE id = ?");
+    $stmt->execute([$user_id_to_edit]);
+    $user = $stmt->fetch();
+
+    if (!$user) {
+        throw new Exception("User not found.");
+    }
+
+    // Handle form submission
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $username = trim($_POST['username']);
+        $email = trim($_POST['email']);
+        $phone = trim($_POST['phone']);
+        $role_id = $_POST['role_id'];
+
+        if (empty($username) || empty($email) || empty($role_id)) {
+            $error = "Username, Email, and Role are required fields.";
+        } else {
+            $update_stmt = $pdo->prepare("UPDATE users SET username = ?, email = ?, phone = ?, role_id = ? WHERE id = ?");
+            $update_stmt->execute([$username, $email, $phone, $role_id, $user_id_to_edit]);
+
+            require_once 'includes/logging.php';
+            log_action($pdo, $_SESSION['user_id'], "Updated profile for user: {$username} (ID: {$user_id_to_edit})");
+
+            $success = "User profile updated successfully.";
+            // Refresh user data to show new values
+            $stmt->execute([$user_id_to_edit]);
+            $user = $stmt->fetch();
+        }
+    }
+
+} catch (Exception $e) {
+    $error = "Error: " . $e->getMessage();
+}
+?>
+
+<div class="container mx-auto mt-10 p-4">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-6">Edit User Profile</h1>
+
+        <?php if ($error): ?>
+            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert"><?php echo $error; ?></div>
+        <?php endif; ?>
+        <?php if ($success): ?>
+            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert"><?php echo $success; ?></div>
+        <?php endif; ?>
+
+        <?php if ($user): ?>
+            <form method="POST" action="edit_user.php?id=<?php echo $user_id_to_edit; ?>" class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label for="username" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Username: <span class="text-red-500">*</span></label>
+                        <input type="text" name="username" id="username" value="<?php echo htmlspecialchars($user['username']); ?>" required class="block w-full px-4 py-2 rounded-md">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Email: <span class="text-red-500">*</span></label>
+                        <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($user['email']); ?>" required class="block w-full px-4 py-2 rounded-md">
+                    </div>
+                    <div>
+                        <label for="phone" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Phone:</label>
+                        <input type="text" name="phone" id="phone" value="<?php echo htmlspecialchars($user['phone']); ?>" class="block w-full px-4 py-2 rounded-md">
+                    </div>
+                    <div>
+                        <label for="role_id" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Role: <span class="text-red-500">*</span></label>
+                        <select name="role_id" id="role_id" required class="block w-full px-4 py-2 rounded-md">
+                            <option value="5" <?php echo $user['role_id'] == 5 ? 'selected' : ''; ?>>Member</option>
+                            <option value="4" <?php echo $user['role_id'] == 4 ? 'selected' : ''; ?>>Treasurer</option>
+                            <option value="3" <?php echo $user['role_id'] == 3 ? 'selected' : ''; ?>>Secretary</option>
+                            <option value="2" <?php echo $user['role_id'] == 2 ? 'selected' : ''; ?>>Chairman</option>
+                             <?php if ($_SESSION['role_id'] == 1): // Only Root can assign Root ?>
+                                <option value="1" <?php echo $user['role_id'] == 1 ? 'selected' : ''; ?>>Root</option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-between items-center">
+                    <a href="member_directory.php" class="text-sm text-indigo-600 hover:text-indigo-900">&larr; Back to Directory</a>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        <?php else: ?>
+            <p>The requested user could not be found. Please return to the directory.</p>
+            <a href="member_directory.php" class="text-indigo-600 hover:text-indigo-900">&larr; Back to Directory</a>
+        <?php endif; ?>
+    </div>
+</div>
+
+<?php
+require_once 'templates/footer.php';
+?>
