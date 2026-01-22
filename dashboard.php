@@ -10,6 +10,7 @@ if (in_array($user_role, [1, 2, 3, 4])) {
 }
 
 require_once 'templates/header.php';
+require_once 'includes/currency_converter.php';
 ?>
 
 <?php
@@ -109,10 +110,12 @@ try {
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Total Savings</h3>
             <p class="text-4xl font-bold text-indigo-600"><?php echo number_format($total_savings, 2); ?> <span class="text-2xl">UGX</span></p>
+            <p class="text-lg text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($total_savings), 2); ?> USD</p>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Active Loan Balance</h3>
             <p class="text-4xl font-bold text-red-600"><?php echo number_format($active_loan_balance, 2); ?> <span class="text-2xl">UGX</span></p>
+            <p class="text-lg text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($active_loan_balance), 2); ?> USD</p>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Next Loan Payment</h3>
