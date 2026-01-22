@@ -21,9 +21,13 @@ if (isset($_POST['update_avatar'])) {
 
         if (in_array($_FILES['avatar']['type'], $allowed_types) && $_FILES['avatar']['size'] <= $max_size) {
             // Sanitize and create a unique filename
+            $upload_dir = 'assets/uploads/avatars/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0755, true);
+            }
             $file_extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
             $safe_filename = uniqid('avatar_', true) . '.' . $file_extension;
-            $upload_path = 'assets/uploads/avatars/' . $safe_filename;
+            $upload_path = $upload_dir . $safe_filename;
 
             if (move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_path)) {
                 try {

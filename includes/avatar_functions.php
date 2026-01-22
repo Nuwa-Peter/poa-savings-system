@@ -15,6 +15,7 @@ function get_initials($first_name, $surname, $username = '') {
     }
 
     // Fallback to username if names are not available
+    $username = $username ?? ''; // Ensure username is not null
     $words = explode(' ', trim($username));
     if (count($words) >= 2) {
         return strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1));

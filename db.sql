@@ -31,7 +31,7 @@ CREATE TABLE `withdrawals` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `amount` decimal(10,2) NOT NULL,
-  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `status` varchar(255) NOT NULL DEFAULT 'pending',
   `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `processed_at` timestamp NULL DEFAULT NULL,
   `processed_by_user_id` int(11) DEFAULT NULL,
@@ -58,7 +58,7 @@ CREATE TABLE `loans` (
   `amount` decimal(10,2) NOT NULL,
   `balance` decimal(10,2) NOT NULL,
   `interest_rate` decimal(4,2) NOT NULL DEFAULT 2.00,
-  `status` enum('pending','approved','rejected','paid') NOT NULL DEFAULT 'pending',
+  `status` varchar(255) NOT NULL DEFAULT 'pending',
   `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `approved_at` timestamp NULL DEFAULT NULL,
   `approved_by_user_id` int(11) DEFAULT NULL,
@@ -254,6 +254,29 @@ CREATE TABLE `password_resets` (
   KEY `user_id` (`user_id`),
   CONSTRAINT `password_resets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `system_settings`
+--
+
+CREATE TABLE `system_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `setting_key` varchar(255) NOT NULL,
+  `setting_value` text DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `setting_key` (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `system_settings`
+--
+
+INSERT INTO `system_settings` (`setting_key`, `setting_value`) VALUES
+('last_interest_run', NULL);
+
 
 COMMIT;
 

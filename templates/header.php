@@ -161,7 +161,11 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
 
                 <!-- User Avatar & Dropdown -->
                 <a href="settings.php" class="relative">
-                     <?php display_avatar($user_details['avatar'], $user_details['username'], $user_details['first_name'], $user_details['surname']); ?>
+                     <?php
+                     if ($user_details) {
+                         display_avatar($user_details['avatar'], $user_details['username'], $user_details['first_name'], $user_details['surname']);
+                     }
+                     ?>
                 </a>
             </div>
         </header>
