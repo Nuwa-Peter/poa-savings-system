@@ -1,43 +1,43 @@
 <?php
-// db_seed.php
-// A command-line script to seed the database with initial admin users.
+require_once 'config/db_connect.php';
 
-// Prevent execution via browser
+// --- Security Check: Ensure this script is run from the CLI ---
 if (php_sapi_name() !== 'cli') {
     die("This script can only be run from the command line.");
 }
 
-require_once 'config/db_connect.php';
-
 try {
     echo "Starting database seeding...\n";
 
-    // 1. Temporarily disable foreign key checks to allow truncation
-    $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
+    // Disable foreign key checks to allow truncation
+    $pdo->exec('SET FOREIGN_KEY_CHECKS=0;');
     echo "Foreign key checks disabled.\n";
 
-    // 2. Truncate tables to ensure a clean slate
-    $pdo->exec("TRUNCATE TABLE users");
-    $pdo->exec("TRUNCATE TABLE password_resets");
-    echo "Users and password_resets tables truncated.\n";
+    // List of tables to truncate
+    $tables = [
+        'users',
+        'savings',
+        'loans',
+        'withdrawals',
+        'loan_payments',
+        'loan_guarantors',
+        'notifications',
+        'logs',
+        'password_resets',
+        'system_settings'
+    ];
 
-    // 3. Re-enable foreign key checks
-    $pdo->exec("SET FOREIGN_KEY_CHECKS=1");
-    echo "Foreign key checks enabled.\n";
-
-    // 4. Start a transaction for the INSERT statements
-    $pdo->beginTransaction();
-
-    // 5. Define the users to be created
-    $default_password = 'password';
-    $hashed_password = password_hash($default_password, PASSWORD_DEFAULT);
-
-    if ($hashed_password === false) {
-        throw new Exception("Failed to hash the default password.");
+    // Truncate all tables
+    foreach ($tables as $table) {
+        $pdo->exec("TRUNCATE TABLE `{$table}`;");
+        echo "Truncated table: {$table}\n";
     }
 
-    echo "Default password hashed successfully.\n";
+    // Re-enable foreign key checks
+    $pdo->exec('SET FOREIGN_KEY_CHECKS=1;');
+    echo "Foreign key checks enabled.\n";
 
+    // --- Seed Users Table ---
     $users_to_seed = [
         [
             'id' => 1,
@@ -46,8 +46,10 @@ try {
             'surname' => 'User',
             'username' => 'root',
             'email' => 'root@poa.dev',
-            'password' => $hashed_password,
-            'role_id' => 1, // Root role
+            'phone' => null,
+            'password' => '$2y$10$CQoZZXkbiWu6/s9vUgBB7OtQuf0JuSOOSYuwsuQDuHSxd1YQy4wbi', // Default password: 'password'
+            'role_id' => 1,
+            'avatar' => null
         ],
         [
             'id' => 2,
@@ -56,34 +58,34 @@ try {
             'surname' => 'Admin',
             'username' => 'chairman',
             'email' => 'chairman@poa.dev',
-            'password' => $hashed_password,
-            'role_id' => 2, // Chairman role
-        ],
+            'phone' => null,
+            'password' => '$2y$10$CQoZZXkbiWu6/s9vUgBB7OtQuf0JuSOOSYuwsuQDuHSxd1YQy4wbi', // Default password: 'password'
+            'role_id' => 2,
+            'avatar' => null
+        ]
     ];
 
-    // 6. Prepare the SQL statement
-    $stmt = $pdo->prepare(
-        "INSERT INTO users (id, account_no, first_name, surname, username, email, password, role_id)
-         VALUES (:id, :account_no, :first_name, :surname, :username, :email, :password, :role_id)"
+    $user_stmt = $pdo->prepare(
+        "INSERT INTO `users` (`id`, `account_no`, `first_name`, `surname`, `username`, `email`, `phone`, `password`, `role_id`, `avatar`)
+         VALUES (:id, :account_no, :first_name, :surname, :username, :email, :phone, :password, :role_id, :avatar)"
     );
 
-    // 4. Insert each user
     foreach ($users_to_seed as $user) {
-        $stmt->execute($user);
-        echo "User '{$user['username']}' created with account number {$user['account_no']}.\n";
+        $user_stmt->execute($user);
     }
+    echo "Seeded " . count($users_to_seed) . " users.\n";
 
-    // Commit the transaction
-    $pdo->commit();
+    // --- Seed System Settings Table ---
+    $settings_stmt = $pdo->prepare("INSERT INTO `system_settings` (`setting_key`, `setting_value`) VALUES (?, ?)");
+    $settings_stmt->execute(['last_interest_run', null]);
+    echo "Seeded system settings.\n";
 
-    echo "\nDatabase seeding completed successfully!\n";
-    echo "You can now log in with the default users (root, chairman) using the password: '$default_password'\n";
+    echo "--------------------------\n";
+    echo "Database seeding complete!\n";
 
-} catch (Exception $e) {
-    // Roll back the transaction if something failed
-    if ($pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
-
-    die("\nERROR: Database seeding failed.\n" . $e->getMessage() . "\n");
+} catch (PDOException $e) {
+    // Re-enable foreign key checks on error
+    $pdo->exec('SET FOREIGN_KEY_CHECKS=1;');
+    die("Database seeding failed: " . $e->getMessage() . "\n");
 }
+?>
