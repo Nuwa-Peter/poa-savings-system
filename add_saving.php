@@ -8,7 +8,7 @@ require_once 'templates/header.php';
 
 // Fetch all users to populate the dropdown, excluding the root user
 try {
-    $stmt = $pdo->query("SELECT id, username, account_no FROM users WHERE account_no != 'POA00000' ORDER BY username ASC");
+    $stmt = $pdo->query("SELECT id, first_name, surname, account_no FROM users WHERE role_id = 5 ORDER BY first_name ASC");
     $users = $stmt->fetchAll();
 } catch (PDOException $e) {
     $users = [];
@@ -44,7 +44,7 @@ try {
                 <option value="" disabled selected>Select a member</option>
                 <?php foreach ($users as $user): ?>
                     <option value="<?php echo htmlspecialchars($user['id']); ?>">
-                        <?php echo htmlspecialchars($user['username']) . ' (' . htmlspecialchars($user['account_no']) . ')'; ?>
+                        <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['surname']) . ' (' . htmlspecialchars($user['account_no']) . ')'; ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -52,10 +52,6 @@ try {
         <div class="mb-4">
             <label for="amount" class="block text-gray-700 text-sm font-bold mb-2">Amount:</label>
             <input type="number" step="0.01" name="amount" id="amount" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-        </div>
-        <div class="mb-6">
-            <label for="proof_image" class="block text-gray-700 text-sm font-bold mb-2">Proof (Bank Slip):</label>
-            <input type="file" name="proof_image" id="proof_image" required accept="image/*" class="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer focus:outline-none">
         </div>
         <div class="flex items-center justify-between">
             <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">

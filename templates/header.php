@@ -128,7 +128,11 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
             </button>
 
-            <h1 class="text-xl font-bold text-gray-800">POA Savings and Credit Society</h1>
+            <?php
+            $role_names = [1 => 'Root', 2 => 'Chairman', 3 => 'Secretary', 4 => 'Treasurer', 5 => 'Member'];
+            $role_name = $role_names[$_SESSION['role_id']] ?? 'Guest';
+            ?>
+            <h1 class="text-xl font-bold text-gray-800"><?php echo htmlspecialchars($role_name); ?> of POA Savings and Credit Society</h1>
 
             <!-- Theme Toggle and User Avatar -->
             <div class="flex items-center space-x-4">
