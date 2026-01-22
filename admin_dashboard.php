@@ -7,6 +7,17 @@ require_once 'config/db_connect.php';
 require_once 'includes/currency_converter.php';
 require_once 'templates/header.php';
 
+$interest_run_this_month = false;
+try {
+    $stmt = $pdo->query("SELECT setting_value FROM system_settings WHERE setting_key = 'last_interest_run'");
+    $last_run_timestamp = $stmt->fetchColumn();
+    if ($last_run_timestamp && (new DateTime($last_run_timestamp))->format('Y-m') === (new DateTime())->format('Y-m')) {
+        $interest_run_this_month = true;
+    }
+} catch (PDOException $e) {
+    // Gracefully handle error, maybe log it, but don't block the dashboard
+}
+
 // --- Fetch Aggregate Data ---
 $system_stats = [
     'total_savings' => 0,
@@ -48,6 +59,13 @@ try {
 
 <div class="container mx-auto mt-10">
     <h2 class="text-3xl font-bold mb-6 text-gray-800">Administrator Dashboard</h2>
+
+    <?php if (!$interest_run_this_month && in_array($_SESSION['role_id'], [1, 2])): ?>
+        <div class="p-4 mb-6 text-sm text-yellow-700 bg-yellow-100 rounded-lg shadow-md" role="alert">
+            <span class="font-medium">Action Required!</span> The monthly loan interest script has not been run for the current month.
+            <a href="apply_interest.php" class="font-bold underline ml-2">Run it now</a>.
+        </div>
+    <?php endif; ?>
 
     <?php if (isset($db_error)): ?>
         <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">

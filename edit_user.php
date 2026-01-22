@@ -36,6 +36,25 @@ try {
         if (empty($username) || empty($email) || empty($role_id)) {
             $error = "Username, Email, and Role are required fields.";
         } else {
+            // --- Chairman Role Swap Logic ---
+            if ($role_id == 2 && $user['role_id'] != 2) { // If user is being promoted to Chairman
+                // Find the current chairman (but not the root user)
+                $current_chairman_stmt = $pdo->prepare("SELECT id FROM users WHERE role_id = 2 AND id != 1");
+                $current_chairman_stmt->execute();
+                $current_chairman = $current_chairman_stmt->fetch();
+
+                if ($current_chairman) {
+                    // Demote the current chairman to a member (role_id 5)
+                    $demote_stmt = $pdo->prepare("UPDATE users SET role_id = 5 WHERE id = ?");
+                    $demote_stmt->execute([$current_chairman['id']]);
+                }
+
+                // Send notification to the new chairman
+                $notification_message = "Congratulations! You have been appointed as the new Chairman.";
+                $notify_stmt = $pdo->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
+                $notify_stmt->execute([$user_id_to_edit, $notification_message]);
+            }
+
             $update_stmt = $pdo->prepare("UPDATE users SET username = ?, email = ?, phone = ?, role_id = ? WHERE id = ?");
             $update_stmt->execute([$username, $email, $phone, $role_id, $user_id_to_edit]);
 

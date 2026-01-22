@@ -61,6 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $log_stmt->execute([$_SESSION['user_id'], $log_action]);
         }
 
+        // Update the system setting to mark interest as run for this month
+        $update_setting_stmt = $pdo->prepare("UPDATE system_settings SET setting_value = NOW() WHERE setting_key = 'last_interest_run'");
+        $update_setting_stmt->execute();
+
         $pdo->commit();
 
     } catch (PDOException $e) {
