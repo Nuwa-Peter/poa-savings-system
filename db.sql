@@ -278,6 +278,26 @@ INSERT INTO `system_settings` (`setting_key`, `setting_value`) VALUES
 ('last_interest_run', NULL);
 
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `savings_log`
+--
+
+CREATE TABLE `savings_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `saving_id` int(11) NOT NULL,
+  `admin_id` int(11) NOT NULL,
+  `old_amount` decimal(10,2) NOT NULL,
+  `new_amount` decimal(10,2) NOT NULL,
+  `reason` text NOT NULL,
+  `changed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `saving_id` (`saving_id`),
+  KEY `admin_id` (`admin_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

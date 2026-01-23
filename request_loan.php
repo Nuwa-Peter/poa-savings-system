@@ -6,14 +6,39 @@ check_permissions([1, 2, 3, 4, 5]);
 require_once 'config/db_connect.php';
 require_once 'templates/header.php';
 
-// Fetch other members to be potential guarantors
-$other_members = [];
+$user_id = $_SESSION['user_id'];
+$is_eligible = false;
+$savings_this_month = 0;
+$total_savings = 0;
+$loan_limit = 0;
+$db_error = null;
+
 try {
-    $stmt = $pdo->prepare("SELECT id, username FROM users WHERE id != ? AND role_id = 5 ORDER BY username ASC");
-    $stmt->execute([$_SESSION['user_id']]);
+    // 1. Fetch total savings to calculate loan limit
+    $stmt = $pdo->prepare("SELECT SUM(amount) FROM savings WHERE user_id = ?");
+    $stmt->execute([$user_id]);
+    $total_savings = $stmt->fetchColumn() ?: 0;
+    $loan_limit = $total_savings * 0.5;
+
+    // 2. Fetch number of savings in the current calendar month
+    $start_of_month = date('Y-m-01');
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM savings WHERE user_id = ? AND created_at >= ?");
+    $stmt->execute([$user_id, $start_of_month]);
+    $savings_this_month = $stmt->fetchColumn() ?: 0;
+
+    // 3. Determine eligibility
+    if ($savings_this_month >= 3) {
+        $is_eligible = true;
+    }
+
+    // 4. Fetch other members to be potential guarantors
+    $stmt = $pdo->prepare("SELECT id, first_name, surname FROM users WHERE id != ? AND role_id = 5 ORDER BY first_name ASC");
+    $stmt->execute([$user_id]);
     $other_members = $stmt->fetchAll();
+
 } catch (PDOException $e) {
-    $db_error = "Could not fetch members: " . $e->getMessage();
+    $db_error = "Could not fetch your financial data: " . $e->getMessage();
+    $other_members = []; // Ensure this is an array to prevent errors in the form
 }
 ?>
 
@@ -32,15 +57,41 @@ try {
         </div>
     <?php endif; ?>
 
-    <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
-        <p class="font-bold">Loan Eligibility Criteria</p>
-        <ul class="list-disc list-inside mt-2">
-            <li>You must have saved at least <strong>three times a week</strong> for the past <strong>four weeks</strong>.</li>
-            <li>The requested loan amount cannot exceed <strong>50%</strong> of your total savings.</li>
-            <li>All loans are subject to a <strong>2% monthly interest rate</strong>.</li>
-        </ul>
-    </div>
+    <?php if ($db_error): ?>
+        <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            <span class="font-medium">Database Error!</span> <?php echo htmlspecialchars($db_error); ?>
+        </div>
+    <?php endif; ?>
 
+    <!-- Eligibility & Info Section -->
+    <?php if (!$is_eligible): ?>
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded-r-lg" role="alert">
+        <p class="font-bold text-lg mb-2">Your Path to Loan Eligibility</p>
+        <p>You are not yet eligible for a loan. Here's what you need to achieve:</p>
+        <ul class="list-disc list-inside mt-3 space-y-1">
+            <li>
+                <strong>Savings This Month:</strong> <?php echo $savings_this_month; ?> / 3
+                <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                    <div class="bg-green-600 h-2.5 rounded-full" style="width: <?php echo min(100, ($savings_this_month / 3) * 100); ?>%"></div>
+                </div>
+            </li>
+            <li class="mt-2">
+                <strong>Your Current Loan Limit:</strong> <?php echo number_format($loan_limit, 2); ?> UGX
+                <p class="text-xs">(This is 50% of your total savings of <?php echo number_format($total_savings, 2); ?> UGX)</p>
+            </li>
+        </ul>
+        <p class="mt-4">Once you have made at least <strong>3 savings</strong> this month, the loan application form will become available here.</p>
+    </div>
+    <?php else: ?>
+    <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
+        <p class="font-bold">Loan Terms</p>
+        <p class="mt-2">A <strong>2% monthly interest rate</strong> applies to the outstanding balance. Your loan limit is <strong>50%</strong> of your total savings, which is currently <strong><?php echo number_format($loan_limit, 2); ?> UGX</strong>.</p>
+    </div>
+    <?php endif; ?>
+
+
+    <!-- Loan Application Form (Only shows if eligible) -->
+    <?php if ($is_eligible): ?>
     <form action="process_loan.php" method="POST" class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="grid grid-cols-1 gap-6">
             <div>
@@ -53,7 +104,7 @@ try {
                     <option value="" disabled selected>Select a member to guarantee your loan</option>
                     <?php foreach ($other_members as $member): ?>
                         <option value="<?php echo htmlspecialchars($member['id']); ?>">
-                            <?php echo htmlspecialchars($member['username']); ?>
+                            <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['surname']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -66,6 +117,7 @@ try {
             </button>
         </div>
     </form>
+    <?php endif; ?>
 </div>
 
 <?php

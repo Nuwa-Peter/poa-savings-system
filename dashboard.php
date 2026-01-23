@@ -17,6 +17,40 @@ require_once 'includes/currency_converter.php';
 require_once 'config/db_connect.php';
 
 $user_id = $_SESSION['user_id'];
+
+// --- Weekly Savings Notification Logic ---
+// Check if today is Sunday and if a notification needs to be sent.
+// To prevent spamming, we'll also check if a similar notification has been sent in the last 6 days.
+if (date('N') == 7) { // 7 = Sunday
+    try {
+        // 1. Check total savings for the current week (Monday to Sunday)
+        $start_of_week = date('Y-m-d H:i:s', strtotime('monday this week'));
+        $stmt = $pdo->prepare("SELECT SUM(amount) FROM savings WHERE user_id = ? AND created_at >= ?");
+        $stmt->execute([$user_id, $start_of_week]);
+        $weekly_savings = $stmt->fetchColumn() ?: 0;
+
+        if ($weekly_savings < 10000) {
+            // 2. Check if a reminder was already sent this week to avoid duplicates
+            $reminder_grace_period = date('Y-m-d H:i:s', strtotime('-6 days'));
+            $notification_stmt = $pdo->prepare(
+                "SELECT COUNT(*) FROM notifications WHERE user_id = ? AND message LIKE ? AND created_at >= ?"
+            );
+            $notification_stmt->execute([$user_id, '%Save 10,000 UGX today%', $reminder_grace_period]);
+            $has_recent_reminder = $notification_stmt->fetchColumn() > 0;
+
+            if (!$has_recent_reminder) {
+                // 3. Insert the new notification
+                $message = "Save 10,000 UGX today to stay on track for loan eligibility!";
+                $insert_stmt = $pdo->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
+                $insert_stmt->execute([$user_id, $message]);
+            }
+        }
+    } catch (PDOException $e) {
+        // Log this error or handle it silently so it doesn't crash the dashboard
+        error_log("Could not process weekly savings notification: " . $e->getMessage());
+    }
+}
+
 $total_savings = 0;
 $active_loan_balance = 0;
 $next_loan_payment = 'N/A';

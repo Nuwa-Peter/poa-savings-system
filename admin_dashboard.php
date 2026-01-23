@@ -108,6 +108,53 @@ try {
         </div>
     </div>
 
+    <!-- Recent Savings Transactions -->
+    <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Recent Savings Transactions</h3>
+        <div class="overflow-auto max-h-96">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr>
+                        <th class="py-3 px-4 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Member</th>
+                        <th class="py-3 px-4 bg-gray-100 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount (UGX)</th>
+                        <th class="py-3 px-4 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+                        <th class="py-3 px-4 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 text-sm">
+                    <?php
+                    $recent_savings = [];
+                    try {
+                        $stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id ORDER BY s.created_at DESC LIMIT 10");
+                        $recent_savings = $stmt->fetchAll();
+                    } catch (PDOException $e) {
+                        echo '<tr><td colspan="4" class="py-4 text-center text-red-500">Could not fetch savings.</td></tr>';
+                    }
+
+                    if (count($recent_savings) > 0):
+                        foreach ($recent_savings as $saving):
+                    ?>
+                            <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                <td class="py-3 px-4"><?php echo htmlspecialchars($saving['first_name'] . ' ' . $saving['surname']); ?></td>
+                                <td class="py-3 px-4 text-right"><?php echo number_format($saving['amount'], 2); ?></td>
+                                <td class="py-3 px-4"><?php echo date('d M Y', strtotime($saving['created_at'])); ?></td>
+                                <td class="py-3 px-4">
+                                    <a href="edit_saving.php?id=<?php echo $saving['id']; ?>" class="text-indigo-600 hover:text-indigo-900 font-semibold">Rectify</a>
+                                </td>
+                            </tr>
+                    <?php
+                        endforeach;
+                    else:
+                    ?>
+                        <tr>
+                            <td colspan="4" class="py-4 text-center text-gray-500">No savings transactions found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Admin's Personal Account View -->
     <div class="mt-8 bg-gray-50 p-6 rounded-lg shadow-inner border">
         <h3 class="text-xl font-semibold text-gray-700 mb-4">My Personal Account</h3>

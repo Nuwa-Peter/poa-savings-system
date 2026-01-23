@@ -44,16 +44,6 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
             $notify_stmt->execute([$user_id]);
             $unread_notifications_count = $notify_stmt->fetchColumn();
 
-            // --- Check if interest needs to be run (for top-level admins) ---
-            $show_interest_alert = false;
-            if (in_array($role_id, [1, 2])) {
-                $stmt = $pdo->query("SELECT setting_value FROM system_settings WHERE setting_key = 'last_interest_run'");
-                $last_run_timestamp = $stmt->fetchColumn();
-                if (!$last_run_timestamp || (new DateTime($last_run_timestamp))->format('Y-m') !== (new DateTime())->format('Y-m')) {
-                    $show_interest_alert = true;
-                }
-            }
-
         } catch (PDOException $e) {
             $user_avatar = null; // Default on error
             $unread_notifications_count = 0;
@@ -163,17 +153,4 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
             </div>
         </header>
         <main class="p-6">
-            <?php if ($show_interest_alert): ?>
-            <div id="interest-alert" class="relative mb-6 rounded-lg border-s-4 border-yellow-500 bg-yellow-50 p-4">
-                <div class="flex items-center gap-2 text-yellow-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-                        <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
-                    </svg>
-                    <strong class="block font-medium"> Action Required </strong>
-                </div>
-                <p class="mt-2 text-sm text-yellow-700">The monthly loan interest has not been applied for the current month. Please run the script to ensure all loan balances are up to date.</p>
-                <a href="apply_interest.php" class="mt-2 inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 text-sm rounded">Apply Interest Now</a>
-                <button onclick="document.getElementById('interest-alert').style.display='none'" class="absolute top-2 right-2 text-yellow-800">&times;</button>
-            </div>
-            <?php endif; ?>
     <?php endif; ?>
