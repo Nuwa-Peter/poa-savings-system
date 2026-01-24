@@ -138,8 +138,9 @@ try {
                                 <td class="py-3 px-4"><?php echo htmlspecialchars($saving['first_name'] . ' ' . $saving['surname']); ?></td>
                                 <td class="py-3 px-4 text-right"><?php echo number_format($saving['amount'], 2); ?></td>
                                 <td class="py-3 px-4"><?php echo date('d M Y', strtotime($saving['created_at'])); ?></td>
-                                <td class="py-3 px-4">
+                                <td class="py-3 px-4 flex items-center space-x-4">
                                     <a href="edit_saving.php?id=<?php echo $saving['id']; ?>" class="text-indigo-600 hover:text-indigo-900 font-semibold">Rectify</a>
+                                    <a href="delete_saving.php?id=<?php echo $saving['id']; ?>" class="text-red-600 hover:text-red-900 font-semibold" onclick="return confirm('Are you sure you want to delete this saving transaction? This action cannot be undone.');">Delete</a>
                                 </td>
                             </tr>
                     <?php

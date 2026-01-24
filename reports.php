@@ -42,7 +42,8 @@ try {
     // 3. Member Activity Report
     $member_activity_stmt = $pdo->query(
         "SELECT
-            u.username,
+            u.first_name,
+            u.surname,
             u.account_no,
             COALESCE(SUM(s.amount), 0) as total_saved,
             COUNT(DISTINCT l.id) as loans_taken
@@ -51,8 +52,7 @@ try {
          LEFT JOIN loans l ON u.id = l.user_id
          WHERE u.role_id = 5
          GROUP BY u.id
-         ORDER BY total_saved DESC
-         LIMIT 20"
+         ORDER BY total_saved DESC"
     );
     $member_activity_data = $member_activity_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -110,13 +110,14 @@ try {
         </div>
     </div>
 
-    <!-- Member Activity Report -->
+    <!-- Good Savers Report -->
     <div class="bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-xl font-semibold text-gray-700 mb-4">Top 20 Members by Savings</h3>
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Good Savers Report</h3>
         <div class="overflow-x-auto">
             <table class="min-w-full leading-normal">
                 <thead>
                     <tr class="border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="px-5 py-3">Rank</th>
                         <th class="px-5 py-3">Member</th>
                         <th class="px-5 py-3 text-right">Total Savings (UGX)</th>
                         <th class="px-5 py-3 text-center">Loans Taken</th>
@@ -124,12 +125,14 @@ try {
                 </thead>
                 <tbody class="text-gray-700">
                     <?php if (empty($member_activity_data)): ?>
-                        <tr><td colspan="3" class="px-5 py-5 text-center">No member activity data available.</td></tr>
+                        <tr><td colspan="4" class="px-5 py-5 text-center">No member activity data available.</td></tr>
                     <?php else: ?>
+                        <?php $rank = 1; ?>
                         <?php foreach ($member_activity_data as $row): ?>
                             <tr class="border-b border-gray-200">
+                                <td class="px-5 py-4 text-center"><?php echo $rank++; ?></td>
                                 <td class="px-5 py-4">
-                                    <p><?php echo htmlspecialchars($row['username']); ?></p>
+                                    <p><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['surname']); ?></p>
                                     <p class="text-xs text-gray-500"><?php echo htmlspecialchars($row['account_no']); ?></p>
                                 </td>
                                 <td class="px-5 py-4 text-right"><?php echo number_format($row['total_saved'], 2); ?></td>

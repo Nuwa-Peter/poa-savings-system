@@ -28,13 +28,15 @@ try {
 
     // Handle form submission
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $first_name = trim($_POST['first_name']);
+        $surname = trim($_POST['surname']);
         $username = trim($_POST['username']);
         $email = trim($_POST['email']);
         $phone = trim($_POST['phone']);
         $role_id = $_POST['role_id'];
 
-        if (empty($username) || empty($email) || empty($role_id)) {
-            $error = "Username, Email, and Role are required fields.";
+        if (empty($first_name) || empty($surname) || empty($username) || empty($email) || empty($role_id)) {
+            $error = "First Name, Surname, Username, Email, and Role are required fields.";
         } else {
             // --- Chairman Role Swap Logic ---
             if ($role_id == 2 && $user['role_id'] != 2) { // If user is being promoted to Chairman
@@ -55,8 +57,10 @@ try {
                 $notify_stmt->execute([$user_id_to_edit, $notification_message]);
             }
 
-            $update_stmt = $pdo->prepare("UPDATE users SET username = ?, email = ?, phone = ?, role_id = ? WHERE id = ?");
-            $update_stmt->execute([$username, $email, $phone, $role_id, $user_id_to_edit]);
+            $update_stmt = $pdo->prepare(
+                "UPDATE users SET first_name = ?, surname = ?, username = ?, email = ?, phone = ?, role_id = ? WHERE id = ?"
+            );
+            $update_stmt->execute([$first_name, $surname, $username, $email, $phone, $role_id, $user_id_to_edit]);
 
             require_once 'includes/logging.php';
             log_action($pdo, $_SESSION['user_id'], "Updated profile for user: {$username} (ID: {$user_id_to_edit})");
