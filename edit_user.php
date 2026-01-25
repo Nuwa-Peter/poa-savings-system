@@ -35,26 +35,12 @@ try {
         $phone = trim($_POST['phone']);
         $role_id = $_POST['role_id'];
 
-        if (empty($first_name) || empty($surname) || empty($username) || empty($email) || empty($role_id)) {
-            $error = "First Name, Surname, Username, Email, and Role are required fields.";
+        if (empty($first_name) || empty($surname) || empty($username) || empty($email)) {
+            $error = "First Name, Surname, Username, and Email are required fields.";
         } else {
-            // --- Chairman Role Swap Logic ---
-            if ($role_id == 2 && $user['role_id'] != 2) { // If user is being promoted to Chairman
-                // Find the current chairman (but not the root user)
-                $current_chairman_stmt = $pdo->prepare("SELECT id FROM users WHERE role_id = 2 AND id != 1");
-                $current_chairman_stmt->execute();
-                $current_chairman = $current_chairman_stmt->fetch();
-
-                if ($current_chairman) {
-                    // Demote the current chairman to a member (role_id 5)
-                    $demote_stmt = $pdo->prepare("UPDATE users SET role_id = 5 WHERE id = ?");
-                    $demote_stmt->execute([$current_chairman['id']]);
-                }
-
-                // Send notification to the new chairman
-                $notification_message = "Congratulations! You have been appointed as the new Chairman.";
-                $notify_stmt = $pdo->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
-                $notify_stmt->execute([$user_id_to_edit, $notification_message]);
+            // If the role is not submitted (because it's disabled for the chairman), retain the existing role_id
+            if (empty($role_id)) {
+                $role_id = $user['role_id'];
             }
 
             $update_stmt = $pdo->prepare(
@@ -119,7 +105,9 @@ try {
                             <option value="5" <?php echo $user['role_id'] == 5 ? 'selected' : ''; ?>>Member</option>
                             <option value="4" <?php echo $user['role_id'] == 4 ? 'selected' : ''; ?>>Treasurer</option>
                             <option value="3" <?php echo $user['role_id'] == 3 ? 'selected' : ''; ?>>Secretary</option>
-                            <option value="2" <?php echo $user['role_id'] == 2 ? 'selected' : ''; ?>>Chairman</option>
+                            <?php if ($user['role_id'] == 2): // If the user is the current chairman, keep the option visible but disabled ?>
+                                <option value="2" selected>Chairman (Cannot be changed here)</option>
+                            <?php endif; ?>
                              <?php if ($_SESSION['role_id'] == 1): // Only Root can assign Root ?>
                                 <option value="1" <?php echo $user['role_id'] == 1 ? 'selected' : ''; ?>>Root</option>
                             <?php endif; ?>

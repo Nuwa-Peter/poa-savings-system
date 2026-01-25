@@ -46,13 +46,14 @@ try {
             u.surname,
             u.account_no,
             COALESCE(SUM(s.amount), 0) as total_saved,
+            COUNT(s.id) as savings_frequency,
             COUNT(DISTINCT l.id) as loans_taken
          FROM users u
          LEFT JOIN savings s ON u.id = s.user_id
          LEFT JOIN loans l ON u.id = l.user_id
          WHERE u.role_id = 5
          GROUP BY u.id
-         ORDER BY total_saved DESC"
+         ORDER BY total_saved DESC, savings_frequency DESC"
     );
     $member_activity_data = $member_activity_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -120,12 +121,13 @@ try {
                         <th class="px-5 py-3">Rank</th>
                         <th class="px-5 py-3">Member</th>
                         <th class="px-5 py-3 text-right">Total Savings (UGX)</th>
+                        <th class="px-5 py-3 text-center">Savings Frequency</th>
                         <th class="px-5 py-3 text-center">Loans Taken</th>
                     </tr>
                 </thead>
                 <tbody class="text-gray-700">
                     <?php if (empty($member_activity_data)): ?>
-                        <tr><td colspan="4" class="px-5 py-5 text-center">No member activity data available.</td></tr>
+                        <tr><td colspan="5" class="px-5 py-5 text-center">No member activity data available.</td></tr>
                     <?php else: ?>
                         <?php $rank = 1; ?>
                         <?php foreach ($member_activity_data as $row): ?>
@@ -136,6 +138,7 @@ try {
                                     <p class="text-xs text-gray-500"><?php echo htmlspecialchars($row['account_no']); ?></p>
                                 </td>
                                 <td class="px-5 py-4 text-right"><?php echo number_format($row['total_saved'], 2); ?></td>
+                                <td class="px-5 py-4 text-center"><?php echo $row['savings_frequency']; ?></td>
                                 <td class="px-5 py-4 text-center"><?php echo $row['loans_taken']; ?></td>
                             </tr>
                         <?php endforeach; ?>

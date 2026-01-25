@@ -73,7 +73,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                     <li class="pt-4">
                         <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Admin Controls</span>
                     </li>
-                    <li><a href="add_user.php" class="block py-2 px-4 rounded hover:bg-gray-700">Add User</a></li>
+                    <li><a href="add_member.php" class="block py-2 px-4 rounded hover:bg-gray-700">Add Member</a></li>
                     <li><a href="add_saving.php" class="block py-2 px-4 rounded hover:bg-gray-700">Add Saving</a></li>
                     <li><a href="manage_requests.php" class="block py-2 px-4 rounded hover:bg-gray-700">Manage Requests</a></li>
                      <?php if (in_array($role_id, [1, 2])): ?>
@@ -122,7 +122,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
             $role_names = [1 => 'Root', 2 => 'Chairman', 3 => 'Secretary', 4 => 'Treasurer', 5 => 'Member'];
             $role_name = $role_names[$_SESSION['role_id']] ?? 'Guest';
             ?>
-            <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200 hidden sm:block"><?php echo htmlspecialchars($role_name); ?> of POA Savings and Credit Society</h1>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($role_name); ?> of POA Savings and Credit Society</h1>
 
             <!-- Theme Toggle and User Avatar -->
             <div class="flex items-center space-x-4">

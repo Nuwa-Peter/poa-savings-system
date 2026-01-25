@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <div class="container mx-auto mt-10">
-    <h2 class="text-2xl font-bold mb-5">Add New User</h2>
+    <h2 class="text-2xl font-bold mb-5">Add New Member</h2>
 
     <?php if ($success): ?>
         <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     <?php endif; ?>
 
-    <form method="POST" action="add_user.php" class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+    <form method="POST" action="add_member.php" class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="md:col-span-1">
                 <label for="first_name" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">First Name: <span class="text-red-500">*</span></label>
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="mt-8 flex justify-end">
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
-                Add User
+                Add Member
             </button>
         </div>
     </form>

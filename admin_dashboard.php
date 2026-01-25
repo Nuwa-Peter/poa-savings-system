@@ -100,7 +100,7 @@ try {
         <h3 class="text-xl font-semibold text-gray-700 mb-4">Quick Actions</h3>
         <div class="flex flex-wrap gap-4">
             <a href="manage_requests.php" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Manage Requests</a>
-            <a href="add_user.php" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add New User</a>
+            <a href="add_member.php" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add New Member</a>
             <a href="add_saving.php" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Add a Saving</a>
             <?php if (in_array($_SESSION['role_id'], [1, 2])): ?>
                 <a href="apply_interest.php" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Apply Loan Interest</a>
