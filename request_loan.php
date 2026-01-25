@@ -27,7 +27,7 @@ try {
     $savings_this_month = $stmt->fetchColumn() ?: 0;
 
     // 3. Determine eligibility
-    if ($savings_this_month >= 3) {
+    if ($savings_this_month >= 3 || $total_savings >= 500000) {
         $is_eligible = true;
     }
 

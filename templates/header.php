@@ -124,7 +124,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
             $role_names = [1 => 'Root', 2 => 'Chairman', 3 => 'Secretary', 4 => 'Treasurer', 5 => 'Member'];
             $role_name = $role_names[$_SESSION['role_id']] ?? 'Guest';
             ?>
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white"><?php echo htmlspecialchars($role_name); ?> of POA Savings and Credit Society</h1>
+            <h1 class="text-xl font-bold header-title"><?php echo htmlspecialchars($role_name); ?> of POA Savings and Credit Society</h1>
 
             <!-- Theme Toggle and User Avatar -->
             <div class="flex items-center space-x-4">
