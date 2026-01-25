@@ -90,7 +90,8 @@ try {
     <?php endif; ?>
 
 
-    <!-- Loan Application Form -->
+    <!-- Loan Application Form (Only shows if eligible) -->
+    <?php if ($is_eligible): ?>
     <form action="process_loan.php" method="POST" class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div class="grid grid-cols-1 gap-6">
             <div>
@@ -116,6 +117,7 @@ try {
             </button>
         </div>
     </form>
+    <?php endif; ?>
 </div>
 
 <?php

@@ -304,41 +304,6 @@ COMMIT;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `temp_savings`
---
-
-CREATE TABLE `temp_savings` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) DEFAULT NULL,
-  `amount` decimal(10,2) DEFAULT NULL,
-  `proof_image_path` varchar(255) DEFAULT NULL,
-  `verified_by_user_id` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `temp_loans`
---
-
-CREATE TABLE `temp_loans` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `user_id` int(11) NOT NULL,
-    `amount` decimal(10,2) NOT NULL,
-    `balance` decimal(10,2) NOT NULL,
-    `interest_rate` decimal(4,2) NOT NULL DEFAULT 2.00,
-    `status` varchar(255) NOT NULL DEFAULT 'pending',
-    `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
-    `approved_at` timestamp NULL DEFAULT NULL,
-    `approved_by_user_id` int(11) DEFAULT NULL,
-    `due_date` date DEFAULT NULL,
-    `last_interest_applied_at` timestamp NULL DEFAULT NULL,
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -16,6 +16,8 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <link rel="stylesheet" href="assets/vendor/cropperjs/cropper.min.css">
+    <script src="assets/vendor/cropperjs/cropper.min.js" defer></script>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/theme.css">
     <script src="assets/js/main.js" defer></script>
