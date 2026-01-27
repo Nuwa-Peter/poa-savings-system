@@ -40,7 +40,7 @@ try {
 ?>
 
 <div class="container mx-auto mt-10 p-4">
-    <h1 class="text-3xl font-bold header-title mb-6">System Analytics</h1>
+    <h1 class="text-3xl font-bold mb-6" style="color: var(--text-primary);">System Analytics</h1>
 
     <?php if (isset($error)): ?>
         <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">

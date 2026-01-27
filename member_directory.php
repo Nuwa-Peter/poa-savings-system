@@ -14,7 +14,7 @@ $sort_column = in_array($sort_column, $valid_columns) ? $sort_column : 'id';
 $sort_order = strtolower($sort_order) === 'desc' ? 'DESC' : 'ASC';
 
 try {
-    $stmt = $pdo->prepare("SELECT id, username, first_name, surname, email, phone, account_no, avatar, created_at FROM users ORDER BY {$sort_column} {$sort_order}");
+    $stmt = $pdo->prepare("SELECT id, username, first_name, surname, email, phone, account_no, avatar, created_at FROM users WHERE status = 'active' ORDER BY {$sort_column} {$sort_order}");
     $stmt->execute();
     $members = $stmt->fetchAll();
 } catch (PDOException $e) {
@@ -76,6 +76,9 @@ function sort_link($column, $text, $current_column, $current_order) {
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo date('M j, Y', strtotime($member['created_at'])); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <a href="edit_user.php?id=<?php echo $member['id']; ?>" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                    <?php if (in_array($_SESSION['role_id'], [1, 2])): ?>
+                                        <a href="delete_member.php?id=<?php echo $member['id']; ?>" class="text-red-600 hover:text-red-900 font-semibold">Delete</a>
+                                    <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
