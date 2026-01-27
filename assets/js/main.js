@@ -33,3 +33,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Listen for window resize events
     window.addEventListener('resize', handleResize);
 });
+
+// --- WebAuthn Helper Functions ---
+function bufferDecode(value) {
+    return Uint8Array.from(atob(value.replace(/_/g, '/').replace(/-/g, '+')), c => c.charCodeAt(0));
+}
+
+function bufferEncode(value) {
+    return btoa(String.fromCharCode.apply(null, new Uint8Array(value)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+}

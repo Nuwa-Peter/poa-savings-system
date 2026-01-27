@@ -156,7 +156,6 @@ CREATE TABLE `savings` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `amount` decimal(10,2) DEFAULT NULL,
-  `proof_image_path` varchar(255) DEFAULT NULL,
   `verified_by_user_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -305,6 +304,29 @@ COMMIT;
 -- --------------------------------------------------------
 
 --
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `webauthn_credentials`
+--
+
+CREATE TABLE `webauthn_credentials` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `credential_id` varchar(255) NOT NULL,
+  `public_key` text NOT NULL,
+  `attestation_object` text,
+  `user_agent` varchar(255),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `credential_id` (`credential_id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -201,6 +201,17 @@ try {
             </div>
         </form>
     </div>
+
+    <!-- Biometric Authentication Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Biometric Login (Fingerprint/Face ID)</h3>
+        <p class="text-gray-600 mb-4">Register your device to log in securely without a password.</p>
+        <div id="webauthn-success" class="hidden p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg"></div>
+        <div id="webauthn-error" class="hidden p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"></div>
+        <button id="register-biometric-btn" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded">
+            Register This Device
+        </button>
+    </div>
 </div>
 
 <?php
@@ -208,6 +219,57 @@ require_once 'templates/footer.php';
 ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // --- WebAuthn Registration ---
+    const registerBtn = document.getElementById('register-biometric-btn');
+    const webauthnSuccess = document.getElementById('webauthn-success');
+    const webauthnError = document.getElementById('webauthn-error');
+
+    if (registerBtn) {
+        registerBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('webauthn_register_start.php');
+                const createArgs = await response.json();
+
+                if (createArgs.error) {
+                    throw new Error(createArgs.error);
+                }
+
+                // Convert base64url to ArrayBuffer
+                createArgs.challenge = bufferDecode(createArgs.challenge);
+                createArgs.user.id = bufferDecode(createArgs.user.id);
+
+                const newCredential = await navigator.credentials.create({
+                    publicKey: createArgs
+                });
+
+                const formData = new FormData();
+                formData.append('clientDataJSON', bufferEncode(newCredential.response.clientDataJSON));
+                formData.append('attestationObject', bufferEncode(newCredential.response.attestationObject));
+
+                const finishResponse = await fetch('webauthn_register_finish.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await finishResponse.json();
+
+                if (result.success) {
+                    webauthnSuccess.textContent = result.message;
+                    webauthnSuccess.classList.remove('hidden');
+                    webauthnError.classList.add('hidden');
+                } else {
+                    throw new Error(result.message);
+                }
+
+            } catch (err) {
+                webauthnError.textContent = 'Registration failed: ' + err.message;
+                webauthnError.classList.remove('hidden');
+                webauthnSuccess.classList.add('hidden');
+            }
+        });
+    }
+
+    // --- Avatar Cropping ---
     const modal = document.getElementById('avatar-modal');
     const uploadBtn = document.getElementById('upload-avatar-btn');
     const uploadInput = document.getElementById('upload-avatar-input');

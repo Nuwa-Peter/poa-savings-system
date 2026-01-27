@@ -14,7 +14,8 @@ if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == 0) {
     $max_size = 5 * 1024 * 1024; // 5MB
 
     if (in_array($_FILES['avatar']['type'], $allowed_types) && $_FILES['avatar']['size'] <= $max_size) {
-        $upload_dir = 'assets/uploads/avatars/';
+        // Use an absolute path for the upload directory
+        $upload_dir = __DIR__ . '/assets/uploads/avatars/';
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
