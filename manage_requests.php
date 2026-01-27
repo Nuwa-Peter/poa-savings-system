@@ -146,9 +146,10 @@ try {
                                     </span>
                                 </td>
                                 <td class="px-5 py-4">
-                                    <form action="process_request_action.php" method="POST" class="inline-flex space-x-2">
+                                    <form action="process_request_action.php" method="POST" class="inline-flex items-center space-x-2">
                                         <input type="hidden" name="request_id" value="<?php echo $loan['id']; ?>">
                                         <input type="hidden" name="request_type" value="loan">
+                                        <input type="number" name="approved_amount" class="w-32 text-sm border-gray-300 rounded" placeholder="Amount" value="<?php echo $loan['amount']; ?>" step="0.01">
                                         <button type="submit" name="action" value="approve"
                                             class="text-sm bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded disabled:bg-gray-400"
                                             <?php echo ($loan['guarantor_status'] !== 'approved') ? 'disabled title="Cannot approve until guarantor approves."' : ''; ?>>

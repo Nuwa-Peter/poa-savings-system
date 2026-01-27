@@ -64,12 +64,17 @@ try {
         $table_name = 'loans';
 
         if ($action === 'approve') {
+            $approved_amount = $_POST['approved_amount'] ?? 0;
+            if (!is_numeric($approved_amount) || $approved_amount <= 0) {
+                throw new Exception("Invalid approved amount specified.");
+            }
+
              // Set due date to 1 month from approval and set interest clock
             $due_date = date('Y-m-d', strtotime('+1 month'));
             $update_stmt = $pdo->prepare(
-                "UPDATE loans SET status = ?, approved_at = NOW(), approved_by_user_id = ?, due_date = ?, last_interest_applied_at = NOW() WHERE id = ? AND status = 'pending'"
+                "UPDATE loans SET amount = ?, balance = ?, status = ?, approved_at = NOW(), approved_by_user_id = ?, due_date = ?, last_interest_applied_at = NOW() WHERE id = ? AND status = 'pending'"
             );
-            $update_stmt->execute([$action, $admin_user_id, $due_date, $request_id]);
+            $update_stmt->execute([$approved_amount, $approved_amount, $action, $admin_user_id, $due_date, $request_id]);
         } else {
             // Standard rejection
             $update_stmt = $pdo->prepare(

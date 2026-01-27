@@ -12,7 +12,7 @@ $new_password = '';
 
 // Fetch all users to populate the dropdown
 try {
-    $users_stmt = $pdo->query("SELECT id, first_name, surname, email FROM users WHERE status = 'active' ORDER BY first_name ASC");
+    $users_stmt = $pdo->query("SELECT id, first_name, surname, email FROM users WHERE status = 'active' AND id != 1 ORDER BY first_name ASC");
     $users = $users_stmt->fetchAll();
 } catch (PDOException $e) {
     $users = [];
