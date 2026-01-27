@@ -2,6 +2,11 @@
 require_once 'includes/auth_check.php';
 require_once 'config/db_connect.php';
 require_once 'config/config.php';
+
+if (!file_exists('vendor/autoload.php')) {
+    echo json_encode(['error' => 'Dependencies not installed. Please run "ddev composer install".']);
+    exit;
+}
 require_once 'vendor/autoload.php';
 
 use lbuchs\WebAuthn\WebAuthn;
@@ -10,6 +15,11 @@ use lbuchs\WebAuthn\WebAuthnException;
 header('Content-Type: application/json');
 
 try {
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    ini_set('log_errors', 1);
+    ini_set('error_log', '/tmp/php_errors.log');
+
     $wa = new WebAuthn(WEBAUTHN_RELYING_PARTY_NAME, WEBAUTHN_RELYING_PARTY_ID);
 
     $user_id = $_SESSION['user_id'];

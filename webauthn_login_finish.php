@@ -2,6 +2,11 @@
 session_start();
 require_once 'config/db_connect.php';
 require_once 'config/config.php';
+
+if (!file_exists('vendor/autoload.php')) {
+    echo json_encode(['error' => 'Dependencies not installed. Please run "ddev composer install".']);
+    exit;
+}
 require_once 'vendor/autoload.php';
 
 use lbuchs\WebAuthn\WebAuthn;
