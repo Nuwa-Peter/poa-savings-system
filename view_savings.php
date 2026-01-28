@@ -26,6 +26,9 @@ try {
     }
     $savings = $savings_stmt->fetchAll();
 
+    // Calculate total savings
+    $total_savings = array_sum(array_column($savings, 'amount'));
+
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
 }
@@ -85,6 +88,15 @@ try {
                     <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
+            <?php if (!empty($savings)): ?>
+                <tfoot>
+                    <tr>
+                        <th class="px-5 py-3 border-t-2 border-gray-200 bg-gray-100 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Total</th>
+                        <th class="px-5 py-3 border-t-2 border-gray-200 bg-gray-100 text-right text-xs font-bold text-gray-700 uppercase tracking-wider"><?php echo number_format($total_savings, 2); ?> UGX</th>
+                        <th class="px-5 py-3 border-t-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"></th>
+                    </tr>
+                </tfoot>
+            <?php endif; ?>
         </table>
     </div>
 </div>
