@@ -11,12 +11,25 @@ $savings = [];
 $error = '';
 
 try {
-    // Fetch all active members for the dropdown
-    $members_stmt = $pdo->query("SELECT id, first_name, surname FROM users WHERE status = 'active' ORDER BY first_name ASC");
+    // Fetch all active members with their total savings for the dropdown
+    $members_stmt = $pdo->query("
+        SELECT u.id, u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
+        FROM users u
+        LEFT JOIN savings s ON u.id = s.user_id
+        WHERE u.status = 'active'
+        GROUP BY u.id
+        ORDER BY u.first_name ASC
+    ");
     $members = $members_stmt->fetchAll();
 
+    // Fetch a mapping of user IDs to their total savings for efficient lookup in the table
+    $member_totals = [];
+    foreach ($members as $m) {
+        $member_totals[$m['id']] = $m['total_saved'];
+    }
+
     // Fetch savings data based on selection
-    $sql = "SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id";
+    $sql = "SELECT s.id, s.user_id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id";
     if ($selected_member_id !== 'all' && is_numeric($selected_member_id)) {
         $sql .= " WHERE s.user_id = ?";
         $savings_stmt = $pdo->prepare($sql);
@@ -51,7 +64,7 @@ try {
                     <option value="all" <?php echo $selected_member_id === 'all' ? 'selected' : ''; ?>>All Members</option>
                     <?php foreach ($members as $member): ?>
                         <option value="<?php echo htmlspecialchars($member['id']); ?>" <?php echo $selected_member_id == $member['id'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['surname']); ?>
+                            <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['surname'] . ' (' . number_format($member['total_saved'], 0) . ' UGX)'); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -81,9 +94,12 @@ try {
                 <?php else: ?>
                     <?php foreach ($savings as $saving): ?>
                         <tr>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><?php echo htmlspecialchars($saving['first_name'] . ' ' . $saving['surname']); ?></td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right"><?php echo number_format($saving['amount'], 2); ?></td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><?php echo date('M j, Y, g:i a', strtotime($saving['created_at'])); ?></td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                <span class="font-semibold text-gray-900"><?php echo htmlspecialchars($saving['first_name'] . ' ' . $saving['surname']); ?></span>
+                                <div class="text-xs text-gray-500">Total Saved: <?php echo number_format($member_totals[$saving['user_id']], 0); ?> UGX</div>
+                            </td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right font-medium text-gray-900"><?php echo number_format($saving['amount'], 2); ?></td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-gray-600"><?php echo date('M j, Y, g:i a', strtotime($saving['created_at'])); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
