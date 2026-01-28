@@ -14,6 +14,11 @@ use lbuchs\WebAuthn\WebAuthnException;
 
 header('Content-Type: application/json');
 
+if (!class_exists('lbuchs\WebAuthn\WebAuthn')) {
+    echo json_encode(['success' => false, 'message' => 'WebAuthn library not found. Please run "ddev composer install".']);
+    exit;
+}
+
 try {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
