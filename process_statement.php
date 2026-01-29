@@ -3,7 +3,7 @@ require_once 'includes/auth_check.php';
 check_permissions([1, 2, 3, 4, 5]);
 
 require_once 'config/db_connect.php';
-require_once 'vendor/autoload.php';
+require_once 'includes/StatementPDF.php';
 
 // --- Validation ---
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -22,135 +22,6 @@ if (!$start_date || !$end_date) {
 }
 
 $end_date_time = $end_date . ' 23:59:59';
-
-// --- Custom PDF Class for A4 Financial Statement ---
-class StatementPDF extends TCPDF {
-    private $userName;
-    private $accountNumber;
-    private $statementPeriod;
-    private $generatedDate;
-
-    public function setUserDetails($name, $acc, $period, $generated) {
-        $this->userName = $name;
-        $this->accountNumber = $acc;
-        $this->statementPeriod = $period;
-        $this->generatedDate = $generated;
-    }
-
-    public function Header() {
-        // Set Font
-        $this->SetFont('helvetica', '', 10);
-
-        // Logo on its own line
-        $this->Image('assets/images/poa_light.png', '', 8, 30, 0, 'PNG', '', 'T', false, 300, 'C');
-        $this->Ln(18); // Add space after the logo
-
-        // Center Company Name
-        $this->SetFont('helvetica', 'B', 12);
-        $this->Cell(0, 10, 'POA Savings and Credit Society', 0, 1, 'C');
-
-        // Center Document Title
-        $this->SetFont('helvetica', 'B', 16);
-        $this->Cell(0, 12, 'ACCOUNT STATEMENT', 0, 1, 'C');
-        $this->Ln(5);
-
-        // Account Information Section
-        $this->SetFont('helvetica', '', 9);
-        $html = '
-<table border="0" cellpadding="2" cellspacing="0" width="100%">
-    <tr>
-        <td width="50%" align="left"><b>Account Name:</b> ' . $this->userName . '<br><b>Account Number:</b> ' . $this->accountNumber . '</td>
-        <td width="50%" align="right"><b>Statement Period:</b> ' . $this->statementPeriod . '<br><b>Generated Date:</b> ' . $this->generatedDate . '</td>
-    </tr>
-</table>';
-        $this->writeHTML($html, true, false, true, false, '');
-        $this->Line(15, $this->GetY() + 2, $this->getPageWidth() - 15, $this->GetY() + 2);
-    }
-
-    // Override AddPage to include the watermark on every new page
-    public function AddPage($orientation = '', $format = '', $keepmargins = false, $tocpage = false) {
-        parent::AddPage($orientation, $format, $keepmargins, $tocpage);
-        $this->addWatermark();
-    }
-
-    private function addWatermark() {
-        // Get the current page dimensions
-        $bMargin = $this->getBreakMargin();
-        $auto_page_break = $this->AutoPageBreak;
-        // Disable auto-page-break to avoid conflicts
-        $this->SetAutoPageBreak(false, 0);
-
-        // Set transparency
-        $this->SetAlpha(0.1);
-        // Add the watermark image
-        $this->Image('assets/images/poa_light.png', 50, 100, 110, 0, 'PNG', '', 'C', true, 300, 'C', false, false, 0);
-        // Restore transparency
-        $this->SetAlpha(1);
-
-        // Restore auto-page-break status
-        $this->SetAutoPageBreak($auto_page_break, $bMargin);
-        // Set the page mark back to the top-left corner
-        $this->setPageMark();
-    }
-
-    public function Footer() {
-        $this->SetY(-18);
-        // Thin horizontal line
-        $this->Line(15, $this->GetY(), $this->getPageWidth() - 15, $this->GetY());
-        $this->SetY(-15);
-        $this->SetFont('helvetica', 'I', 8);
-        $this->SetTextColor(128);
-
-        // Generated On Timestamp (from user details for consistency)
-        $this->Cell(0, 10, 'Generated on: ' . $this->generatedDate, 0, 0, 'L');
-
-        // Page Number
-        $this->Cell(0, 10, 'Page '.$this->getAliasNumPage().' of '.$this->getAliasNbPages(), 0, 0, 'R');
-    }
-
-    public function FancyTransactionTable($header, $data, $openingBalance) {
-        $this->SetFillColor(229, 231, 235); // Light grey for header
-        $this->SetTextColor(0);
-        $this->SetDrawColor(209, 213, 219);
-        $this->SetFont('helvetica', 'B', 10);
-        $this->SetLineWidth(0.2);
-
-        // Header
-        // 40% for Description, remaining 60% for others
-        $w = array(30, 74, 28, 28, 25);
-        for($i = 0; $i < count($header); $i++) {
-            $this->Cell($w[$i], 10, $header[$i], 1, 0, 'C', 1);
-        }
-        $this->Ln();
-
-        // Color and font restoration
-        $this->SetFont('helvetica', '', 9);
-
-        // Data
-        $fill = false; // For zebra-striping
-        $balance = $openingBalance;
-        if (empty($data)) {
-            $this->Cell(array_sum($w), 15, 'No transactions recorded for this period', 'LRB', 0, 'C', $fill);
-            $this->Ln();
-        } else {
-            foreach($data as $row) {
-                $debit = is_numeric($row['debit']) ? $row['debit'] : 0;
-                $credit = is_numeric($row['credit']) ? $row['credit'] : 0;
-                $balance += $credit - $debit;
-
-                $this->SetFillColor(248, 249, 250);
-                $this->Cell($w[0], 9, date('Y-m-d', strtotime($row['date'])), 'LR', 0, 'L', $fill);
-                $this->Cell($w[1], 9, htmlspecialchars($row['type']), 'R', 0, 'L', $fill);
-                $this->Cell($w[2], 9, ($debit > 0) ? number_format($debit, 2) : '-', 'R', 0, 'R', $fill);
-                $this->Cell($w[3], 9, ($credit > 0) ? number_format($credit, 2) : '-', 'R', 0, 'R', $fill);
-                $this->Cell($w[4], 9, number_format($balance, 2), 'R', 0, 'R', $fill);
-                $this->Ln();
-                $fill = !$fill;
-            }
-        }
-        $this->Cell(array_sum($w), 0, '', 'T');
-    }
-}
 
 try {
     // --- Data Fetching (reusing existing, correct logic) ---
@@ -228,7 +99,7 @@ EOD;
     // --- Transaction Table ---
     $pdf->SetY($pdf->GetY() + 5);
     $table_header = ['Date', 'Description', 'Debit', 'Credit', 'Balance'];
-    $pdf->FancyTransactionTable($table_header, $transactions, $opening_balance);
+    $pdf->FancyTable($table_header, $transactions, [30, 74, 28, 28, 25], $opening_balance);
 
     $pdf->Output('Account_Statement_' . $user['username'] . '.pdf', 'I');
 

@@ -22,25 +22,25 @@ try {
     ");
     $members = $members_stmt->fetchAll();
 
-    // Fetch a mapping of user IDs to their total savings for efficient lookup in the table
-    $member_totals = [];
-    foreach ($members as $m) {
-        $member_totals[$m['id']] = $m['total_saved'];
-    }
+    // Fetch savings totals grouped by member based on selection
+    $sql = "SELECT u.id as user_id, u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
+            FROM users u
+            LEFT JOIN savings s ON u.id = s.user_id
+            WHERE u.status = 'active'";
 
-    // Fetch savings data based on selection
-    $sql = "SELECT s.id, s.user_id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id";
     if ($selected_member_id !== 'all' && is_numeric($selected_member_id)) {
-        $sql .= " WHERE s.user_id = ?";
+        $sql .= " AND u.id = ?";
+        $sql .= " GROUP BY u.id";
         $savings_stmt = $pdo->prepare($sql);
         $savings_stmt->execute([$selected_member_id]);
     } else {
+        $sql .= " GROUP BY u.id ORDER BY total_saved DESC";
         $savings_stmt = $pdo->query($sql);
     }
     $savings = $savings_stmt->fetchAll();
 
-    // Calculate total savings
-    $total_savings = array_sum(array_column($savings, 'amount'));
+    // Calculate grand total savings for the footer
+    $total_savings = array_sum(array_column($savings, 'total_saved'));
 
 } catch (PDOException $e) {
     $error = "Database error: " . $e->getMessage();
@@ -82,24 +82,23 @@ try {
             <thead>
                 <tr>
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Member</th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount (UGX)</th>
-                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Saved (UGX)</th>
+                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Last Check Date</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($savings)): ?>
                     <tr>
-                        <td colspan="3" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">No savings transactions found.</td>
+                        <td colspan="3" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">No members with savings found.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($savings as $saving): ?>
                         <tr>
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                 <span class="font-semibold text-gray-900"><?php echo htmlspecialchars($saving['first_name'] . ' ' . $saving['surname']); ?></span>
-                                <div class="text-xs text-gray-500">Total Saved: <?php echo number_format($member_totals[$saving['user_id']], 0); ?> UGX</div>
                             </td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right font-medium text-gray-900"><?php echo number_format($saving['amount'], 2); ?></td>
-                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-gray-600"><?php echo date('M j, Y, g:i a', strtotime($saving['created_at'])); ?></td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right font-bold text-gray-900"><?php echo number_format($saving['total_saved'], 2); ?></td>
+                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-gray-600"><?php echo date('M j, Y, g:i a'); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
