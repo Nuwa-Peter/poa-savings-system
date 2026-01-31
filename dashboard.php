@@ -143,12 +143,12 @@ try {
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Total Savings</h3>
-            <p class="text-4xl font-bold text-indigo-600"><?php echo number_format($total_savings, 2); ?> <span class="text-2xl">UGX</span></p>
+            <p class="text-4xl font-bold text-indigo-600"><?php echo number_format($total_savings, 0); ?> <span class="text-2xl">UGX</span></p>
             <p class="text-lg text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($total_savings), 2); ?> USD</p>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Active Loan Balance</h3>
-            <p class="text-4xl font-bold text-red-600"><?php echo number_format($active_loan_balance, 2); ?> <span class="text-2xl">UGX</span></p>
+            <p class="text-4xl font-bold text-red-600"><?php echo number_format($active_loan_balance, 0); ?> <span class="text-2xl">UGX</span></p>
             <p class="text-lg text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($active_loan_balance), 2); ?> USD</p>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
@@ -190,9 +190,9 @@ try {
                                             <div class="text-right">
                                                 <p class="font-semibold">
                                                     <?php if ($transaction['type'] === 'Saving'): ?>
-                                                        <span class="text-green-600">+<?php echo number_format($transaction['amount'], 2); ?> UGX</span>
+                                                        <span class="text-green-600">+<?php echo number_format($transaction['amount'], 0); ?> UGX</span>
                                                     <?php else: ?>
-                                                        <span class="text-red-600">-<?php echo number_format($transaction['amount'], 2); ?> UGX</span>
+                                                        <span class="text-red-600">-<?php echo number_format($transaction['amount'], 0); ?> UGX</span>
                                                     <?php endif; ?>
                                                 </p>
                                                 <p class="text-xs capitalize <?php

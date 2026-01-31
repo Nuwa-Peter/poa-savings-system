@@ -87,7 +87,7 @@ $pdf->FancyTable($header, $table_data, $w);
 if ($selected_member_id === 'all') {
     $pdf->SetFont('helvetica', 'B', 10);
     $pdf->Cell($w[0], 10, 'GRAND TOTAL', 1, 0, 'R');
-    $pdf->Cell($w[1], 10, number_format($grand_total, 2), 1, 0, 'R');
+    $pdf->Cell($w[1], 10, number_format($grand_total, 0), 1, 0, 'R');
     $pdf->Cell($w[2], 10, '', 1, 1, 'R');
 }
 

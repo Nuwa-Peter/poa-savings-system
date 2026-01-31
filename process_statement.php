@@ -74,8 +74,8 @@ try {
     $pdf->AddPage();
 
     // --- Balance Summary Box ---
-    $formatted_opening_balance = "<b>Opening Balance:</b> " . number_format($opening_balance, 2) . " UGX";
-    $formatted_closing_balance = "<b>Closing Balance:</b> " . number_format($closing_balance, 2) . " UGX";
+    $formatted_opening_balance = "<b>Opening Balance:</b> " . number_format($opening_balance, 0) . " UGX";
+    $formatted_closing_balance = "<b>Closing Balance:</b> " . number_format($closing_balance, 0) . " UGX";
 
     $summary_html = <<<EOD
 <style>

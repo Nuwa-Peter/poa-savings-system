@@ -109,7 +109,7 @@ try {
         $request_amount = $request_details['amount'];
 
         $action_past_tense = ($action === 'approve') ? 'approved' : 'rejected';
-        $notification_message = "Your {$request_type} request for " . number_format($request_amount, 2) . " UGX has been " . $action_past_tense . ".";
+        $notification_message = "Your {$request_type} request for " . number_format($request_amount, 0) . " UGX has been " . $action_past_tense . ".";
 
         $notify_stmt = $pdo->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
         $notify_stmt->execute([$requester_user_id, $notification_message]);

@@ -93,8 +93,8 @@ try {
                             <tr class="border-b border-gray-200">
                                 <td class="px-5 py-4 capitalize font-semibold"><?php echo htmlspecialchars($row['status']); ?></td>
                                 <td class="px-5 py-4 text-center"><?php echo $row['count']; ?></td>
-                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_amount'], 2); ?> UGX</td>
-                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_balance'], 2); ?> UGX</td>
+                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_amount'], 0); ?> UGX</td>
+                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_balance'], 0); ?> UGX</td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -137,7 +137,7 @@ try {
                                     <p><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['surname']); ?></p>
                                     <p class="text-xs text-gray-500"><?php echo htmlspecialchars($row['account_no']); ?></p>
                                 </td>
-                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_saved'], 2); ?></td>
+                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_saved'], 0); ?></td>
                                 <td class="px-5 py-4 text-center"><?php echo $row['savings_frequency']; ?></td>
                                 <td class="px-5 py-4 text-center"><?php echo $row['loans_taken']; ?></td>
                             </tr>

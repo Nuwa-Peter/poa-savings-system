@@ -39,7 +39,7 @@ if ($saving_id) {
 
             <div class="mb-4">
                 <p><strong>Member:</strong> <?php echo htmlspecialchars($saving['first_name'] . ' ' . $saving['surname']); ?></p>
-                <p><strong>Original Amount:</strong> <?php echo htmlspecialchars(number_format($saving['amount'], 2)); ?> UGX</p>
+                <p><strong>Original Amount:</strong> <?php echo htmlspecialchars(number_format($saving['amount'], 0)); ?> UGX</p>
                 <p><strong>Date:</strong> <?php echo htmlspecialchars(date('d M Y, H:i', strtotime($saving['created_at']))); ?></p>
             </div>
 

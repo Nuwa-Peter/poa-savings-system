@@ -53,7 +53,7 @@ try {
     $max_loan_amount = $total_savings / 2;
 
     if ($amount > $max_loan_amount) {
-        $error_msg = 'Eligibility failed: Requested amount exceeds 50% of your total savings. Your maximum loan amount is ' . number_format($max_loan_amount, 2);
+        $error_msg = 'Eligibility failed: Requested amount exceeds 50% of your total savings. Your maximum loan amount is ' . number_format($max_loan_amount, 0);
         header('Location: request_loan.php?error=' . urlencode($error_msg));
         exit;
     }
@@ -79,12 +79,12 @@ try {
     $borrower_stmt->execute([$user_id]);
     $borrower_username = $borrower_stmt->fetchColumn();
 
-    $notification_message = htmlspecialchars($borrower_username) . " has requested you to be a guarantor for a loan of " . number_format($amount, 2) . " UGX. Please review this request.";
+    $notification_message = htmlspecialchars($borrower_username) . " has requested you to be a guarantor for a loan of " . number_format($amount, 0) . " UGX. Please review this request.";
     $notify_stmt = $pdo->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
     $notify_stmt->execute([$guarantor_id, $notification_message]);
 
     // 4. Log the action for audit purposes.
-    $log_action = "User requested a loan of " . number_format($amount, 2) . " with guarantor ID " . $guarantor_id;
+    $log_action = "User requested a loan of " . number_format($amount, 0) . " with guarantor ID " . $guarantor_id;
     $log_stmt = $pdo->prepare("INSERT INTO logs (user_id, action) VALUES (?, ?)");
     $log_stmt->execute([$user_id, $log_action]);
 

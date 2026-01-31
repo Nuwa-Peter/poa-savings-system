@@ -77,12 +77,12 @@ try {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Total Savings</h3>
-            <p class="text-4xl font-bold text-indigo-600"><?php echo number_format($system_stats['total_savings'], 2); ?> <span class="text-2xl">UGX</span></p>
+            <p class="text-4xl font-bold text-indigo-600"><?php echo number_format($system_stats['total_savings'], 0); ?> <span class="text-2xl">UGX</span></p>
             <p class="text-lg text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($system_stats['total_savings']), 2); ?> USD</p>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-2">Outstanding Loans</h3>
-            <p class="text-4xl font-bold text-red-600"><?php echo number_format($system_stats['total_loan_balance'], 2); ?> <span class="text-2xl">UGX</span></p>
+            <p class="text-4xl font-bold text-red-600"><?php echo number_format($system_stats['total_loan_balance'], 0); ?> <span class="text-2xl">UGX</span></p>
             <p class="text-lg text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($system_stats['total_loan_balance']), 2); ?> USD</p>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
@@ -136,7 +136,7 @@ try {
                     ?>
                             <tr class="border-b border-gray-200 hover:bg-gray-50">
                                 <td class="py-3 px-4"><?php echo htmlspecialchars($saving['first_name'] . ' ' . $saving['surname']); ?></td>
-                                <td class="py-3 px-4 text-right"><?php echo number_format($saving['amount'], 2); ?></td>
+                                <td class="py-3 px-4 text-right"><?php echo number_format($saving['amount'], 0); ?></td>
                                 <td class="py-3 px-4"><?php echo date('d M Y', strtotime($saving['created_at'])); ?></td>
                                 <td class="py-3 px-4 flex items-center space-x-4">
                                     <a href="edit_saving.php?id=<?php echo $saving['id']; ?>" class="text-indigo-600 hover:text-indigo-900 font-semibold">Rectify</a>
@@ -162,12 +162,12 @@ try {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h4 class="text-lg font-semibold text-gray-700 mb-2">My Total Savings</h4>
-                <p class="text-3xl font-bold text-indigo-600"><?php echo number_format($admin_personal_stats['total_savings'], 2); ?> <span class="text-xl">UGX</span></p>
+                <p class="text-3xl font-bold text-indigo-600"><?php echo number_format($admin_personal_stats['total_savings'], 0); ?> <span class="text-xl">UGX</span></p>
                 <p class="text-md text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($admin_personal_stats['total_savings']), 2); ?> USD</p>
             </div>
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h4 class="text-lg font-semibold text-gray-700 mb-2">My Loan Balance</h4>
-                <p class="text-3xl font-bold text-red-600"><?php echo number_format($admin_personal_stats['loan_balance'], 2); ?> <span class="text-xl">UGX</span></p>
+                <p class="text-3xl font-bold text-red-600"><?php echo number_format($admin_personal_stats['loan_balance'], 0); ?> <span class="text-xl">UGX</span></p>
                 <p class="text-md text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($admin_personal_stats['loan_balance']), 2); ?> USD</p>
             </div>
         </div>

@@ -104,15 +104,15 @@ class StatementPDF extends TCPDF {
 
                     $this->Cell($w[0], 9, date('Y-m-d', strtotime($row['date'])), 'LR', 0, 'L', $fill);
                     $this->Cell($w[1], 9, htmlspecialchars($row['type']), 'R', 0, 'L', $fill);
-                    $this->Cell($w[2], 9, ($debit > 0) ? number_format($debit, 2) : '-', 'R', 0, 'R', $fill);
-                    $this->Cell($w[3], 9, ($credit > 0) ? number_format($credit, 2) : '-', 'R', 0, 'R', $fill);
-                    $this->Cell($w[4], 9, number_format($balance, 2), 'R', 0, 'R', $fill);
+                    $this->Cell($w[2], 9, ($debit > 0) ? number_format($debit, 0) : '-', 'R', 0, 'R', $fill);
+                    $this->Cell($w[3], 9, ($credit > 0) ? number_format($credit, 0) : '-', 'R', 0, 'R', $fill);
+                    $this->Cell($w[4], 9, number_format($balance, 0), 'R', 0, 'R', $fill);
                 } else {
                     // Generic table
                     $col = 0;
                     foreach ($row as $val) {
                         $align = (is_numeric($val) && $col > 0) ? 'R' : 'L';
-                        $display_val = is_numeric($val) ? number_format($val, 2) : $val;
+                        $display_val = is_numeric($val) ? number_format($val, 0) : $val;
                         $this->Cell($w[$col], 9, $display_val, 'LR', 0, $align, $fill);
                         $col++;
                     }
