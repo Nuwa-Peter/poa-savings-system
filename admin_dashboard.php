@@ -68,6 +68,20 @@ try {
         $savings_values[] = $row['total_savings'];
     }
 
+    // 6. Data for Admin's Personal Savings Trend Chart
+    $personal_trend_stmt = $pdo->prepare(
+        "SELECT amount, created_at FROM savings WHERE user_id = ? ORDER BY created_at ASC"
+    );
+    $personal_trend_stmt->execute([$admin_user_id]);
+    $personal_history = $personal_trend_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $personal_labels = [];
+    $personal_values = [];
+    foreach ($personal_history as $row) {
+        $personal_labels[] = date("M j, Y", strtotime($row['created_at']));
+        $personal_values[] = $row['amount'];
+    }
+
 } catch (PDOException $e) {
     $db_error = "Database error: " . $e->getMessage();
 }
@@ -112,10 +126,19 @@ try {
         </div>
     </div>
 
-    <!-- Savings Trend Chart -->
-    <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-xl font-semibold text-gray-700 mb-4">Society Savings Trend</h3>
-        <canvas id="societySavingsChart"></canvas>
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+        <!-- Society Savings Trend Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Society Savings Trend</h3>
+            <canvas id="societySavingsChart"></canvas>
+        </div>
+
+        <!-- Personal Savings Trend Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">My Personal Savings Trend</h3>
+            <canvas id="personalSavingsChart"></canvas>
+        </div>
     </div>
 
     <!-- Quick Actions -->
@@ -201,8 +224,8 @@ try {
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const ctx = document.getElementById('societySavingsChart').getContext('2d');
-    new Chart(ctx, {
+    const societyCtx = document.getElementById('societySavingsChart').getContext('2d');
+    new Chart(societyCtx, {
         type: 'line',
         data: {
             labels: <?php echo json_encode($savings_labels ?? []); ?>,
@@ -230,6 +253,42 @@ document.addEventListener('DOMContentLoaded', function () {
                     callbacks: {
                         label: function(context) {
                             return 'Total: UGX ' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const personalCtx = document.getElementById('personalSavingsChart').getContext('2d');
+    new Chart(personalCtx, {
+        type: 'line',
+        data: {
+            labels: <?php echo json_encode($personal_labels ?? []); ?>,
+            datasets: [{
+                label: 'Savings Amount',
+                data: <?php echo json_encode($personal_values ?? []); ?>,
+                borderColor: 'rgba(16, 185, 129, 1)',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return 'UGX ' + value.toLocaleString(); }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Amount: UGX ' + context.parsed.y.toLocaleString();
                         }
                     }
                 }
