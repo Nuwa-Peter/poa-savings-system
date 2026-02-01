@@ -21,12 +21,13 @@ try {
     );
     $loan_performance_data = $loan_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. Savings Growth Report
+    // 2. Savings Growth Report (Excluding root ID 1)
     $savings_growth_stmt = $pdo->query(
         "SELECT
             DATE_FORMAT(created_at, '%Y-%m') as month,
             SUM(amount) as total_savings
          FROM savings
+         WHERE user_id != 1
          GROUP BY month
          ORDER BY month ASC"
     );
@@ -51,7 +52,7 @@ try {
          FROM users u
          LEFT JOIN savings s ON u.id = s.user_id
          LEFT JOIN loans l ON u.id = l.user_id
-         WHERE u.role_id = 5
+         WHERE u.role_id = 5 AND u.id != 1
          GROUP BY u.id
          ORDER BY total_saved DESC, savings_frequency DESC"
     );

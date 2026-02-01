@@ -32,9 +32,9 @@ $admin_personal_stats = [
 $admin_user_id = $_SESSION['user_id'];
 
 try {
-    // 1. System-wide stats
-    $system_stats['total_savings'] = $pdo->query("SELECT SUM(amount) FROM savings")->fetchColumn() ?: 0;
-    $system_stats['total_loan_balance'] = $pdo->query("SELECT SUM(balance) FROM loans WHERE status = 'approved'")->fetchColumn() ?: 0;
+    // 1. System-wide stats (Excluding root user ID 1)
+    $system_stats['total_savings'] = $pdo->query("SELECT SUM(amount) FROM savings WHERE user_id != 1")->fetchColumn() ?: 0;
+    $system_stats['total_loan_balance'] = $pdo->query("SELECT SUM(balance) FROM loans WHERE status = 'approved' AND user_id != 1")->fetchColumn() ?: 0;
 
     // 3. Pending Withdrawals Count
     $system_stats['pending_withdrawals'] = $pdo->query("SELECT COUNT(*) FROM withdrawals WHERE status = 'pending'")->fetchColumn() ?: 0;
@@ -50,6 +50,23 @@ try {
     $personal_loan_stmt = $pdo->prepare("SELECT SUM(balance) FROM loans WHERE user_id = ? AND status = 'approved'");
     $personal_loan_stmt->execute([$admin_user_id]);
     $admin_personal_stats['loan_balance'] = $personal_loan_stmt->fetchColumn() ?: 0;
+
+    // 5. Data for Savings Trend Chart (Aggregated for all members, excluding root)
+    $savings_trend_stmt = $pdo->query(
+        "SELECT DATE_FORMAT(created_at, '%Y-%m') as month, SUM(amount) as total_savings
+         FROM savings
+         WHERE user_id != 1
+         GROUP BY month
+         ORDER BY month ASC"
+    );
+    $savings_trend_data = $savings_trend_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $savings_labels = [];
+    $savings_values = [];
+    foreach ($savings_trend_data as $row) {
+        $savings_labels[] = date("M Y", strtotime($row['month'] . "-01"));
+        $savings_values[] = $row['total_savings'];
+    }
 
 } catch (PDOException $e) {
     $db_error = "Database error: " . $e->getMessage();
@@ -95,6 +112,12 @@ try {
         </div>
     </div>
 
+    <!-- Savings Trend Chart -->
+    <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Society Savings Trend</h3>
+        <canvas id="societySavingsChart"></canvas>
+    </div>
+
     <!-- Quick Actions -->
     <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
         <h3 class="text-xl font-semibold text-gray-700 mb-4">Quick Actions</h3>
@@ -125,7 +148,8 @@ try {
                     <?php
                     $recent_savings = [];
                     try {
-                        $stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id ORDER BY s.created_at DESC LIMIT 10");
+                        // Exclude root user (ID 1)
+                        $stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 ORDER BY s.created_at DESC LIMIT 10");
                         $recent_savings = $stmt->fetchAll();
                     } catch (PDOException $e) {
                         echo '<tr><td colspan="4" class="py-4 text-center text-red-500">Could not fetch savings.</td></tr>';
@@ -174,6 +198,46 @@ try {
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('societySavingsChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <?php echo json_encode($savings_labels ?? []); ?>,
+            datasets: [{
+                label: 'Total Society Savings per Month',
+                data: <?php echo json_encode($savings_values ?? []); ?>,
+                borderColor: 'rgba(79, 70, 229, 1)',
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return 'UGX ' + value.toLocaleString(); }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Total: UGX ' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
 
 <?php
 require_once 'templates/footer.php';
