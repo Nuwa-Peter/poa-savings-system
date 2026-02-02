@@ -6,8 +6,9 @@ require_once 'config/db_connect.php';
 require_once 'includes/StatementPDF.php';
 
 $selected_member_id = $_GET['member_id'] ?? 'all';
+$view_mode = $_GET['view_mode'] ?? 'summary';
 $savings = [];
-$report_title = 'SAVINGS SUMMARY REPORT';
+$report_title = ($view_mode === 'history' ? 'DETAILED SAVINGS HISTORY' : 'SAVINGS SUMMARY REPORT');
 $user_name = 'All Members';
 $account_no = '';
 
@@ -19,24 +20,45 @@ try {
         if ($user) {
             $user_name = $user['first_name'] . ' ' . $user['surname'];
             $account_no = $user['account_no'];
-            $report_title = 'MEMBER SAVINGS REPORT';
+            $report_title = ($view_mode === 'history' ? 'MEMBER SAVINGS HISTORY' : 'MEMBER SAVINGS REPORT');
         }
+    }
 
-        $sql = "SELECT u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
-                FROM users u
-                LEFT JOIN savings s ON u.id = s.user_id
-                WHERE u.id = ?
-                GROUP BY u.id";
-        $savings_stmt = $pdo->prepare($sql);
-        $savings_stmt->execute([$selected_member_id]);
+    if ($view_mode === 'history') {
+        if ($selected_member_id !== 'all' && is_numeric($selected_member_id)) {
+            $sql = "SELECT u.first_name, u.surname, s.amount, s.created_at
+                    FROM savings s
+                    JOIN users u ON s.user_id = u.id
+                    WHERE s.user_id = ?
+                    ORDER BY s.created_at DESC";
+            $savings_stmt = $pdo->prepare($sql);
+            $savings_stmt->execute([$selected_member_id]);
+        } else {
+            $sql = "SELECT u.first_name, u.surname, s.amount, s.created_at
+                    FROM savings s
+                    JOIN users u ON s.user_id = u.id
+                    WHERE u.id != 1
+                    ORDER BY s.created_at DESC";
+            $savings_stmt = $pdo->query($sql);
+        }
     } else {
-        $sql = "SELECT u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
-                FROM users u
-                LEFT JOIN savings s ON u.id = s.user_id
-                WHERE u.status = 'active' AND u.id != 1
-                GROUP BY u.id
-                ORDER BY total_saved DESC";
-        $savings_stmt = $pdo->query($sql);
+        if ($selected_member_id !== 'all' && is_numeric($selected_member_id)) {
+            $sql = "SELECT u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
+                    FROM users u
+                    LEFT JOIN savings s ON u.id = s.user_id
+                    WHERE u.id = ?
+                    GROUP BY u.id";
+            $savings_stmt = $pdo->prepare($sql);
+            $savings_stmt->execute([$selected_member_id]);
+        } else {
+            $sql = "SELECT u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
+                    FROM users u
+                    LEFT JOIN savings s ON u.id = s.user_id
+                    WHERE u.status = 'active' AND u.id != 1
+                    GROUP BY u.id
+                    ORDER BY total_saved DESC";
+            $savings_stmt = $pdo->query($sql);
+        }
     }
     $savings = $savings_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -69,27 +91,28 @@ $pdf->AddPage();
 $table_data = [];
 $grand_total = 0;
 foreach ($savings as $row) {
+    $amount = ($view_mode === 'history' ? $row['amount'] : $row['total_saved']);
+    $date_str = ($view_mode === 'history' ? date('M j, Y, g:i a', strtotime($row['created_at'])) : date('M j, Y'));
+
     $table_data[] = [
         $row['first_name'] . ' ' . $row['surname'],
-        $row['total_saved'],
-        date('M j, Y')
+        $amount,
+        $date_str
     ];
-    $grand_total += $row['total_saved'];
+    $grand_total += $amount;
 }
 
-$header = ['Member', 'Total Saved (UGX)', 'Last Check Date'];
+$header = ['Member', ($view_mode === 'history' ? 'Amount (UGX)' : 'Total Saved (UGX)'), ($view_mode === 'history' ? 'Date & Time' : 'Last Check Date')];
 $w = [80, 50, 50];
 
 $pdf->SetY(65);
 $pdf->FancyTable($header, $table_data, $w);
 
-// Add Grand Total row manually if multiple members
-if ($selected_member_id === 'all') {
-    $pdf->SetFont('helvetica', 'B', 10);
-    $pdf->Cell($w[0], 10, 'GRAND TOTAL', 1, 0, 'R');
-    $pdf->Cell($w[1], 10, number_format($grand_total, 0), 1, 0, 'R');
-    $pdf->Cell($w[2], 10, '', 1, 1, 'R');
-}
+// Add Grand Total row manually
+$pdf->SetFont('helvetica', 'B', 10);
+$pdf->Cell($w[0], 10, 'GRAND TOTAL', 1, 0, 'R');
+$pdf->Cell($w[1], 10, number_format($grand_total, 0), 1, 0, 'R');
+$pdf->Cell($w[2], 10, '', 1, 1, 'R');
 
 $pdf->Output('savings_report.pdf', 'I');
 ?>
