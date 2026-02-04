@@ -52,6 +52,36 @@ if (date('N') == 7) { // 7 = Sunday
     }
 }
 
+// --- Loan Due Date Notification Logic ---
+try {
+    // Find approved loans for this user that are due within 7 days
+    $due_soon_stmt = $pdo->prepare("
+        SELECT id, balance, due_date
+        FROM loans
+        WHERE user_id = ? AND status = 'approved' AND due_date <= DATE_ADD(NOW(), INTERVAL 7 DAY) AND balance > 0
+    ");
+    $due_soon_stmt->execute([$user_id]);
+    $loans_due = $due_soon_stmt->fetchAll();
+
+    foreach ($loans_due as $loan) {
+        $days_left = ceil((strtotime($loan['due_date']) - time()) / 86400);
+        $msg_prefix = ($days_left <= 0) ? "Your loan is OVERDUE" : "Your loan is due in $days_left days";
+        $message = "$msg_prefix. Please make a repayment of " . number_format($loan['balance'], 0) . " UGX by " . date('M j, Y', strtotime($loan['due_date'])) . ".";
+
+        // Check if we already sent a reminder today for this loan
+        $check_stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND message LIKE ? AND created_at >= CURDATE()");
+        $check_stmt->execute([$user_id, "Loan #{$loan['id']}%"]);
+        if ($check_stmt->fetchColumn() == 0) {
+             // Prefix message with Loan ID for tracking
+             $full_message = "Loan #{$loan['id']}: $message";
+             $insert_stmt = $pdo->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
+             $insert_stmt->execute([$user_id, $full_message]);
+        }
+    }
+} catch (PDOException $e) {
+    error_log("Could not process loan due reminders: " . $e->getMessage());
+}
+
 $total_savings = 0;
 $active_loan_balance = 0;
 $next_loan_payment = 'N/A';

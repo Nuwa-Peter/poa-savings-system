@@ -31,11 +31,16 @@ try {
             l.amount,
             l.requested_at,
             gu.username as guarantor_name,
-            lg.status as guarantor_status
+            lg.status as guarantor_status,
+            lc.description as collateral_desc,
+            lc.estimated_value as collateral_value,
+            l.secretary_approval,
+            l.chairman_approval
          FROM loans l
          JOIN users u ON l.user_id = u.id
          LEFT JOIN loan_guarantors lg ON l.id = lg.loan_id
          LEFT JOIN users gu ON lg.guarantor_id = gu.id
+         LEFT JOIN loan_collateral lc ON l.id = lc.loan_id
          WHERE l.status = 'pending'
          ORDER BY l.requested_at ASC"
     );
@@ -115,8 +120,9 @@ try {
                     <tr class="border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         <th class="px-5 py-3">User</th>
                         <th class="px-5 py-3">Amount</th>
+                        <th class="px-5 py-3">Collateral</th>
                         <th class="px-5 py-3">Guarantor</th>
-                        <th class="px-5 py-3">Guarantor Status</th>
+                        <th class="px-5 py-3">Status</th>
                         <th class="px-5 py-3">Actions</th>
                     </tr>
                 </thead>
@@ -133,17 +139,26 @@ try {
                                     <p class="text-xs text-gray-500"><?php echo htmlspecialchars($loan['account_no']); ?></p>
                                 </td>
                                 <td class="px-5 py-4"><?php echo number_format($loan['amount'], 0); ?> UGX</td>
+                                <td class="px-5 py-4 text-xs">
+                                    <p class="font-semibold"><?php echo htmlspecialchars($loan['collateral_desc'] ?? 'N/A'); ?></p>
+                                    <?php if ($loan['collateral_value']): ?>
+                                        <p class="text-gray-500">Value: <?php echo number_format($loan['collateral_value'], 0); ?> UGX</p>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="px-5 py-4"><?php echo htmlspecialchars($loan['guarantor_name'] ?? 'N/A'); ?></td>
-                                <td class="px-5 py-4">
-                                    <span class="px-2 py-1 font-semibold leading-tight text-xs rounded-full <?php
-                                        switch ($loan['guarantor_status']) {
-                                            case 'approved': echo 'bg-green-100 text-green-700'; break;
-                                            case 'rejected': echo 'bg-red-100 text-red-700'; break;
-                                            default: echo 'bg-yellow-100 text-yellow-700'; break;
-                                        }
-                                    ?>">
-                                        <?php echo ucfirst(htmlspecialchars($loan['guarantor_status'] ?? 'pending')); ?>
-                                    </span>
+                                <td class="px-5 py-4 text-xs space-y-1">
+                                    <div class="flex items-center space-x-1">
+                                        <span class="w-2 h-2 rounded-full <?php echo $loan['guarantor_status'] === 'approved' ? 'bg-green-500' : 'bg-yellow-500'; ?>"></span>
+                                        <span>Guarantor: <?php echo ucfirst(htmlspecialchars($loan['guarantor_status'] ?? 'pending')); ?></span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <span class="w-2 h-2 rounded-full <?php echo $loan['secretary_approval'] ? 'bg-green-500' : 'bg-yellow-500'; ?>"></span>
+                                        <span>Secretary: <?php echo $loan['secretary_approval'] ? 'Approved' : 'Pending'; ?></span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <span class="w-2 h-2 rounded-full <?php echo $loan['chairman_approval'] ? 'bg-green-500' : 'bg-yellow-500'; ?>"></span>
+                                        <span>Chairman: <?php echo $loan['chairman_approval'] ? 'Approved' : 'Pending'; ?></span>
+                                    </div>
                                 </td>
                                 <td class="px-5 py-4">
                                     <form action="process_request_action.php" method="POST" class="inline-flex items-center space-x-2">

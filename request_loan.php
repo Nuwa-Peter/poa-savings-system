@@ -110,6 +110,18 @@ try {
                 </select>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">The member you select will be sent a request to approve guaranteeing your loan. Your loan cannot be approved by an admin until your guarantor approves.</p>
             </div>
+
+            <div class="border-t pt-4 mt-4">
+                <h4 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Collateral Details</h4>
+                <div class="mb-4">
+                    <label for="collateral_description" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Description of Collateral: <span class="text-red-500">*</span></label>
+                    <textarea name="collateral_description" id="collateral_description" required rows="3" class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. Logbook for Toyota Premio, KAB 123X"></textarea>
+                </div>
+                <div>
+                    <label for="collateral_value" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Estimated Value (UGX): <span class="text-red-500">*</span></label>
+                    <input type="number" step="1" name="collateral_value" id="collateral_value" required class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
         </div>
         <div class="mt-8 flex justify-end">
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">

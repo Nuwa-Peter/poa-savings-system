@@ -73,6 +73,9 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                 <li><a href="repay_loan.php" class="block py-2 px-4 rounded hover:bg-gray-700">Repay Loan</a></li>
                 <li><a href="guarantor_requests.php" class="block py-2 px-4 rounded hover:bg-gray-700">Guarantor Requests</a></li>
                 <li><a href="generate_statement.php" class="block py-2 px-4 rounded hover:bg-gray-700">Download Statement</a></li>
+                <li><a href="view_dividends.php" class="block py-2 px-4 rounded hover:bg-gray-700">My Dividends</a></li>
+                <li><a href="welfare.php" class="block py-2 px-4 rounded hover:bg-gray-700">Welfare Fund</a></li>
+                <li><a href="savings_goals.php" class="block py-2 px-4 rounded hover:bg-gray-700">Savings Goals</a></li>
 
                 <?php if (in_array($role_id, [1, 2, 3])): // Admin-level actions ?>
                     <li class="pt-4">
@@ -83,6 +86,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                     <li><a href="manage_requests.php" class="block py-2 px-4 rounded hover:bg-gray-700">Manage Requests</a></li>
                      <?php if (in_array($role_id, [1, 2])): ?>
                         <li><a href="apply_interest.php" class="block py-2 px-4 rounded hover:bg-gray-700">Apply Interest</a></li>
+                        <li><a href="admin_dividends.php" class="block py-2 px-4 rounded hover:bg-gray-700">Distribute Dividends</a></li>
                     <?php endif; ?>
                 <?php endif; ?>
 
@@ -92,6 +96,9 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                     </li>
                     <li><a href="reports.php" class="block py-2 px-4 rounded hover:bg-gray-700">System Reports</a></li>
                     <li><a href="view_savings.php" class="block py-2 px-4 rounded hover:bg-gray-700">View Savings</a></li>
+                    <li><a href="admin_welfare.php" class="block py-2 px-4 rounded hover:bg-gray-700">Welfare Fund Report</a></li>
+                    <li><a href="admin_expenses.php" class="block py-2 px-4 rounded hover:bg-gray-700">Society Expenses</a></li>
+                    <li><a href="admin_investments.php" class="block py-2 px-4 rounded hover:bg-gray-700">Investment Portfolio</a></li>
                 <?php endif; ?>
 
                 <?php if (in_array($role_id, [1, 2])): ?>
