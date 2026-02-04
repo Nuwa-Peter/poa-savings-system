@@ -6,16 +6,19 @@ require_once 'config/db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $saving_id = $_POST['saving_id'] ?? null;
-    $old_amount = str_replace(',', '', $_POST['old_amount'] ?? 0);
-    $new_amount = str_replace(',', '', $_POST['new_amount'] ?? '');
+    $raw_old_amount = $_POST['old_amount'] ?? 0;
+    $raw_new_amount = $_POST['new_amount'] ?? '';
     $reason = trim($_POST['reason'] ?? '');
     $admin_id = $_SESSION['user_id'];
 
     // Validation
-    if (empty($saving_id) || $new_amount === '' || $reason === '') {
+    if (empty($saving_id) || $raw_new_amount === '' || $reason === '') {
         header("Location: edit_saving.php?id={$saving_id}&error=Missing required fields.");
         exit;
     }
+
+    $old_amount = round(str_replace(',', '', $raw_old_amount));
+    $new_amount = round(str_replace(',', '', $raw_new_amount));
 
     if (!is_numeric($new_amount) || (float)$new_amount < 0) {
         header("Location: edit_saving.php?id={$saving_id}&error=Invalid amount.");

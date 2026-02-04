@@ -11,8 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $loan_id = $_POST['loan_id'] ?? null;
-$amount = $_POST['amount'] ?? 0;
-$current_balance = $_POST['current_balance'] ?? 0;
+$raw_amount = $_POST['amount'] ?? 0;
+$raw_balance = $_POST['current_balance'] ?? 0;
+$amount = round(str_replace(',', '', $raw_amount ?: 0));
+$current_balance = round(str_replace(',', '', $raw_balance ?: 0));
 $user_id = $_SESSION['user_id'];
 $redirect_url = 'repay_loan.php';
 

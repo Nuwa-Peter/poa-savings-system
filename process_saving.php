@@ -9,7 +9,8 @@ check_permissions([1, 2, 3]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_POST['user_id'];
-    $amount = $_POST['amount'];
+    $raw_amount = $_POST['amount'] ?? 0;
+    $amount = round(str_replace(',', '', $raw_amount ?: 0));
     $verifier_id = $_SESSION['user_id'];
 
     // --- Database Insertion ---

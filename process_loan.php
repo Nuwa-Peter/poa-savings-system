@@ -12,7 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $user_id = $_SESSION['user_id'];
-$amount = $_POST['amount'] ?? 0;
+$raw_amount = $_POST['amount'] ?? 0;
+$amount = round(str_replace(',', '', $raw_amount ?: 0));
 $guarantor_id = $_POST['guarantor_id'] ?? null;
 
 // --- Basic Validation ---

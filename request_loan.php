@@ -96,7 +96,7 @@ try {
         <div class="grid grid-cols-1 gap-6">
             <div>
                 <label for="amount" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Loan Amount: <span class="text-red-500">*</span></label>
-                <input type="number" step="0.01" name="amount" id="amount" required class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="number" step="1" name="amount" id="amount" required class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div>
                 <label for="guarantor_id" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Select a Guarantor: <span class="text-red-500">*</span></label>

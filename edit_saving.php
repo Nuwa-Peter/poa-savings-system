@@ -45,7 +45,7 @@ if ($saving_id) {
 
             <div class="mb-4">
                 <label for="new_amount" class="block text-gray-700 text-sm font-bold mb-2">New Amount: <span class="text-red-500">*</span></label>
-                <input type="number" step="0.01" name="new_amount" id="new_amount" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value="<?php echo htmlspecialchars($saving['amount']); ?>">
+                <input type="number" step="1" name="new_amount" id="new_amount" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" value="<?php echo htmlspecialchars((int)$saving['amount']); ?>">
             </div>
 
             <div class="mb-4">

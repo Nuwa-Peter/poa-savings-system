@@ -13,7 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Get form data
-$amount = $_POST['amount'] ?? 0;
+$raw_amount = $_POST['amount'] ?? 0;
+$amount = round(str_replace(',', '', $raw_amount ?: 0));
 $user_id = $_SESSION['user_id'];
 
 // --- Validation ---
