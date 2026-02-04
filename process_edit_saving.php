@@ -6,18 +6,18 @@ require_once 'config/db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $saving_id = $_POST['saving_id'] ?? null;
-    $old_amount = $_POST['old_amount'] ?? 0;
-    $new_amount = $_POST['new_amount'] ?? 0;
+    $old_amount = str_replace(',', '', $_POST['old_amount'] ?? 0);
+    $new_amount = str_replace(',', '', $_POST['new_amount'] ?? '');
     $reason = trim($_POST['reason'] ?? '');
     $admin_id = $_SESSION['user_id'];
 
     // Validation
-    if (empty($saving_id) || empty($new_amount) || empty($reason)) {
+    if (empty($saving_id) || $new_amount === '' || $reason === '') {
         header("Location: edit_saving.php?id={$saving_id}&error=Missing required fields.");
         exit;
     }
 
-    if (!is_numeric($new_amount) || $new_amount < 0) {
+    if (!is_numeric($new_amount) || (float)$new_amount < 0) {
         header("Location: edit_saving.php?id={$saving_id}&error=Invalid amount.");
         exit;
     }
@@ -42,13 +42,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->commit();
 
-        header("Location: dashboard.php?success=Saving updated successfully.");
+        header("Location: admin_dashboard.php?success=Saving updated successfully.");
         exit;
 
-    } catch (PDOException $e) {
-        $pdo->rollBack();
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         // Redirect with a generic error; specific errors could be logged for the admin
-        header("Location: edit_saving.php?id={$saving_id}&error=Database error occurred.");
+        header("Location: edit_saving.php?id={$saving_id}&error=" . urlencode("Error: " . $e->getMessage()));
         exit;
     }
 } else {
