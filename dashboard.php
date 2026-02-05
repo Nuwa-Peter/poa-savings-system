@@ -172,29 +172,54 @@ try {
 <div class="space-y-6">
     <!-- Quick Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Total Savings</h3>
-            <p class="text-4xl font-bold text-indigo-600"><?php echo number_format($total_savings, 0); ?> <span class="text-2xl">UGX</span></p>
-            <p class="text-lg text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($total_savings), 2); ?> USD</p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                    <i data-lucide="piggy-bank" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Savings</span>
+            </div>
+            <p class="text-3xl font-bold text-slate-900"><?php echo number_format($total_savings, 0); ?> <span class="text-sm font-normal text-slate-500">UGX</span></p>
+            <p class="text-xs text-slate-500 mt-1">~ $<?php echo number_format(convert_ugx_to_usd($total_savings ?? 0), 2); ?> USD</p>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Active Loan Balance</h3>
-            <p class="text-4xl font-bold text-red-600"><?php echo number_format($active_loan_balance, 0); ?> <span class="text-2xl">UGX</span></p>
-            <p class="text-lg text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($active_loan_balance), 2); ?> USD</p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-rose-50 rounded-lg text-rose-600">
+                    <i data-lucide="landmark" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Loan Balance</span>
+            </div>
+            <p class="text-3xl font-bold text-slate-900"><?php echo number_format($active_loan_balance, 0); ?> <span class="text-sm font-normal text-slate-500">UGX</span></p>
+            <p class="text-xs text-slate-500 mt-1">~ $<?php echo number_format(convert_ugx_to_usd($active_loan_balance ?? 0), 2); ?> USD</p>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Next Loan Payment</h3>
-            <p class="text-4xl font-bold text-gray-600"><?php echo $next_loan_payment; ?></p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-amber-50 rounded-lg text-amber-600">
+                    <i data-lucide="calendar" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Next Payment</span>
+            </div>
+            <p class="text-3xl font-bold text-slate-900"><?php echo $next_loan_payment; ?></p>
+            <p class="text-xs text-slate-500 mt-1">Scheduled date</p>
         </div>
     </div>
 
     <!-- Quick Actions -->
-     <div class="bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-xl font-semibold text-gray-700 mb-4">Quick Actions</h3>
-        <div class="flex flex-wrap gap-4">
-            <a href="withdraw.php" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Request Withdrawal</a>
-            <a href="request_loan.php" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Apply for Loan</a>
-            <a href="repay_loan.php" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Repay Loan</a>
+     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
+        <div class="flex flex-wrap gap-3">
+            <a href="withdraw.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                <i data-lucide="arrow-up-circle" class="w-4 h-4 text-orange-500"></i>
+                <span>Request Withdrawal</span>
+            </a>
+            <a href="request_loan.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                <i data-lucide="landmark" class="w-4 h-4 text-blue-500"></i>
+                <span>Apply for Loan</span>
+            </a>
+            <a href="repay_loan.php" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                <i data-lucide="wallet" class="w-4 h-4"></i>
+                <span>Repay Loan</span>
+            </a>
         </div>
     </div>
 

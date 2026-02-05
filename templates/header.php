@@ -17,6 +17,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
     <link rel="stylesheet" href="assets/vendor/cropperjs/cropper.min.css">
@@ -26,13 +27,21 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
     <script src="assets/js/main.js" defer></script>
     <script src="assets/js/theme.js" defer></script>
 </head>
-<body class="bg-gray-100 flex">
+<body class="bg-slate-50 flex">
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="md:hidden"></div>
+
     <?php
     if ($is_logged_in) {
         // Include notification functions
         require_once 'includes/notifications.php';
         // Include new avatar functions
         require_once 'includes/avatar_functions.php';
+        // Include reusable UI components
+        require_once 'includes/ui_components.php';
 
         // Fetch user's avatar path for display
         // In a real app, you would have this from the initial login query
@@ -61,65 +70,65 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
         <div class="p-4 border-b border-gray-700 flex justify-center items-center">
             <img id="logo" src="assets/images/poa_light.png" alt="POA Savings Logo" class="h-10">
         </div>
-        <nav class="flex-grow p-4 overflow-y-auto">
-            <ul class="space-y-2">
-                <li><a href="dashboard.php" class="block py-2 px-4 rounded hover:bg-gray-700">Dashboard</a></li>
+        <nav class="flex-grow p-4 overflow-y-auto sidebar-nav">
+            <ul class="space-y-1">
+                <li><a href="dashboard.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span></a></li>
 
-                <li class="pt-4">
-                    <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Member Actions</span>
+                <li class="pt-6 pb-2">
+                    <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Member Actions</span>
                 </li>
-                <li><a href="withdraw.php" class="block py-2 px-4 rounded hover:bg-gray-700">Request Withdrawal</a></li>
-                <li><a href="request_loan.php" class="block py-2 px-4 rounded hover:bg-gray-700">Request Loan</a></li>
-                <li><a href="repay_loan.php" class="block py-2 px-4 rounded hover:bg-gray-700">Repay Loan</a></li>
-                <li><a href="guarantor_requests.php" class="block py-2 px-4 rounded hover:bg-gray-700">Guarantor Requests</a></li>
-                <li><a href="generate_statement.php" class="block py-2 px-4 rounded hover:bg-gray-700">Download Statement</a></li>
-                <li><a href="view_dividends.php" class="block py-2 px-4 rounded hover:bg-gray-700">My Dividends</a></li>
-                <li><a href="welfare.php" class="block py-2 px-4 rounded hover:bg-gray-700">Welfare Fund</a></li>
-                <li><a href="savings_goals.php" class="block py-2 px-4 rounded hover:bg-gray-700">Savings Goals</a></li>
+                <li><a href="withdraw.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="arrow-up-circle" class="w-4 h-4 text-orange-400"></i><span>Request Withdrawal</span></a></li>
+                <li><a href="request_loan.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="landmark" class="w-4 h-4 text-blue-400"></i><span>Request Loan</span></a></li>
+                <li><a href="repay_loan.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i><span>Repay Loan</span></a></li>
+                <li><a href="guarantor_requests.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="users" class="w-4 h-4 text-indigo-400"></i><span>Guarantor Requests</span></a></li>
+                <li><a href="generate_statement.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="file-text" class="w-4 h-4"></i><span>Download Statement</span></a></li>
+                <li><a href="view_dividends.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="pie-chart" class="w-4 h-4 text-pink-400"></i><span>My Dividends</span></a></li>
+                <li><a href="welfare.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="heart" class="w-4 h-4 text-rose-400"></i><span>Welfare Fund</span></a></li>
+                <li><a href="savings_goals.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="target" class="w-4 h-4 text-amber-400"></i><span>Savings Goals</span></a></li>
 
                 <?php if (in_array($role_id, [1, 2, 3])): // Admin-level actions ?>
-                    <li class="pt-4">
-                        <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Admin Controls</span>
+                    <li class="pt-6 pb-2">
+                        <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Admin Controls</span>
                     </li>
-                    <li><a href="add_member.php" class="block py-2 px-4 rounded hover:bg-gray-700">Add Member</a></li>
-                    <li><a href="add_saving.php" class="block py-2 px-4 rounded hover:bg-gray-700">Add Saving</a></li>
-                    <li><a href="manage_requests.php" class="block py-2 px-4 rounded hover:bg-gray-700">Manage Requests</a></li>
+                    <li><a href="add_member.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="user-plus" class="w-4 h-4"></i><span>Add Member</span></a></li>
+                    <li><a href="add_saving.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="plus-circle" class="w-4 h-4"></i><span>Add Saving</span></a></li>
+                    <li><a href="manage_requests.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="clipboard-list" class="w-4 h-4"></i><span>Manage Requests</span></a></li>
                      <?php if (in_array($role_id, [1, 2])): ?>
-                        <li><a href="apply_interest.php" class="block py-2 px-4 rounded hover:bg-gray-700">Apply Interest</a></li>
-                        <li><a href="admin_dividends.php" class="block py-2 px-4 rounded hover:bg-gray-700">Distribute Dividends</a></li>
+                        <li><a href="apply_interest.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="percent" class="w-4 h-4"></i><span>Apply Interest</span></a></li>
+                        <li><a href="admin_dividends.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="gift" class="w-4 h-4"></i><span>Distribute Dividends</span></a></li>
                     <?php endif; ?>
                 <?php endif; ?>
 
                 <?php if (in_array($role_id, [1, 2, 3, 4])): ?>
-                    <li class="pt-4">
-                        <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Reports & Logs</span>
+                    <li class="pt-6 pb-2">
+                        <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Reports & Logs</span>
                     </li>
-                    <li><a href="reports.php" class="block py-2 px-4 rounded hover:bg-gray-700">System Reports</a></li>
-                    <li><a href="view_savings.php" class="block py-2 px-4 rounded hover:bg-gray-700">View Savings</a></li>
-                    <li><a href="admin_welfare.php" class="block py-2 px-4 rounded hover:bg-gray-700">Welfare Fund Report</a></li>
-                    <li><a href="admin_expenses.php" class="block py-2 px-4 rounded hover:bg-gray-700">Society Expenses</a></li>
-                    <li><a href="admin_investments.php" class="block py-2 px-4 rounded hover:bg-gray-700">Investment Portfolio</a></li>
+                    <li><a href="reports.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="bar-chart-3" class="w-4 h-4"></i><span>System Reports</span></a></li>
+                    <li><a href="view_savings.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i><span>View Savings</span></a></li>
+                    <li><a href="admin_welfare.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="activity" class="w-4 h-4"></i><span>Welfare Fund Report</span></a></li>
+                    <li><a href="admin_expenses.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="receipt" class="w-4 h-4"></i><span>Society Expenses</span></a></li>
+                    <li><a href="admin_investments.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="briefcase" class="w-4 h-4"></i><span>Investment Portfolio</span></a></li>
                 <?php endif; ?>
 
                 <?php if (in_array($role_id, [1, 2])): ?>
-                    <li class="pt-4">
-                        <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Advanced</span>
+                    <li class="pt-6 pb-2">
+                        <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Advanced</span>
                     </li>
-                    <li><a href="member_directory.php" class="block py-2 px-4 rounded hover:bg-gray-700">Member Directory</a></li>
-                    <li><a href="admin_reset_password.php" class="block py-2 px-4 rounded hover:bg-gray-700">Reset User Password</a></li>
-                    <li><a href="admin_audit_view.php" class="block py-2 px-4 rounded hover:bg-gray-700">Audit View</a></li>
-                    <li><a href="admin_analytics_view.php" class="block py-2 px-4 rounded hover:bg-gray-700">Analytics View</a></li>
-                    <li><a href="admin_tabular_view.php" class="block py-2 px-4 rounded hover:bg-gray-700">Tabular View</a></li>
+                    <li><a href="member_directory.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="users" class="w-4 h-4"></i><span>Member Directory</span></a></li>
+                    <li><a href="admin_reset_password.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="key" class="w-4 h-4"></i><span>Reset User Password</span></a></li>
+                    <li><a href="admin_audit_view.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="shield-check" class="w-4 h-4"></i><span>Audit View</span></a></li>
+                    <li><a href="admin_analytics_view.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="line-chart" class="w-4 h-4"></i><span>Analytics View</span></a></li>
+                    <li><a href="admin_tabular_view.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="table" class="w-4 h-4"></i><span>Tabular View</span></a></li>
                 <?php endif; ?>
 
                 <?php if ($role_id == 2): ?>
-                    <li><a href="handover.php" class="block py-2 px-4 rounded hover:bg-gray-700">Handover Role</a></li>
+                    <li><a href="handover.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="refresh-cw" class="w-4 h-4"></i><span>Handover Role</span></a></li>
                 <?php endif; ?>
             </ul>
         </nav>
-        <div class="p-4 border-t border-gray-700">
-            <a href="settings.php" class="block py-2 px-4 rounded hover:bg-gray-700">Settings</a>
-            <a href="logout.php" class="block py-2 px-4 rounded hover:bg-gray-700">Logout</a>
+        <div class="p-4 border-t border-gray-700 sidebar-footer">
+            <a href="settings.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="settings" class="w-4 h-4"></i><span>Settings</span></a>
+            <a href="logout.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors text-rose-400"><i data-lucide="log-out" class="w-4 h-4"></i><span>Logout</span></a>
         </div>
     </aside>
 

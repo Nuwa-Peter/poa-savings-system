@@ -72,10 +72,16 @@ try {
     <?php endif; ?>
 
     <!-- Pending Withdrawals Section -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h3 class="text-xl font-semibold text-gray-700 mb-4">Pending Withdrawals</h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full leading-normal">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+        <div class="p-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+            <h3 class="text-xl font-bold text-slate-800 text-gray-700">Pending Withdrawals</h3>
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                <input type="text" id="withdrawal-search" placeholder="Search withdrawals..." class="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all w-64">
+            </div>
+        </div>
+        <div class="overflow-x-auto p-6">
+            <table class="min-w-full leading-normal" data-interactive="true" data-search-input="withdrawal-search" data-pagination="5">
                 <thead>
                     <tr class="border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         <th class="px-5 py-3">User</th>
@@ -112,10 +118,16 @@ try {
     </div>
 
     <!-- Pending Loans Section -->
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-xl font-semibold text-gray-700 mb-4">Pending Loans</h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full leading-normal">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+            <h3 class="text-xl font-bold text-slate-800 text-gray-700">Pending Loans</h3>
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                <input type="text" id="loan-search" placeholder="Search loans..." class="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all w-64">
+            </div>
+        </div>
+        <div class="overflow-x-auto p-6">
+            <table class="min-w-full leading-normal" data-interactive="true" data-search-input="loan-search" data-pagination="5">
                 <thead>
                     <tr class="border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         <th class="px-5 py-3">User</th>
@@ -164,7 +176,7 @@ try {
                                     <form action="process_request_action.php" method="POST" class="inline-flex items-center space-x-2">
                                         <input type="hidden" name="request_id" value="<?php echo $loan['id']; ?>">
                                         <input type="hidden" name="request_type" value="loan">
-                                        <input type="number" name="approved_amount" class="w-32 text-sm border-gray-300 rounded" placeholder="Amount" value="<?php echo $loan['amount']; ?>" step="0.01">
+                                        <input type="text" inputmode="numeric" data-type="currency" name="approved_amount" class="w-32 text-sm border-gray-300 rounded" placeholder="Amount" value="<?php echo (int)$loan['amount']; ?>">
                                         <button type="submit" name="action" value="approve"
                                             class="text-sm bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded disabled:bg-gray-400"
                                             <?php echo ($loan['guarantor_status'] !== 'approved') ? 'disabled title="Cannot approve until guarantor approves."' : ''; ?>>

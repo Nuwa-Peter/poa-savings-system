@@ -66,7 +66,7 @@ try {
                 <form action="welfare.php" method="POST">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Amount (UGX)</label>
-                        <input type="number" step="1" name="amount" required class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
+                        <input type="text" inputmode="numeric" data-type="currency" name="amount" required class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>

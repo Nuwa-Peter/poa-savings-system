@@ -59,27 +59,31 @@ function sort_link($column, $text, $current_tab, $current_column, $current_order
     <p class="text-gray-600 dark:text-gray-400 mb-6">A raw data view of the core financial records in the system.</p>
 
     <!-- Tab Navigation -->
-    <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="mb-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
         <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="myTab" role="tablist">
             <li class="mr-2" role="presentation">
-                <a href="?tab=savings" class="inline-block p-4 border-b-2 rounded-t-lg <?php echo $tab === 'savings' ? 'border-blue-500 text-blue-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300'; ?>">Savings</a>
+                <a href="?tab=savings" class="inline-block p-4 border-b-2 rounded-t-lg transition-colors <?php echo $tab === 'savings' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'; ?>">Savings</a>
             </li>
             <li class="mr-2" role="presentation">
-                <a href="?tab=withdrawals" class="inline-block p-4 border-b-2 rounded-t-lg <?php echo $tab === 'withdrawals' ? 'border-blue-500 text-blue-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300'; ?>">Withdrawals</a>
+                <a href="?tab=withdrawals" class="inline-block p-4 border-b-2 rounded-t-lg transition-colors <?php echo $tab === 'withdrawals' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'; ?>">Withdrawals</a>
             </li>
             <li class="mr-2" role="presentation">
-                <a href="?tab=loans" class="inline-block p-4 border-b-2 rounded-t-lg <?php echo $tab === 'loans' ? 'border-blue-500 text-blue-600' : 'border-transparent hover:text-gray-600 hover:border-gray-300'; ?>">Loans</a>
+                <a href="?tab=loans" class="inline-block p-4 border-b-2 rounded-t-lg transition-colors <?php echo $tab === 'loans' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'; ?>">Loans</a>
             </li>
         </ul>
+        <div class="relative pb-2">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 -mt-1 w-4 h-4 text-slate-400"></i>
+            <input type="text" id="tabular-search" placeholder="Search data..." class="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all w-64">
+        </div>
     </div>
 
     <!-- Table Content -->
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all">
         <?php if ($error): ?>
-            <p class="text-red-500"><?php echo $error; ?></p>
+            <p class="text-red-500 p-8"><?php echo $error; ?></p>
         <?php else: ?>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <table class="min-w-full divide-y divide-slate-200" data-interactive="true" data-search-input="tabular-search" data-pagination="20">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
                             <?php

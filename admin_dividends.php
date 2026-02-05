@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['distribute'])) {
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Value</label>
-                        <input type="number" step="0.01" name="value" required class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
+                        <input type="text" inputmode="numeric" data-type="currency" name="value" required class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>

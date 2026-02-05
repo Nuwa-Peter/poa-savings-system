@@ -84,7 +84,7 @@ try {
         </div>
     <?php endif; ?>
 
-    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6 transition-all">
         <form action="view_savings.php" method="GET" class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-4">
                 <div>
@@ -106,16 +106,21 @@ try {
                     </select>
                 </div>
             </div>
-            <div>
-                <a href="download_savings_report.php?member_id=<?php echo htmlspecialchars($selected_member_id); ?>&view_mode=<?php echo htmlspecialchars($view_mode); ?>" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                    Download as PDF
+            <div class="flex items-center gap-2">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                    <input type="text" id="table-search" placeholder="Search records..." class="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all w-64">
+                </div>
+                <a href="download_savings_report.php?member_id=<?php echo htmlspecialchars($selected_member_id); ?>&view_mode=<?php echo htmlspecialchars($view_mode); ?>" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors shadow-sm">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    Download PDF
                 </a>
             </div>
         </form>
     </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-md">
-        <table class="min-w-full leading-normal">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all">
+        <table class="min-w-full leading-normal" data-interactive="true" data-search-input="table-search" data-pagination="15">
             <thead>
                 <tr>
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Member</th>
@@ -126,7 +131,9 @@ try {
             <tbody>
                 <?php if (empty($savings)): ?>
                     <tr>
-                        <td colspan="3" class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">No savings records found.</td>
+                        <td colspan="3" class="px-5 py-10 bg-white">
+                            <?php echo renderEmptyState('database', 'No Savings Found', 'There are no savings records matching your criteria.', 'Add a Saving', 'add_saving.php'); ?>
+                        </td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($savings as $saving): ?>

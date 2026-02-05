@@ -118,23 +118,45 @@ try {
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Total Savings</h3>
-            <p class="text-4xl font-bold text-indigo-600"><?php echo number_format($system_stats['total_savings'], 0); ?> <span class="text-2xl">UGX</span></p>
-            <p class="text-lg text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($system_stats['total_savings']), 2); ?> USD</p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                    <i data-lucide="piggy-bank" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Savings</span>
+            </div>
+            <p class="text-3xl font-bold text-slate-900"><?php echo number_format($system_stats['total_savings'], 0); ?> <span class="text-sm font-normal text-slate-500">UGX</span></p>
+            <p class="text-xs text-slate-500 mt-1">~ $<?php echo number_format(convert_ugx_to_usd($system_stats['total_savings']), 2); ?> USD</p>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Outstanding Loans</h3>
-            <p class="text-4xl font-bold text-red-600"><?php echo number_format($system_stats['total_loan_balance'], 0); ?> <span class="text-2xl">UGX</span></p>
-            <p class="text-lg text-gray-500 mt-2">~ $<?php echo number_format(convert_ugx_to_usd($system_stats['total_loan_balance']), 2); ?> USD</p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-rose-50 rounded-lg text-rose-600">
+                    <i data-lucide="landmark" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Outstanding Loans</span>
+            </div>
+            <p class="text-3xl font-bold text-slate-900"><?php echo number_format($system_stats['total_loan_balance'], 0); ?> <span class="text-sm font-normal text-slate-500">UGX</span></p>
+            <p class="text-xs text-slate-500 mt-1">~ $<?php echo number_format(convert_ugx_to_usd($system_stats['total_loan_balance']), 2); ?> USD</p>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Pending Withdrawals</h3>
-            <p class="text-4xl font-bold text-yellow-600"><?php echo $system_stats['pending_withdrawals']; ?></p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-amber-50 rounded-lg text-amber-600">
+                    <i data-lucide="arrow-up-right" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Withdrawals</span>
+            </div>
+            <p class="text-3xl font-bold text-slate-900"><?php echo $system_stats['pending_withdrawals']; ?></p>
+            <p class="text-xs text-slate-500 mt-1">Pending approval</p>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Pending Loans</h3>
-            <p class="text-4xl font-bold text-yellow-600"><?php echo $system_stats['pending_loans']; ?></p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
+                    <i data-lucide="clock" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Loan Apps</span>
+            </div>
+            <p class="text-3xl font-bold text-slate-900"><?php echo $system_stats['pending_loans']; ?></p>
+            <p class="text-xs text-slate-500 mt-1">Pending review</p>
         </div>
     </div>
 
@@ -154,14 +176,26 @@ try {
     </div>
 
     <!-- Quick Actions -->
-    <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-xl font-semibold text-gray-700 mb-4">Quick Actions</h3>
-        <div class="flex flex-wrap gap-4">
-            <a href="manage_requests.php" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Manage Requests</a>
-            <a href="add_member.php" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Add New Member</a>
-            <a href="add_saving.php" class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded">Add a Saving</a>
+    <div class="mt-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
+        <div class="flex flex-wrap gap-3">
+            <a href="manage_requests.php" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm hover:shadow-indigo-200">
+                <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                <span>Manage Requests</span>
+            </a>
+            <a href="add_member.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                <i data-lucide="user-plus" class="w-4 h-4 text-indigo-600"></i>
+                <span>Add Member</span>
+            </a>
+            <a href="add_saving.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i>
+                <span>Add Saving</span>
+            </a>
             <?php if (in_array($_SESSION['role_id'], [1, 2])): ?>
-                <a href="apply_interest.php" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">Apply Loan Interest</a>
+                <a href="apply_interest.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                    <i data-lucide="percent" class="w-4 h-4 text-orange-600"></i>
+                    <span>Apply Interest</span>
+                </a>
             <?php endif; ?>
         </div>
     </div>
@@ -193,13 +227,19 @@ try {
                     if (count($recent_savings) > 0):
                         foreach ($recent_savings as $saving):
                     ?>
-                            <tr class="border-b border-gray-200 hover:bg-gray-50">
-                                <td class="py-3 px-4"><?php echo htmlspecialchars($saving['first_name'] . ' ' . $saving['surname']); ?></td>
-                                <td class="py-3 px-4 text-right"><?php echo number_format($saving['amount'], 0); ?></td>
-                                <td class="py-3 px-4"><?php echo date('d M Y', strtotime($saving['created_at'])); ?></td>
+                            <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                <td class="py-3 px-4 font-medium text-slate-700"><?php echo htmlspecialchars($saving['first_name'] . ' ' . $saving['surname']); ?></td>
+                                <td class="py-3 px-4 text-right font-semibold text-slate-900"><?php echo number_format($saving['amount'], 0); ?></td>
+                                <td class="py-3 px-4 text-slate-500"><?php echo date('d M Y', strtotime($saving['created_at'])); ?></td>
                                 <td class="py-3 px-4 flex items-center space-x-4">
-                                    <a href="edit_saving.php?id=<?php echo $saving['id']; ?>" class="text-indigo-600 hover:text-indigo-900 font-semibold">Rectify</a>
-                                    <a href="delete_saving.php?id=<?php echo $saving['id']; ?>" class="text-red-600 hover:text-red-900 font-semibold" onclick="return confirm('Are you sure you want to delete this saving transaction? This action cannot be undone.');">Delete</a>
+                                    <a href="edit_saving.php?id=<?php echo $saving['id']; ?>" class="text-indigo-600 hover:text-indigo-900 inline-flex items-center gap-1">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        <span>Rectify</span>
+                                    </a>
+                                    <a href="delete_saving.php?id=<?php echo $saving['id']; ?>" class="text-rose-600 hover:text-rose-900 inline-flex items-center gap-1" onclick="return confirm('Are you sure?');">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        <span>Delete</span>
+                                    </a>
                                 </td>
                             </tr>
                     <?php
@@ -207,7 +247,9 @@ try {
                     else:
                     ?>
                         <tr>
-                            <td colspan="4" class="py-4 text-center text-gray-500">No savings transactions found.</td>
+                            <td colspan="4" class="py-10">
+                                <?php echo renderEmptyState('list', 'No Recent Savings', 'Recent savings transactions will appear here.', 'Add a Saving', 'add_saving.php'); ?>
+                            </td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

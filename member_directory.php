@@ -31,16 +31,22 @@ function sort_link($column, $text, $current_column, $current_order) {
 ?>
 
 <div class="container mx-auto mt-10 p-4">
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-6">Member Directory</h1>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all">
+        <div class="p-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+            <h1 class="text-2xl font-bold text-slate-800">Member Directory</h1>
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                <input type="text" id="member-search" placeholder="Search members..." class="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all w-64">
+            </div>
+        </div>
 
         <?php if (isset($error)): ?>
-            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
-                <span class="font-medium">Error!</span> <?php echo $error; ?>
+            <div class="p-8 text-center text-red-600 font-medium">
+                <?php echo $error; ?>
             </div>
         <?php else: ?>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <table class="min-w-full divide-y divide-slate-200" data-interactive="true" data-search-input="member-search" data-pagination="15">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Avatar</th>

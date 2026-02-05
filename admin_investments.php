@@ -93,7 +93,7 @@ try {
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Amount Invested (UGX)</label>
-                        <input type="number" step="1" name="amount" required class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
+                        <input type="text" inputmode="numeric" data-type="currency" name="amount" required class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Expected Return (%)</label>
@@ -146,7 +146,7 @@ try {
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                         <form action="admin_investments.php" method="POST" class="inline-flex items-center space-x-2">
                                             <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                                            <input type="number" step="1" name="current_value" value="<?php echo (int)$row['current_value']; ?>" class="w-24 p-1 border rounded dark:bg-gray-700 dark:text-white text-xs">
+                                            <input type="text" inputmode="numeric" data-type="currency" name="current_value" value="<?php echo (int)$row['current_value']; ?>" class="w-24 p-1 border rounded dark:bg-gray-700 dark:text-white text-xs">
                                             <select name="status" class="p-1 border rounded dark:bg-gray-700 dark:text-white text-xs">
                                                 <option value="active" <?php echo $row['status'] === 'active' ? 'selected' : ''; ?>>Active</option>
                                                 <option value="matured" <?php echo $row['status'] === 'matured' ? 'selected' : ''; ?>>Matured</option>

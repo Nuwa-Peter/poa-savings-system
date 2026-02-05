@@ -79,7 +79,7 @@ try {
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Target Amount (UGX)</label>
-                        <input type="number" step="1" name="target_amount" required class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
+                        <input type="text" inputmode="numeric" data-type="currency" name="target_amount" required class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Target Date (Optional)</label>
