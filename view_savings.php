@@ -26,7 +26,7 @@ try {
     if ($view_mode === 'history') {
         // Detailed History View
         if ($selected_member_id !== 'all' && is_numeric($selected_member_id)) {
-            $sql = "SELECT s.amount, s.created_at, u.first_name, u.surname
+            $sql = "SELECT s.id, s.amount, s.created_at, u.first_name, u.surname
                     FROM savings s
                     JOIN users u ON s.user_id = u.id
                     WHERE s.user_id = ?
@@ -34,7 +34,7 @@ try {
             $savings_stmt = $pdo->prepare($sql);
             $savings_stmt->execute([$selected_member_id]);
         } else {
-            $sql = "SELECT s.amount, s.created_at, u.first_name, u.surname
+            $sql = "SELECT s.id, s.amount, s.created_at, u.first_name, u.surname
                     FROM savings s
                     JOIN users u ON s.user_id = u.id
                     WHERE u.id != 1
@@ -126,6 +126,9 @@ try {
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Member</th>
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider"><?php echo $view_mode === 'history' ? 'Amount (UGX)' : 'Total Saved (UGX)'; ?></th>
                     <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"><?php echo $view_mode === 'history' ? 'Date & Time' : 'Last Check Date'; ?></th>
+                    <?php if ($view_mode === 'history' && in_array($_SESSION['role_id'], [1, 2, 3])): ?>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                    <?php endif; ?>
                 </tr>
             </thead>
             <tbody>
@@ -147,6 +150,14 @@ try {
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-gray-600">
                                 <?php echo $view_mode === 'history' ? date('M j, Y, g:i a', strtotime($saving['created_at'])) : date('M j, Y, g:i a'); ?>
                             </td>
+                            <?php if ($view_mode === 'history' && in_array($_SESSION['role_id'], [1, 2, 3])): ?>
+                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    <a href="edit_saving.php?id=<?php echo $saving['id']; ?>" class="text-indigo-600 hover:text-indigo-900 inline-flex items-center gap-1">
+                                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        <span>Rectify</span>
+                                    </a>
+                                </td>
+                            <?php endif; ?>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -157,6 +168,9 @@ try {
                         <th class="px-5 py-3 border-t-2 border-gray-200 bg-gray-100 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Total</th>
                         <th class="px-5 py-3 border-t-2 border-gray-200 bg-gray-100 text-right text-xs font-bold text-gray-700 uppercase tracking-wider"><?php echo number_format($total_savings, 0); ?> UGX</th>
                         <th class="px-5 py-3 border-t-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"></th>
+                        <?php if ($view_mode === 'history' && in_array($_SESSION['role_id'], [1, 2, 3])): ?>
+                            <th class="px-5 py-3 border-t-2 border-gray-200 bg-gray-100"></th>
+                        <?php endif; ?>
                     </tr>
                 </tfoot>
             <?php endif; ?>

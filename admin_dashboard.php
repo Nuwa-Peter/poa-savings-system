@@ -191,6 +191,10 @@ try {
                 <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i>
                 <span>Add Saving</span>
             </a>
+            <a href="view_savings.php?view_mode=history" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                <i data-lucide="edit-3" class="w-4 h-4 text-orange-600"></i>
+                <span>Rectify Savings</span>
+            </a>
             <?php if (in_array($_SESSION['role_id'], [1, 2])): ?>
                 <a href="apply_interest.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
                     <i data-lucide="percent" class="w-4 h-4 text-orange-600"></i>

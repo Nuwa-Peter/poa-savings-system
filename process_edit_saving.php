@@ -28,6 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $pdo->beginTransaction();
 
+        // 0. Fetch user_id for redirection
+        $stmt = $pdo->prepare("SELECT user_id FROM savings WHERE id = ?");
+        $stmt->execute([$saving_id]);
+        $saving_user_id = $stmt->fetchColumn();
+
         // 1. Update the saving record
         $stmt = $pdo->prepare("UPDATE savings SET amount = ? WHERE id = ?");
         $stmt->execute([$new_amount, $saving_id]);
@@ -45,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->commit();
 
-        header("Location: admin_dashboard.php?success=Saving updated successfully.");
+        header("Location: view_savings.php?member_id={$saving_user_id}&view_mode=history&success=Saving updated successfully.");
         exit;
 
     } catch (Exception $e) {
