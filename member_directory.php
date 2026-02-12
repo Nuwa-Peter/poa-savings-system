@@ -5,6 +5,9 @@ check_permissions([1, 2]);
 
 require_once 'config/db_connect.php';
 require_once 'templates/header.php';
+require_once 'includes/CreditScoreHelper.php';
+
+$scoreHelper = new CreditScoreHelper($pdo);
 
 // Logic for sorting
 $sort_column = $_GET['sort'] ?? 'id';
@@ -56,6 +59,7 @@ function sort_link($column, $text, $current_column, $current_order) {
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('username', 'Username', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('email', 'Email', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('phone', 'Phone', $sort_column, $sort_order); ?></th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Credit Score</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('account_no', 'Account No.', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"><?php echo sort_link('created_at', 'Joined On', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
@@ -78,6 +82,14 @@ function sort_link($column, $text, $current_column, $current_order) {
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['username']); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['email']); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['phone']); ?></td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <?php
+                                            $score = $scoreHelper->getScore($member['id']);
+                                            $label = $scoreHelper->getScoreLabel($score);
+                                        ?>
+                                        <span class="font-bold <?php echo $label['color']; ?>"><?php echo $score; ?></span>
+                                        <span class="text-[10px] uppercase opacity-70 block"><?php echo $label['label']; ?></span>
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['account_no']); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo date('M j, Y', strtotime($member['created_at'])); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

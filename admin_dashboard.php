@@ -168,10 +168,12 @@ try {
             <canvas id="societySavingsChart"></canvas>
         </div>
 
-        <!-- Personal Savings Trend Chart -->
+        <!-- Liquidity Analytics -->
         <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">My Personal Savings Trend</h3>
-            <canvas id="personalSavingsChart"></canvas>
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Financial Liquidity (Debt vs Savings)</h3>
+            <div class="h-64 flex justify-center">
+                <canvas id="liquidityChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -319,37 +321,22 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const personalCtx = document.getElementById('personalSavingsChart').getContext('2d');
-    new Chart(personalCtx, {
-        type: 'line',
+    const liqCtx = document.getElementById('liquidityChart').getContext('2d');
+    new Chart(liqCtx, {
+        type: 'doughnut',
         data: {
-            labels: <?php echo json_encode($personal_labels ?? []); ?>,
+            labels: ['Total Savings', 'Outstanding Loans'],
             datasets: [{
-                label: 'Savings Amount',
-                data: <?php echo json_encode($personal_values ?? []); ?>,
-                borderColor: 'rgba(16, 185, 129, 1)',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                fill: true,
-                tension: 0.3
+                data: [<?php echo $system_stats['total_savings']; ?>, <?php echo $system_stats['total_loan_balance']; ?>],
+                backgroundColor: ['rgba(79, 70, 229, 0.8)', 'rgba(244, 63, 94, 0.8)'],
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) { return 'UGX ' + value.toLocaleString(); }
-                    }
-                }
-            },
+            maintainAspectRatio: false,
             plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return 'Amount: UGX ' + context.parsed.y.toLocaleString();
-                        }
-                    }
-                }
+                legend: { position: 'bottom' }
             }
         }
     });

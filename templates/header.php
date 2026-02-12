@@ -84,6 +84,9 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                 <li><a href="generate_statement.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="file-text" class="w-4 h-4"></i><span>Download Statement</span></a></li>
                 <li><a href="view_dividends.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="pie-chart" class="w-4 h-4 text-pink-400"></i><span>My Dividends</span></a></li>
                 <li><a href="welfare.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="heart" class="w-4 h-4 text-rose-400"></i><span>Welfare Fund</span></a></li>
+                <li><a href="view_share_capital.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="award" class="w-4 h-4 text-purple-400"></i><span>My Share Capital</span></a></li>
+                <li><a href="fixed_deposits.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="lock" class="w-4 h-4 text-emerald-400"></i><span>Fixed Deposits</span></a></li>
+                <li><a href="pay_subscription.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="calendar-check" class="w-4 h-4 text-orange-400"></i><span>My Subscriptions</span></a></li>
                 <li><a href="savings_goals.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="target" class="w-4 h-4 text-amber-400"></i><span>Savings Goals</span></a></li>
 
                 <?php if (in_array($role_id, [1, 2, 3])): // Admin-level actions ?>
@@ -92,6 +95,8 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                     </li>
                     <li><a href="add_member.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="user-plus" class="w-4 h-4"></i><span>Add Member</span></a></li>
                     <li><a href="add_saving.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="plus-circle" class="w-4 h-4"></i><span>Add Saving</span></a></li>
+                    <li><a href="admin_share_capital.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="award" class="w-4 h-4"></i><span>Manage Share Capital</span></a></li>
+                    <li><a href="admin_subscriptions.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="calendar-days" class="w-4 h-4"></i><span>Manage Subscriptions</span></a></li>
                     <li><a href="manage_requests.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="clipboard-list" class="w-4 h-4"></i><span>Manage Requests</span></a></li>
                      <?php if (in_array($role_id, [1, 2])): ?>
                         <li><a href="apply_interest.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="percent" class="w-4 h-4"></i><span>Apply Interest</span></a></li>
@@ -104,6 +109,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                         <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Reports & Logs</span>
                     </li>
                     <li><a href="reports.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="bar-chart-3" class="w-4 h-4"></i><span>System Reports</span></a></li>
+                    <li><a href="financial_reports.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="landmark" class="w-4 h-4 text-emerald-400"></i><span>Financial Reports</span></a></li>
                     <li><a href="view_savings.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="eye" class="w-4 h-4"></i><span>View Savings</span></a></li>
                     <li><a href="admin_welfare.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="activity" class="w-4 h-4"></i><span>Welfare Fund Report</span></a></li>
                     <li><a href="admin_expenses.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="receipt" class="w-4 h-4"></i><span>Society Expenses</span></a></li>
