@@ -51,24 +51,22 @@ try {
     $personal_loan_stmt->execute([$admin_user_id]);
     $admin_personal_stats['loan_balance'] = $personal_loan_stmt->fetchColumn() ?: 0;
 
-    // 5. Data for Savings Trend Chart (Aggregated for all members, excluding root)
-    $savings_trend_stmt = $pdo->query(
-        "SELECT DATE_FORMAT(created_at, '%Y-%m') as month, SUM(amount) as total_savings
-         FROM savings
-         WHERE user_id != 1
-         GROUP BY month
-         ORDER BY month ASC"
+    // 5. Data for Society Cumulative Savings Chart (Each deposit)
+    $society_savings_stmt = $pdo->query(
+        "SELECT amount, created_at FROM savings WHERE user_id != 1 ORDER BY created_at ASC"
     );
-    $savings_trend_data = $savings_trend_stmt->fetchAll(PDO::FETCH_ASSOC);
+    $society_savings_history = $society_savings_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $savings_labels = [];
-    $savings_values = [];
-    foreach ($savings_trend_data as $row) {
-        $savings_labels[] = date("M Y", strtotime($row['month'] . "-01"));
-        $savings_values[] = $row['total_savings'];
+    $society_cumulative_labels = [];
+    $society_cumulative_values = [];
+    $running_total = 0;
+    foreach ($society_savings_history as $row) {
+        $running_total += $row['amount'];
+        $society_cumulative_labels[] = date("M j, Y H:i", strtotime($row['created_at']));
+        $society_cumulative_values[] = $running_total;
     }
 
-    // 6. Data for Admin's Personal Savings Trend Chart
+    // 6. Data for Admin's Personal Savings Trend Chart (Cumulative)
     $personal_trend_stmt = $pdo->prepare(
         "SELECT amount, created_at FROM savings WHERE user_id = ? ORDER BY created_at ASC"
     );
@@ -76,10 +74,12 @@ try {
     $personal_history = $personal_trend_stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $personal_labels = [];
-    $personal_values = [];
+    $personal_cumulative_values = [];
+    $personal_running_total = 0;
     foreach ($personal_history as $row) {
+        $personal_running_total += $row['amount'];
         $personal_labels[] = date("M j, Y", strtotime($row['created_at']));
-        $personal_values[] = $row['amount'];
+        $personal_cumulative_values[] = $personal_running_total;
     }
 
 } catch (PDOException $e) {
@@ -161,16 +161,22 @@ try {
     </div>
 
     <!-- Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-        <!-- Society Savings Trend Chart -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+        <!-- Personal Savings Trend Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">My Personal Savings</h3>
+            <canvas id="personalSavingsChart"></canvas>
+        </div>
+
+        <!-- Society Savings Trend Chart (Cumulative) -->
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-4">Society Savings Trend</h3>
-            <canvas id="societySavingsChart"></canvas>
+            <canvas id="societyCumulativeChart"></canvas>
         </div>
 
         <!-- Liquidity Analytics -->
         <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">Financial Liquidity (Debt vs Savings)</h3>
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Debt vs Savings</h3>
             <div class="h-64 flex justify-center">
                 <canvas id="liquidityChart"></canvas>
             </div>
@@ -284,16 +290,56 @@ try {
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const societyCtx = document.getElementById('societySavingsChart').getContext('2d');
+    const societyCtx = document.getElementById('societyCumulativeChart').getContext('2d');
     new Chart(societyCtx, {
         type: 'line',
         data: {
-            labels: <?php echo json_encode($savings_labels ?? []); ?>,
+            labels: <?php echo json_encode($society_cumulative_labels ?? []); ?>,
             datasets: [{
-                label: 'Total Society Savings per Month',
-                data: <?php echo json_encode($savings_values ?? []); ?>,
+                label: 'Cumulative Society Savings',
+                data: <?php echo json_encode($society_cumulative_values ?? []); ?>,
                 borderColor: 'rgba(79, 70, 229, 1)',
                 backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                fill: true,
+                tension: 0.1,
+                pointRadius: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return 'UGX ' + value.toLocaleString(); }
+                    }
+                },
+                x: {
+                    display: false // Hide X axis for cleaner look if many points
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Cumulative: UGX ' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const personalCtx = document.getElementById('personalSavingsChart').getContext('2d');
+    new Chart(personalCtx, {
+        type: 'line',
+        data: {
+            labels: <?php echo json_encode($personal_labels ?? []); ?>,
+            datasets: [{
+                label: 'My Balance',
+                data: <?php echo json_encode($personal_cumulative_values ?? []); ?>,
+                borderColor: 'rgba(16, 185, 129, 1)',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 fill: true,
                 tension: 0.3
             }]
@@ -307,20 +353,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         callback: function(value) { return 'UGX ' + value.toLocaleString(); }
                     }
                 }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return 'Total: UGX ' + context.parsed.y.toLocaleString();
-                        }
-                    }
-                }
             }
         }
     });
 
-    const personalCtx = document.getElementById('personalSavingsChart').getContext('2d');
     const liqCtx = document.getElementById('liquidityChart').getContext('2d');
     new Chart(liqCtx, {
         type: 'doughnut',

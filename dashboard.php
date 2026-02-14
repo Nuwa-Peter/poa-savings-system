@@ -108,9 +108,27 @@ try {
     $chart_stmt->execute([$user_id]);
     $savings_for_chart = $chart_stmt->fetchAll();
 
+    $personal_cumulative_values = [];
+    $personal_running_total = 0;
     foreach ($savings_for_chart as $saving) {
+        $personal_running_total += $saving['amount'];
         $savings_dates[] = date('M j, Y', strtotime($saving['created_at']));
-        $savings_amounts[] = $saving['amount'];
+        $personal_cumulative_values[] = $personal_running_total;
+    }
+
+    // --- Fetch Society Cumulative Savings (Each deposit) ---
+    $society_savings_stmt = $pdo->query(
+        "SELECT amount, created_at FROM savings WHERE user_id != 1 ORDER BY created_at ASC"
+    );
+    $society_savings_history = $society_savings_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $society_cumulative_labels = [];
+    $society_cumulative_values = [];
+    $society_running_total = 0;
+    foreach ($society_savings_history as $row) {
+        $society_running_total += $row['amount'];
+        $society_cumulative_labels[] = date("M j, Y H:i", strtotime($row['created_at']));
+        $society_cumulative_values[] = $society_running_total;
     }
 
     // --- Fetch all transaction types for the history list ---
@@ -223,12 +241,20 @@ try {
         </div>
     </div>
 
-    <!-- Charts and History -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">Savings Trend</h3>
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">My Savings Progress</h3>
             <canvas id="savingsLineChart"></canvas>
         </div>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">Society Savings Trend</h3>
+            <canvas id="societyCumulativeChart"></canvas>
+        </div>
+    </div>
+
+    <!-- History -->
+    <div class="grid grid-cols-1 gap-6">
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-xl font-semibold text-gray-700 mb-4">Transaction History</h3>
             <div class="overflow-auto max-h-96">
@@ -281,7 +307,7 @@ try {
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // --- Line Chart for Savings Trend ---
+    // --- Personal Savings Chart ---
     const lineCtx = document.getElementById('savingsLineChart').getContext('2d');
     if (lineCtx) {
         new Chart(lineCtx, {
@@ -289,43 +315,55 @@ document.addEventListener('DOMContentLoaded', function () {
             data: {
                 labels: <?php echo json_encode($savings_dates); ?>,
                 datasets: [{
-                    label: 'Savings Amount',
-                    data: <?php echo json_encode($savings_amounts); ?>,
-                    borderColor: 'rgba(79, 70, 229, 1)',
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    label: 'My Balance',
+                    data: <?php echo json_encode($personal_cumulative_values); ?>,
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     fill: true,
                     tension: 0.3
                 }]
             },
             options: {
                 responsive: true,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    const ugxValue = context.parsed.y;
-                                    label += 'UGX ' + ugxValue.toLocaleString();
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
                 scales: {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: function(value) {
-                                return 'UGX ' + value.toLocaleString();
-                            }
+                            callback: function(value) { return 'UGX ' + value.toLocaleString(); }
                         }
                     }
+                }
+            }
+        });
+    }
+
+    // --- Society Cumulative Chart ---
+    const societyCtx = document.getElementById('societyCumulativeChart').getContext('2d');
+    if (societyCtx) {
+        new Chart(societyCtx, {
+            type: 'line',
+            data: {
+                labels: <?php echo json_encode($society_cumulative_labels); ?>,
+                datasets: [{
+                    label: 'Society Total',
+                    data: <?php echo json_encode($society_cumulative_values); ?>,
+                    borderColor: 'rgba(79, 70, 229, 1)',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    fill: true,
+                    tension: 0.1,
+                    pointRadius: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) { return 'UGX ' + value.toLocaleString(); }
+                        }
+                    },
+                    x: { display: false }
                 }
             }
         });
