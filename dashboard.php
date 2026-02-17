@@ -242,13 +242,13 @@ try {
     </div>
 
     <!-- Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">My Savings Progress</h3>
+    <div class="grid grid-cols-1 gap-8">
+        <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="text-2xl font-bold text-slate-800 mb-6">My Savings Progress</h3>
             <canvas id="savingsLineChart"></canvas>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">Society Savings Trend</h3>
+        <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="text-2xl font-bold text-slate-800 mb-6">Society Savings Trend</h3>
             <canvas id="societyCumulativeChart"></canvas>
         </div>
     </div>
@@ -325,6 +325,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             options: {
                 responsive: true,
+                aspectRatio: 3,
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -356,6 +357,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             options: {
                 responsive: true,
+                aspectRatio: 3,
                 scales: {
                     y: {
                         beginAtZero: true,

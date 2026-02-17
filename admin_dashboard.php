@@ -160,23 +160,25 @@ try {
         </div>
     </div>
 
-    <!-- Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+    <!-- Main Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
         <!-- Personal Savings Trend Chart -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">My Personal Savings</h3>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">My Personal Savings</h3>
             <canvas id="personalSavingsChart"></canvas>
         </div>
 
         <!-- Society Savings Trend Chart (Cumulative) -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">Society Savings Trend</h3>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">Society Savings Trend</h3>
             <canvas id="societyCumulativeChart"></canvas>
         </div>
+    </div>
 
-        <!-- Liquidity Analytics -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold text-gray-700 mb-4">Debt vs Savings</h3>
+    <!-- Secondary Analytics -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+        <div class="lg:col-start-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="text-lg font-bold text-slate-800 mb-4 text-center">Debt vs Savings</h3>
             <div class="h-64 flex justify-center">
                 <canvas id="liquidityChart"></canvas>
             </div>
