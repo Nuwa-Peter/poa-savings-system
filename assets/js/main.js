@@ -55,11 +55,12 @@ function showToast(message, type = 'info') {
 
     toast.innerHTML = `
         <i data-lucide="${iconName}" class="w-5 h-5 mr-3"></i>
-        <div class="flex-1 text-sm font-medium">${decodeURIComponent(message.replace(/\+/g, ' '))}</div>
+        <div class="flex-1 text-sm font-medium toast-msg"></div>
         <button class="ml-4 hover:opacity-70 transition-opacity" onclick="this.parentElement.remove()">
             <i data-lucide="x" class="w-4 h-4"></i>
         </button>
     `;
+    toast.querySelector('.toast-msg').textContent = decodeURIComponent(message.replace(/\+/g, ' '));
 
     container.appendChild(toast);
     lucide.createIcons({ props: { class: 'lucide' }, node: toast });

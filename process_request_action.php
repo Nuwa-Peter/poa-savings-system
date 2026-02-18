@@ -65,6 +65,8 @@ try {
 
         if ($action === 'approve') {
             $approved_amount = $_POST['approved_amount'] ?? 0;
+            // Strip commas from masked input
+            $approved_amount = str_replace(',', '', $approved_amount);
             if (!is_numeric($approved_amount) || $approved_amount <= 0) {
                 throw new Exception("Invalid approved amount specified.");
             }
