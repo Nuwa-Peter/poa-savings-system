@@ -40,3 +40,23 @@ function generate_account_number($pdo) {
         throw new Exception("Failed to generate account number: " . $e->getMessage());
     }
 }
+
+/**
+ * Detects if the current user is on a mobile device based on the User-Agent.
+ *
+ * @return bool True if mobile, false otherwise.
+ */
+function isMobileDevice() {
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $mobileKeywords = [
+        'Mobile', 'Android', 'Silk/', 'Kindle', 'BlackBerry', 'Opera Mini', 'Opera Mobi'
+    ];
+
+    foreach ($mobileKeywords as $keyword) {
+        if (strpos($userAgent, $keyword) !== false) {
+            return true;
+        }
+    }
+
+    return false;
+}

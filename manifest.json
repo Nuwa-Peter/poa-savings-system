@@ -1,0 +1,22 @@
+{
+  "name": "Poa Sacco Mobile",
+  "short_name": "Poa Sacco",
+  "description": "Professional Society Savings and Loan Management",
+  "start_url": "/dashboard.php",
+  "display": "standalone",
+  "background_color": "#4f46e5",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "assets/images/poa_light.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/images/poa_light.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
