@@ -112,8 +112,12 @@ try {
                     <input type="text" id="table-search" placeholder="Search records..." class="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all w-64">
                 </div>
                 <a href="download_savings_report.php?member_id=<?php echo htmlspecialchars($selected_member_id); ?>&view_mode=<?php echo htmlspecialchars($view_mode); ?>" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors shadow-sm">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    Download PDF
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    PDF
+                </a>
+                <a href="export_savings.php?member_id=<?php echo htmlspecialchars($selected_member_id); ?>&view_mode=<?php echo htmlspecialchars($view_mode); ?>" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors shadow-sm">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                    CSV
                 </a>
             </div>
         </form>
