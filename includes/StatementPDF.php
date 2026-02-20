@@ -1,6 +1,13 @@
 <?php
 // Ensure TCPDF is available
-require_once __DIR__ . '/../vendor/autoload.php';
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+}
+
+// Fallback manual loading if Composer autoloader is not present or failed to load the class
+if (!class_exists('TCPDF') && file_exists(__DIR__ . '/../vendor/tecnickcom/tcpdf/tcpdf.php')) {
+    require_once __DIR__ . '/../vendor/tecnickcom/tcpdf/tcpdf.php';
+}
 
 class StatementPDF extends TCPDF {
     private $userName;

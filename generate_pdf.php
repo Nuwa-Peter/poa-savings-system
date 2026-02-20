@@ -1,10 +1,8 @@
 <?php
 require_once 'includes/auth_check.php';
 require_once 'config/db_connect.php';
-// For QR Code generation
-require_once 'lib/phpqrcode/qrlib.php';
-// For PDF Generation
-require_once 'lib/tcpdf/tcpdf.php';
+// Ensure dependencies are loaded
+require_once 'vendor/autoload.php';
 
 // All logged-in users can generate their own statements
 check_permissions([1, 2, 3, 4, 5]); // Assuming 5 roles exist
@@ -115,18 +113,17 @@ $html .= '
 
 $pdf->writeHTML($html, true, false, true, false, '');
 
-// --- QR Code Generation ---
+// --- QR Code Generation (Using TCPDF internal functionality) ---
 $qr_data = "Verification Code:\nUser: {$user['username']}\nAccount: {$user['account_no']}\nDate: " . date('Y-m-d');
-$qr_code_file = 'uploads/qr_codes/' . $user['account_no'] . '.png';
-
-if (!is_dir('uploads/qr_codes/')) {
-    mkdir('uploads/qr_codes/', 0755, true);
-}
-// Generate QR code
-QRcode::png($qr_data, $qr_code_file, QR_ECLEVEL_L, 3);
+$style = array(
+    'border' => false,
+    'padding' => 0,
+    'fgcolor' => array(0,0,0),
+    'bgcolor' => false
+);
 
 // Add QR code to PDF
-$pdf->Image($qr_code_file, 170, 250, 25, 25, 'PNG');
+$pdf->write2DBarcode($qr_data, 'QRCODE,L', 170, 250, 25, 25, $style, 'N');
 $pdf->SetFont('helvetica', 'I', 8);
 $pdf->Text(168, 275, 'Scan for verification');
 
