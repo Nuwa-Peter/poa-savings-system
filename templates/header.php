@@ -74,43 +74,51 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
         </div>
         <nav class="flex-grow p-4 overflow-y-auto sidebar-nav">
             <ul class="space-y-1">
+                <!-- Group 1: SOCIETY OVERVIEW -->
+                <li class="pt-6 pb-2">
+                    <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Society Overview</span>
+                </li>
                 <li><a href="dashboard.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span></a></li>
                 <li><a href="about.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="help-circle" class="w-4 h-4 text-indigo-400"></i><span>About & Help</span></a></li>
+                <?php if (in_array($role_id, [1, 2])): ?>
+                    <li><a href="member_directory.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="users-2" class="w-4 h-4 text-blue-400"></i><span>Member Directory</span></a></li>
+                <?php endif; ?>
 
-                <!-- Member Services Section -->
+                <!-- Group 2: FINANCIAL SERVICES -->
                 <li class="pt-6 pb-2">
-                    <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Member Services</span>
+                    <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Financial Services</span>
                 </li>
-                <li><a href="view_savings.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="piggy-bank" class="w-4 h-4 text-emerald-400"></i><span>My Savings</span></a></li>
+                <li><a href="view_savings.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="piggy-bank" class="w-4 h-4 text-emerald-400"></i><span>View Savings</span></a></li>
                 <li><a href="withdraw.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="arrow-up-circle" class="w-4 h-4 text-orange-400"></i><span>Request Withdrawal</span></a></li>
                 <li><a href="request_loan.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="landmark" class="w-4 h-4 text-blue-400"></i><span>Request Loan</span></a></li>
                 <li><a href="repay_loan.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i><span>Repay Loan</span></a></li>
-                <li><a href="guarantor_requests.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="users" class="w-4 h-4 text-indigo-400"></i><span>Guarantor Requests</span></a></li>
-                <li><a href="generate_statement.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="file-text" class="w-4 h-4"></i><span>Download Statement</span></a></li>
-                <li><a href="view_dividends.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="pie-chart" class="w-4 h-4 text-pink-400"></i><span>My Dividends</span></a></li>
+                <li><a href="view_dividends.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="pie-chart" class="w-4 h-4 text-pink-400"></i><span>View Dividends</span></a></li>
                 <li><a href="welfare.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="heart" class="w-4 h-4 text-rose-400"></i><span>Welfare Fund</span></a></li>
-                <li><a href="view_share_capital.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="award" class="w-4 h-4 text-purple-400"></i><span>My Share Capital</span></a></li>
+                <li><a href="view_share_capital.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="award" class="w-4 h-4 text-purple-400"></i><span>View Share Capital</span></a></li>
                 <li><a href="fixed_deposits.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="lock" class="w-4 h-4 text-emerald-400"></i><span>Fixed Deposits</span></a></li>
-                <li><a href="pay_subscription.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="calendar-check" class="w-4 h-4 text-orange-400"></i><span>My Subscriptions</span></a></li>
+                <li><a href="pay_subscription.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="calendar-check" class="w-4 h-4 text-orange-400"></i><span>View Subscriptions</span></a></li>
                 <li><a href="savings_goals.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="target" class="w-4 h-4 text-amber-400"></i><span>Savings Goals</span></a></li>
+                <li><a href="guarantor_requests.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="users" class="w-4 h-4 text-indigo-400"></i><span>Guarantor Requests</span></a></li>
+                <li><a href="generate_statement.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="file-text" class="w-4 h-4"></i><span>View Statement</span></a></li>
 
-                <?php if (in_array($role_id, [1, 2, 3])): // Administration ?>
+                <!-- Group 3: ADMINISTRATION -->
+                <?php if (in_array($role_id, [1, 2, 3])): ?>
                     <li class="pt-6 pb-2">
                         <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Administration</span>
                     </li>
-                    <li><a href="member_directory.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="users-2" class="w-4 h-4 text-indigo-400"></i><span>Member Directory</span></a></li>
+                    <li><a href="manage_requests.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="clipboard-list" class="w-4 h-4"></i><span>Manage Requests</span></a></li>
                     <li><a href="add_member.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="user-plus" class="w-4 h-4"></i><span>Add Member</span></a></li>
                     <li><a href="add_saving.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="plus-circle" class="w-4 h-4"></i><span>Add Saving</span></a></li>
                     <li><a href="admin_share_capital.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="award" class="w-4 h-4"></i><span>Manage Share Capital</span></a></li>
                     <li><a href="admin_subscriptions.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="calendar-days" class="w-4 h-4"></i><span>Manage Subscriptions</span></a></li>
-                    <li><a href="manage_requests.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="clipboard-list" class="w-4 h-4"></i><span>Manage Requests</span></a></li>
-                     <?php if (in_array($role_id, [1, 2])): ?>
+                    <?php if (in_array($role_id, [1, 2])): ?>
                         <li><a href="apply_interest.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="percent" class="w-4 h-4"></i><span>Apply Interest</span></a></li>
                         <li><a href="admin_dividends.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="gift" class="w-4 h-4"></i><span>Distribute Dividends</span></a></li>
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <?php if (in_array($role_id, [1, 2, 3, 4])): // Reporting & Analytics ?>
+                <!-- Group 4: REPORTING & ANALYTICS -->
+                <?php if (in_array($role_id, [1, 2, 3, 4])): ?>
                     <li class="pt-6 pb-2">
                         <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Reports & Analytics</span>
                     </li>
@@ -123,9 +131,10 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                     <li><a href="admin_tabular_view.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="table" class="w-4 h-4"></i><span>Tabular View</span></a></li>
                 <?php endif; ?>
 
-                <?php if (in_array($role_id, [1, 2])): // Advanced & Security ?>
+                <!-- Group 5: SECURITY & TOOLS -->
+                <?php if (in_array($role_id, [1, 2])): ?>
                     <li class="pt-6 pb-2">
-                        <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Advanced</span>
+                        <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Security & Tools</span>
                     </li>
                     <li><a href="admin_reset_password.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="key" class="w-4 h-4"></i><span>Reset User Password</span></a></li>
                     <li><a href="admin_audit_view.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="shield-check" class="w-4 h-4"></i><span>Audit View</span></a></li>

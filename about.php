@@ -123,7 +123,7 @@ $label = $scoreHelper->getScoreLabel($current_score);
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-600">Member</td>
-                                <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">View savings, Request loans, Manage goals, View personal dividends.</td>
+                                <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">View savings, Request loans, Manage goals, View dividends.</td>
                             </tr>
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-amber-600">Admin / Root</td>

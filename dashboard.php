@@ -352,7 +352,7 @@ try {
     <!-- Charts -->
     <div class="grid grid-cols-1 gap-8">
         <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-            <h3 class="text-2xl font-bold text-slate-800 mb-6">My Savings Progress</h3>
+            <h3 class="text-2xl font-bold text-slate-800 mb-6">Savings Progress</h3>
             <canvas id="savingsLineChart"></canvas>
         </div>
         <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
