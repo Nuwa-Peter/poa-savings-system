@@ -67,7 +67,7 @@ class CreditScoreHelper {
 
             return $score;
 
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             return 500;
         }
     }
@@ -78,7 +78,7 @@ class CreditScoreHelper {
             $stmt->execute([$user_id]);
             $score = $stmt->fetchColumn();
             return $score ?: 500;
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             // Table might be missing, return baseline
             return 500;
         }

@@ -4,6 +4,7 @@ require_once 'includes/auth_check.php';
 check_permissions([1, 2, 3, 4]);
 
 require_once 'config/db_connect.php';
+require_once 'includes/user_functions.php';
 require_once 'templates/header.php';
 require_once 'includes/CreditScoreHelper.php';
 
@@ -15,12 +16,17 @@ if (!$member_id) {
 
 try {
     // Fetch member details
-    $stmt = $pdo->prepare("SELECT u.*, r.role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = ?");
+    $stmt = $pdo->prepare("SELECT u.*, r.role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ?");
     $stmt->execute([$member_id]);
     $member = $stmt->fetch();
 
     if (!$member) {
         die("Member not found.");
+    }
+
+    // Fallback if roles table is missing or role_name is NULL
+    if (!isset($member['role_name']) || is_null($member['role_name'])) {
+        $member['role_name'] = getRoleName($member['role_id']);
     }
 
     // Fetch savings summary
@@ -39,17 +45,6 @@ try {
 
 } catch (PDOException $e) {
     die("Database error: " . $e->getMessage());
-}
-
-function getRoleName($roleId) {
-    switch ($roleId) {
-        case 1: return 'Root';
-        case 2: return 'Chairman';
-        case 3: return 'Secretary';
-        case 4: return 'Treasurer';
-        case 5: return 'Member';
-        default: return 'Unknown';
-    }
 }
 
 // Generate QR Code URL (pointing to a public profile)

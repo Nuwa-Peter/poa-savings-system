@@ -64,17 +64,7 @@ try {
     $users = [];
 }
 
-// Map role IDs to role names for display
-function getRoleName($roleId) {
-    switch ($roleId) {
-        case 1: return 'Root';
-        case 2: return 'Chairman';
-        case 3: return 'Secretary';
-        case 4: return 'Treasurer';
-        case 5: return 'Member';
-        default: return 'Unknown';
-    }
-}
+require_once 'includes/user_functions.php';
 ?>
 
 <div class="container mx-auto">

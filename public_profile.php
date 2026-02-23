@@ -1,6 +1,7 @@
 <?php
 // Public page - no auth check for basic info
 require_once 'config/db_connect.php';
+require_once 'includes/user_functions.php';
 require_once 'includes/avatar_functions.php';
 
 $member_id = $_GET['id'] ?? null;
@@ -11,15 +12,20 @@ if (!$member_id) {
 
 try {
     // Fetch limited member details for public view
-    $stmt = $pdo->prepare("SELECT u.first_name, u.surname, u.username, u.account_no, u.avatar, u.created_at, r.role_name
+    $stmt = $pdo->prepare("SELECT u.first_name, u.surname, u.username, u.account_no, u.avatar, u.created_at, u.role_id, r.role_name
                            FROM users u
-                           JOIN roles r ON u.role_id = r.id
+                           LEFT JOIN roles r ON u.role_id = r.id
                            WHERE u.id = ? AND u.status = 'active'");
     $stmt->execute([$member_id]);
     $member = $stmt->fetch();
 
     if (!$member) {
         die("Member not found or account is inactive.");
+    }
+
+    // Fallback if roles table is missing or role_name is NULL
+    if (!isset($member['role_name']) || is_null($member['role_name'])) {
+        $member['role_name'] = getRoleName($member['role_id']);
     }
 
 } catch (PDOException $e) {

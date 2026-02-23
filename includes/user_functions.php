@@ -60,3 +60,20 @@ function isMobileDevice() {
 
     return false;
 }
+
+/**
+ * Maps a role ID to its corresponding role name.
+ *
+ * @param int $roleId The role ID.
+ * @return string The role name.
+ */
+function getRoleName($roleId) {
+    switch ($roleId) {
+        case 1: return 'Root';
+        case 2: return 'Chairman';
+        case 3: return 'Secretary';
+        case 4: return 'Treasurer';
+        case 5: return 'Member';
+        default: return 'Unknown';
+    }
+}

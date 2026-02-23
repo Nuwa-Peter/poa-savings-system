@@ -17,7 +17,7 @@ $sort_column = in_array($sort_column, $valid_columns) ? $sort_column : 'id';
 $sort_order = strtolower($sort_order) === 'desc' ? 'DESC' : 'ASC';
 
 try {
-    $stmt = $pdo->prepare("SELECT id, username, first_name, surname, email, phone, account_no, avatar, created_at FROM users WHERE status = 'active' ORDER BY {$sort_column} {$sort_order}");
+    $stmt = $pdo->prepare("SELECT id, username, first_name, surname, email, phone, account_no, avatar, status, created_at FROM users ORDER BY {$sort_column} {$sort_order}");
     $stmt->execute();
     $members = $stmt->fetchAll();
 } catch (PDOException $e) {
@@ -63,6 +63,7 @@ function sort_link($column, $text, $current_column, $current_order) {
                             <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"><?php echo sort_link('email', 'Email', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"><?php echo sort_link('phone', 'Phone', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Credit Score</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"><?php echo sort_link('account_no', 'Account No.', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"><?php echo sort_link('created_at', 'Joined On', $sort_column, $sort_order); ?></th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Actions</th>
@@ -92,6 +93,13 @@ function sort_link($column, $text, $current_column, $current_order) {
                                         ?>
                                         <span class="font-bold <?php echo $label['color']; ?>"><?php echo $score; ?></span>
                                         <span class="text-[10px] uppercase opacity-70 block"><?php echo $label['label']; ?></span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <?php if ($member['status'] === 'active'): ?>
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">Active</span>
+                                        <?php else: ?>
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800">Deleted</span>
+                                        <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($member['account_no']); ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400"><?php echo date('M j, Y', strtotime($member['created_at'])); ?></td>
