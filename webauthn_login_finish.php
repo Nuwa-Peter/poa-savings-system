@@ -55,6 +55,7 @@ try {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['role_id'] = $user['role_id'];
+        $_SESSION['last_activity'] = time();
 
         unset($_SESSION['webauthn_challenge']);
         echo json_encode(['success' => true]);
