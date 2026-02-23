@@ -17,7 +17,7 @@ $sort_column = in_array($sort_column, $valid_columns) ? $sort_column : 'id';
 $sort_order = strtolower($sort_order) === 'desc' ? 'DESC' : 'ASC';
 
 try {
-    $stmt = $pdo->prepare("SELECT id, username, first_name, surname, email, phone, account_no, avatar, created_at FROM users WHERE status = 'active' AND id != 1 ORDER BY {$sort_column} {$sort_order}");
+    $stmt = $pdo->prepare("SELECT id, username, first_name, surname, email, phone, account_no, avatar, created_at FROM users WHERE status = 'active' ORDER BY {$sort_column} {$sort_order}");
     $stmt->execute();
     $members = $stmt->fetchAll();
 } catch (PDOException $e) {

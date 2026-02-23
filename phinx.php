@@ -17,6 +17,14 @@ return
             'pass' => 'db',
             'port' => '3306',
             'charset' => 'utf8',
+        ],
+        'local' => [
+            'adapter' => 'mysql',
+            'unix_socket' => '/var/run/mysqld/mysqld.sock',
+            'name' => 'poa_savings',
+            'user' => 'poa_user',
+            'pass' => 'poa_password',
+            'charset' => 'utf8',
         ]
     ],
     'version_order' => 'creation'

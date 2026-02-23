@@ -73,10 +73,15 @@ class CreditScoreHelper {
     }
 
     public function getScore($user_id) {
-        $stmt = $this->pdo->prepare("SELECT score FROM member_credit_scores WHERE user_id = ?");
-        $stmt->execute([$user_id]);
-        $score = $stmt->fetchColumn();
-        return $score ?: 500;
+        try {
+            $stmt = $this->pdo->prepare("SELECT score FROM member_credit_scores WHERE user_id = ?");
+            $stmt->execute([$user_id]);
+            $score = $stmt->fetchColumn();
+            return $score ?: 500;
+        } catch (PDOException $e) {
+            // Table might be missing, return baseline
+            return 500;
+        }
     }
 
     public function getScoreLabel($score) {
