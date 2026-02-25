@@ -31,8 +31,10 @@ try {
     }
 
     // 1. Update the guarantor status
+    // Map code action ('approve'/'reject') to DB ENUM ('approved'/'rejected')
+    $db_status = ($action === 'approve') ? 'approved' : 'rejected';
     $update_stmt = $pdo->prepare("UPDATE loan_guarantors SET status = ?, responded_at = NOW() WHERE id = ?");
-    $update_stmt->execute([$action, $guarantor_request_id]);
+    $update_stmt->execute([$db_status, $guarantor_request_id]);
 
     // 2. Log the action
     $log_action = "User responded '" . $action . "' to guarantor request #" . $guarantor_request_id;

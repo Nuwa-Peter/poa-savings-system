@@ -12,7 +12,8 @@ class CreditScoreHelper {
      * Score range: 300 to 850 (FICO-style)
      */
     public function updateScore($user_id) {
-        $months_active = 0;
+        $months_active = 1;
+        $score = 500;
         try {
             // Fetch user info for time-weighted analysis
             $user_stmt = $this->pdo->prepare("SELECT created_at FROM users WHERE id = ?");
@@ -25,14 +26,12 @@ class CreditScoreHelper {
             $now = new DateTime();
             $interval = $joined_date->diff($now);
             $months_active = ($interval->y * 12) + $interval->m;
-            if ($months_active < 1) $months_active = 1; // Minimum 1 month weight
+            if ($months_active < 1) $months_active = 1;
 
-            // Task 1.1: Time-Weighted Baseline
-            // New members (< 3 months) get a grace period baseline of 600
+            // Baseline
             $score = ($months_active < 3) ? 600 : 500;
 
-            // Task 1.2: Historical Deep-Dive (Savings)
-            // Get all savings records
+            // Savings analysis
             $savings_stmt = $this->pdo->prepare("SELECT amount, created_at FROM savings WHERE user_id = ? ORDER BY created_at ASC");
             $savings_stmt->execute([$user_id]);
             $all_savings = $savings_stmt->fetchAll();
@@ -45,67 +44,57 @@ class CreditScoreHelper {
                 $deposit_months[$month_key] = true;
             }
 
-            // Task 1.4: Savings Frequency Ratio
             $actual_deposits_count = count($deposit_months);
             $frequency_ratio = $actual_deposits_count / $months_active;
-
-            // Task 1.3: Proportional Fairness
-            // Reward consistency: +200 max points based on frequency ratio
             $score += round($frequency_ratio * 200);
 
-            // Reward volume: +5 points per 100,000 UGX saved (capped at 100 points)
             $volume_points = floor($total_saved / 100000) * 5;
             $score += min(100, $volume_points);
 
-            // Task 1.2: Historical Deep-Dive (Loans)
+            // Loan analysis
             $loan_stmt = $this->pdo->prepare("SELECT * FROM loans WHERE user_id = ? AND status IN ('approved', 'closed')");
             $loan_stmt->execute([$user_id]);
             $loans = $loan_stmt->fetchAll();
 
             foreach ($loans as $loan) {
-                if ($loan['status'] === 'closed') {
-                    $score += 50; // Points for completing a loan
-                }
-
-                // Check for overdue (simple logic: if balance > 0 and due_date passed)
-                if ($loan['balance'] > 0 && strtotime($loan['due_date']) < time()) {
-                    $score -= 150; // Major penalty for overdue
-                }
+                if ($loan['status'] === 'closed') $score += 50;
+                if ($loan['balance'] > 0 && strtotime($loan['due_date']) < time()) $score -= 150;
             }
 
-            // Guaranteed Loans Penalty
-            $guarantor_stmt = $this->pdo->prepare("
-                SELECT l.balance, l.due_date
-                FROM loans l
-                JOIN loan_guarantors lg ON l.id = lg.loan_id
-                WHERE lg.guarantor_id = ? AND lg.status = 'approved' AND l.balance > 0
-            ");
-            $guarantor_stmt->execute([$user_id]);
-            $guaranteed = $guarantor_stmt->fetchAll();
-            foreach ($guaranteed as $g) {
-                if (strtotime($g['due_date']) < time()) {
-                    $score -= 30; // Penalty for bad guarantee
+            // Guarantor penalty
+            try {
+                $guarantor_stmt = $this->pdo->prepare("
+                    SELECT l.balance, l.due_date
+                    FROM loans l
+                    JOIN loan_guarantors lg ON l.id = lg.loan_id
+                    WHERE lg.guarantor_id = ? AND lg.status = 'approved' AND l.balance > 0
+                ");
+                $guarantor_stmt->execute([$user_id]);
+                $guaranteed = $guarantor_stmt->fetchAll();
+                foreach ($guaranteed as $g) {
+                    if (strtotime($g['due_date']) < time()) $score -= 30;
                 }
+            } catch (\Exception $e) {
+                // Ignore errors related to loan_guarantors table if it's missing/broken
             }
 
-            // Cap the score (FICO range 300-850)
             $score = max(300, min(850, $score));
 
-            // Save to DB
-            $update_stmt = $this->pdo->prepare("INSERT INTO member_credit_scores (user_id, score) VALUES (?, ?) ON DUPLICATE KEY UPDATE score = VALUES(score)");
-            $update_stmt->execute([$user_id, $score]);
+            // Save to DB (only if table exists)
+            try {
+                $update_stmt = $this->pdo->prepare("INSERT INTO member_credit_scores (user_id, score) VALUES (?, ?) ON DUPLICATE KEY UPDATE score = VALUES(score)");
+                $update_stmt->execute([$user_id, $score]);
+            } catch (\Exception $e) {
+                // Log silently or ignore if table doesn't exist
+            }
 
             return $score;
 
-        } catch (\PDOException $e) {
-            // Handle missing table by returning calculated score but not saving
-            return isset($score) ? $score : (($months_active < 3) ? 600 : 500);
+        } catch (\Exception $e) {
+            return $score;
         }
     }
 
-    /**
-     * Task 1.5: Batch Update all member scores
-     */
     public function recalculateAllScores() {
         try {
             $stmt = $this->pdo->query("SELECT id FROM users");
@@ -117,7 +106,7 @@ class CreditScoreHelper {
                 $count++;
             }
             return $count;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             return false;
         }
     }
@@ -128,8 +117,7 @@ class CreditScoreHelper {
             $stmt->execute([$user_id]);
             $score = $stmt->fetchColumn();
             return $score ?: 500;
-        } catch (\PDOException $e) {
-            // Table might be missing, return baseline
+        } catch (\Exception $e) {
             return 500;
         }
     }
