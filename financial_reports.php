@@ -17,8 +17,9 @@ try {
     $total_withdrawals = $pdo->query("SELECT SUM(amount) FROM withdrawals WHERE status = 'approved'")->fetchColumn() ?: 0;
     $total_expenses = $pdo->query("SELECT SUM(amount) FROM expenses")->fetchColumn() ?: 0;
     $total_invested = $pdo->query("SELECT SUM(amount_invested) FROM investments")->fetchColumn() ?: 0;
+    $total_loans_disbursed = $pdo->query("SELECT SUM(amount) FROM loans WHERE status = 'approved'")->fetchColumn() ?: 0;
 
-    $cash_in_hand = ($total_savings + $total_subs + $total_repayments) - ($total_withdrawals + $total_expenses + $total_invested);
+    $cash_in_hand = ($total_savings + $total_subs + $total_repayments) - ($total_withdrawals + $total_expenses + $total_invested + $total_loans_disbursed);
 
     // 2. Loans Outstanding
     $loans_outstanding = $pdo->query("SELECT SUM(balance) FROM loans WHERE status = 'approved'")->fetchColumn() ?: 0;

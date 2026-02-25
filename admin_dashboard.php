@@ -180,7 +180,30 @@ try {
 
         <!-- Mobile Recent Activity -->
         <div class="space-y-3 px-1">
-            <h3 class="text-sm font-bold text-slate-800 px-1">Recent Savings</h3>
+            <h3 class="text-sm font-bold text-slate-800 px-1">Recent Disbursements</h3>
+            <?php
+            try {
+                $md_stmt = $pdo->query("SELECT l.amount, l.approved_at, u.first_name, u.surname FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' ORDER BY l.approved_at DESC LIMIT 3");
+                $md_recent = $md_stmt->fetchAll();
+                foreach ($md_recent as $d):
+            ?>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between group active:bg-slate-50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <i data-lucide="banknote" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-800"><?php echo htmlspecialchars($d['first_name'] . ' ' . $d['surname']); ?></p>
+                            <p class="text-[10px] text-slate-400 font-medium"><?php echo date('d M Y', strtotime($d['approved_at'])); ?></p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-blue-600"><?php echo number_format($d['amount'], 0); ?></p>
+                    </div>
+                </div>
+            <?php endforeach; } catch (Exception $e) {} ?>
+
+            <h3 class="text-sm font-bold text-slate-800 px-1 pt-2">Recent Savings</h3>
             <?php
             // Fetch recent savings again for mobile to ensure we have them if the block above didn't run (it should have, but being explicit)
             try {
@@ -305,6 +328,45 @@ try {
                     <span>Apply Interest</span>
                 </a>
             <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Recent Loan Disbursements -->
+    <div class="hidden lg:block mt-8 bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Recent Loan Disbursements (Cash Given)</h3>
+        <div class="overflow-auto max-h-96">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr>
+                        <th class="py-3 px-4 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Member</th>
+                        <th class="py-3 px-4 bg-gray-100 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount (UGX)</th>
+                        <th class="py-3 px-4 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Disbursed At</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 text-sm">
+                    <?php
+                    try {
+                        $disbursements_stmt = $pdo->query("SELECT l.amount, l.approved_at, u.first_name, u.surname FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' ORDER BY l.approved_at DESC LIMIT 5");
+                        $disbursements = $disbursements_stmt->fetchAll();
+                        if (count($disbursements) > 0):
+                            foreach ($disbursements as $d):
+                    ?>
+                                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                    <td class="py-3 px-4 font-medium text-slate-700"><?php echo htmlspecialchars($d['first_name'] . ' ' . $d['surname']); ?></td>
+                                    <td class="py-3 px-4 text-right font-semibold text-emerald-600"><?php echo number_format($d['amount'], 0); ?></td>
+                                    <td class="py-3 px-4 text-slate-500"><?php echo date('d M Y, H:i', strtotime($d['approved_at'])); ?></td>
+                                </tr>
+                    <?php
+                            endforeach;
+                        else:
+                            echo '<tr><td colspan="3" class="py-4 text-center text-gray-500">No disbursements yet.</td></tr>';
+                        endif;
+                    } catch (PDOException $e) {
+                        echo '<tr><td colspan="3" class="py-4 text-center text-red-500">Error fetching disbursements.</td></tr>';
+                    }
+                    ?>
+                </tbody>
+            </table>
         </div>
     </div>
 

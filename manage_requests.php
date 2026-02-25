@@ -179,8 +179,8 @@ try {
                                         <input type="text" inputmode="numeric" data-type="currency" name="approved_amount" class="w-32 text-sm border-gray-300 rounded" placeholder="Amount" value="<?php echo (int)$loan['amount']; ?>">
                                         <button type="submit" name="action" value="approve"
                                             class="text-sm bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded disabled:bg-gray-400"
-                                            <?php echo ($loan['guarantor_status'] !== 'approved') ? 'disabled title="Cannot approve until guarantor approves."' : ''; ?>>
-                                            Approve
+                                            <?php echo ($loan['guarantor_status'] !== 'approved') ? 'disabled title="Cannot approve until guarantor approves."' : 'title="Approving this loan will record it as disbursed and reduce the society\'s cash balance."'; ?>>
+                                            Approve & Disburse
                                         </button>
                                         <button type="submit" name="action" value="reject" class="text-sm bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded">Reject</button>
                                     </form>

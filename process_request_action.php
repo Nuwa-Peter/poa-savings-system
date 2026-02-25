@@ -64,6 +64,13 @@ try {
         $table_name = 'loans';
 
         if ($action === 'approve') {
+            // Check if all guarantors have approved
+            $guarantor_check_stmt = $pdo->prepare("SELECT COUNT(*) FROM loan_guarantors WHERE loan_id = ? AND status != 'approved'");
+            $guarantor_check_stmt->execute([$request_id]);
+            if ($guarantor_check_stmt->fetchColumn() > 0) {
+                throw new Exception("Approval failed: All guarantors must approve this loan first.");
+            }
+
             $approved_amount = $_POST['approved_amount'] ?? 0;
             // Strip commas from masked input
             $approved_amount = str_replace(',', '', $approved_amount);
