@@ -32,7 +32,7 @@ try {
             $sql = "SELECT u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
                     FROM users u
                     LEFT JOIN savings s ON u.id = s.user_id
-                    WHERE u.status = 'active' AND u.id = ?
+                    WHERE u.id = ?
                     GROUP BY u.id";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$selected_member_id]);
@@ -40,7 +40,7 @@ try {
             $sql = "SELECT u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
                     FROM users u
                     LEFT JOIN savings s ON u.id = s.user_id
-                    WHERE u.status = 'active' AND u.id != 1
+                    WHERE u.id != 1
                     GROUP BY u.id
                     ORDER BY total_saved DESC";
             $stmt = $pdo->query($sql);

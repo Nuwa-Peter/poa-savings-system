@@ -92,14 +92,8 @@ $public_url = $protocol . "://" . $host . "/public_profile.php?id=" . $member['i
                 <div class="mt-8">
                     <p class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-2">Public Profile QR</p>
                     <div class="flex justify-center">
-                         <?php
-                            // Using the same logic we have in generate_pdf.php but for HTML
-                            // Actually, TCPDF doesn't easily output just a QR in HTML.
-                            // I'll use a simple placeholder or a small image generation script.
-                            // For now, let's just use a placeholder text or a link.
-                         ?>
-                         <div class="p-2 border border-slate-200 rounded-lg bg-slate-50">
-                            <i data-lucide="qr-code" class="w-24 h-24 text-slate-300"></i>
+                         <div class="p-2 border border-slate-200 rounded-lg bg-white shadow-sm">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo urlencode($public_url); ?>" alt="Public Profile QR" class="w-24 h-24">
                          </div>
                     </div>
                     <p class="mt-2 text-[10px] text-slate-400">Scan to view public credentials</p>

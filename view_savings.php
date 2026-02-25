@@ -12,12 +12,12 @@ $savings = [];
 $error = '';
 
 try {
-    // Fetch all active members with their total savings for the dropdown (excluding root ID 1)
+    // Fetch all members with their total savings for the dropdown (excluding root ID 1)
     $members_stmt = $pdo->query("
         SELECT u.id, u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
         FROM users u
         LEFT JOIN savings s ON u.id = s.user_id
-        WHERE u.status = 'active' AND u.id != 1
+        WHERE u.id != 1
         GROUP BY u.id
         ORDER BY u.first_name ASC
     ");
@@ -48,7 +48,7 @@ try {
             $sql = "SELECT u.id as user_id, u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
                     FROM users u
                     LEFT JOIN savings s ON u.id = s.user_id
-                    WHERE u.status = 'active' AND u.id = ?
+                    WHERE u.id = ?
                     GROUP BY u.id";
             $savings_stmt = $pdo->prepare($sql);
             $savings_stmt->execute([$selected_member_id]);
@@ -56,7 +56,7 @@ try {
             $sql = "SELECT u.id as user_id, u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
                     FROM users u
                     LEFT JOIN savings s ON u.id = s.user_id
-                    WHERE u.status = 'active' AND u.id != 1
+                    WHERE u.id != 1
                     GROUP BY u.id
                     ORDER BY total_saved DESC";
             $savings_stmt = $pdo->query($sql);

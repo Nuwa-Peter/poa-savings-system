@@ -8,7 +8,7 @@ return
     ],
     'environments' => [
         'default_migration_table' => 'phinxlog',
-        'default_database' => 'ddev',
+        'default_environment' => 'ddev',
         'ddev' => [
             'adapter' => 'mysql',
             'host' => 'db',
@@ -20,7 +20,7 @@ return
         ],
         'local' => [
             'adapter' => 'mysql',
-            'unix_socket' => '/var/run/mysqld/mysqld.sock',
+            'host' => 'localhost',
             'name' => 'poa_savings',
             'user' => 'poa_user',
             'pass' => 'poa_password',
