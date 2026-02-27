@@ -13,8 +13,8 @@ if (!$member_id) {
 }
 
 try {
-    // Fetch member details
-    $stmt = $pdo->prepare("SELECT u.*, r.role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ?");
+    // Fetch member details (Excluding root and chairman)
+    $stmt = $pdo->prepare("SELECT u.*, r.role_name FROM users u LEFT JOIN roles r ON u.role_id = r.id WHERE u.id = ? AND u.id != 1 AND u.role_id != 2");
     $stmt->execute([$member_id]);
     $member = $stmt->fetch();
 

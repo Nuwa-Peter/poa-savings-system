@@ -10,9 +10,9 @@ $eligible_successors = [];
 $error = '';
 
 try {
-    // Fetch all members who are not the current chairman
-    $stmt = $pdo->prepare("SELECT id, first_name, surname FROM users WHERE role_id = 5 AND id != ? AND status = 'active' ORDER BY first_name ASC");
-    $stmt->execute([$current_chairman_id]);
+    // Fetch all members (role_id 5) who are not root or chairman
+    $stmt = $pdo->prepare("SELECT id, first_name, surname FROM users WHERE role_id = 5 AND id != 1 AND role_id != 2 AND status = 'active' ORDER BY first_name ASC");
+    $stmt->execute();
     $eligible_successors = $stmt->fetchAll();
 } catch (PDOException $e) {
     $error = "Could not fetch eligible members: " . $e->getMessage();

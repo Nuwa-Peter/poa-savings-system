@@ -117,8 +117,9 @@ try {
     }
 
     // --- Fetch Society Cumulative Savings (Each deposit) ---
+    // Exclude root and chairman
     $society_savings_stmt = $pdo->query(
-        "SELECT amount, created_at FROM savings WHERE user_id != 1 ORDER BY created_at ASC"
+        "SELECT s.amount, s.created_at FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2 ORDER BY s.created_at ASC"
     );
     $society_savings_history = $society_savings_stmt->fetchAll(PDO::FETCH_ASSOC);
 

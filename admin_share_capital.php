@@ -38,12 +38,13 @@ try {
         SELECT sc.*, u.first_name, u.surname, u.account_no
         FROM share_capital sc
         JOIN users u ON sc.user_id = u.id
+        WHERE u.id != 1 AND u.role_id != 2
         ORDER BY sc.created_at DESC
     ");
     $records = $stmt->fetchAll();
 
     // Fetch members for the dropdown
-    $members_stmt = $pdo->query("SELECT id, first_name, surname, account_no FROM users WHERE status = 'active' AND id != 1 ORDER BY first_name ASC");
+    $members_stmt = $pdo->query("SELECT id, first_name, surname, account_no FROM users WHERE status = 'active' AND id != 1 AND role_id != 2 ORDER BY first_name ASC");
     $members = $members_stmt->fetchAll();
 
 } catch (PDOException $e) {

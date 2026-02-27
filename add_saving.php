@@ -6,9 +6,9 @@ check_permissions([1, 2, 3]);
 require_once 'config/db_connect.php'; // Include db connection
 require_once 'templates/header.php';
 
-// Fetch all users to populate the dropdown, excluding the root user
+// Fetch all users to populate the dropdown, excluding root and chairman
 try {
-    $stmt = $pdo->query("SELECT id, first_name, surname, account_no FROM users WHERE id != 1 AND status = 'active' ORDER BY first_name ASC");
+    $stmt = $pdo->query("SELECT id, first_name, surname, account_no FROM users WHERE id != 1 AND role_id != 2 AND status = 'active' ORDER BY first_name ASC");
     $users = $stmt->fetchAll();
 } catch (PDOException $e) {
     $users = [];

@@ -17,8 +17,8 @@ if (!$user_id_to_edit) {
 }
 
 try {
-    // Fetch user data
-    $stmt = $pdo->prepare("SELECT id, first_name, surname, username, email, phone, role_id FROM users WHERE id = ? AND status = 'active'");
+    // Fetch user data (Excluding root and chairman)
+    $stmt = $pdo->prepare("SELECT id, first_name, surname, username, email, phone, role_id FROM users WHERE id = ? AND id != 1 AND role_id != 2 AND status = 'active'");
     $stmt->execute([$user_id_to_edit]);
     $user = $stmt->fetch();
 

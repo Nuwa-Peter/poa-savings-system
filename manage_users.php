@@ -50,12 +50,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
     }
 }
 
-// Fetch all users to display, excluding the root user
+// Fetch all users to display, excluding root and chairman
 try {
     $stmt = $pdo->query(
         "SELECT id, username, account_no, email, role_id
          FROM users
-         WHERE account_no != 'POA00000'
+         WHERE id != 1 AND role_id != 2
          ORDER BY username ASC"
     );
     $users = $stmt->fetchAll();

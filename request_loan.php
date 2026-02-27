@@ -32,7 +32,8 @@ try {
     }
 
     // 4. Fetch other members to be potential guarantors
-    $stmt = $pdo->prepare("SELECT id, first_name, surname FROM users WHERE id != ? AND role_id = 5 AND status = 'active' ORDER BY first_name ASC");
+    // Exclude root and chairman
+    $stmt = $pdo->prepare("SELECT id, first_name, surname FROM users WHERE id != ? AND id != 1 AND role_id != 2 AND role_id = 5 AND status = 'active' ORDER BY first_name ASC");
     $stmt->execute([$user_id]);
     $other_members = $stmt->fetchAll();
 

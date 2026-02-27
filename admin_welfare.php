@@ -10,8 +10,8 @@ $error = '';
 $history = [];
 
 try {
-    // Total fund balance
-    $total_stmt = $pdo->query("SELECT SUM(amount) FROM welfare_contributions");
+    // Total fund balance (Excluding root and chairman)
+    $total_stmt = $pdo->query("SELECT SUM(wc.amount) FROM welfare_contributions wc JOIN users u ON wc.user_id = u.id WHERE u.id != 1 AND u.role_id != 2");
     $total_fund = $total_stmt->fetchColumn() ?: 0;
 
     // Recent contributions
@@ -19,6 +19,7 @@ try {
         SELECT wc.amount, wc.description, wc.created_at, u.username, u.first_name, u.surname
         FROM welfare_contributions wc
         JOIN users u ON wc.user_id = u.id
+        WHERE u.id != 1 AND u.role_id != 2
         ORDER BY wc.created_at DESC
         LIMIT 50
     ");

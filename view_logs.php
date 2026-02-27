@@ -7,11 +7,12 @@ require_once 'config/db_connect.php';
 require_once 'templates/header.php';
 
 try {
-    // Fetch logs with user information
+    // Fetch logs with user information (Excluding root and chairman)
     $stmt = $pdo->query(
         'SELECT logs.id, logs.action, logs.timestamp, users.username
          FROM logs
          JOIN users ON logs.user_id = users.id
+         WHERE users.id != 1 AND users.role_id != 2
          ORDER BY logs.timestamp DESC'
     );
     $logs = $stmt->fetchAll();

@@ -7,11 +7,11 @@ require_once 'config/db_connect.php';
 require_once 'templates/header.php';
 
 try {
-    // --- Data for Membership Growth Chart (Excluding root ID 1) ---
+    // --- Data for Membership Growth Chart (Excluding root and chairman) ---
     $member_growth_stmt = $pdo->prepare(
         "SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(id) as new_members
          FROM users
-         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH) AND id != 1
+         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH) AND id != 1 AND role_id != 2
          GROUP BY month
          ORDER BY month ASC"
     );
@@ -22,14 +22,14 @@ try {
     $growth_values = json_encode(array_column($member_growth_data, 'new_members'));
 
 
-    // --- Data for Financial Summary Chart (Excluding root ID 1) ---
-    $total_savings_stmt = $pdo->query("SELECT SUM(amount) FROM savings WHERE user_id != 1");
+    // --- Data for Financial Summary Chart (Excluding root and chairman) ---
+    $total_savings_stmt = $pdo->query("SELECT SUM(s.amount) FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2");
     $total_savings = $total_savings_stmt->fetchColumn() ?: 0;
 
-    $total_loans_disbursed_stmt = $pdo->query("SELECT SUM(amount) FROM loans WHERE status = 'approved' AND user_id != 1");
+    $total_loans_disbursed_stmt = $pdo->query("SELECT SUM(l.amount) FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2");
     $total_loans_disbursed = $total_loans_disbursed_stmt->fetchColumn() ?: 0;
 
-    $total_loan_balance_stmt = $pdo->query("SELECT SUM(balance) FROM loans WHERE status = 'approved' AND user_id != 1");
+    $total_loan_balance_stmt = $pdo->query("SELECT SUM(l.balance) FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2");
     $total_loan_balance = $total_loan_balance_stmt->fetchColumn() ?: 0;
 
     $financial_summary_data = json_encode([$total_savings, $total_loans_disbursed, $total_loan_balance]);

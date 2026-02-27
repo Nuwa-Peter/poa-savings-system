@@ -12,16 +12,16 @@ $savings_by_user = [];
 $db_error = '';
 
 try {
-    // 1. Fetch total savings across the entire system (Excluding root ID 1)
-    $total_stmt = $pdo->query("SELECT SUM(amount) as total FROM savings WHERE user_id != 1");
+    // 1. Fetch total savings across the entire system (Excluding root and chairman)
+    $total_stmt = $pdo->query("SELECT SUM(s.amount) as total FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2");
     $total_system_savings = $total_stmt->fetchColumn() ?? 0;
 
-    // 2. Fetch savings grouped by user (Excluding root ID 1)
+    // 2. Fetch savings grouped by user (Excluding root and chairman)
     $user_savings_stmt = $pdo->query(
         "SELECT u.id, u.username, u.account_no, SUM(s.amount) as total_saved
          FROM users u
          JOIN savings s ON u.id = s.user_id
-         WHERE u.id != 1 -- Exclude root user from report
+         WHERE u.id != 1 AND u.role_id != 2 -- Exclude system users from report
          GROUP BY u.id, u.username, u.account_no
          ORDER BY total_saved DESC"
     );

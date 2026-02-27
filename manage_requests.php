@@ -12,7 +12,7 @@ try {
         "SELECT w.id, u.username, u.account_no, w.amount, w.requested_at
          FROM withdrawals w
          JOIN users u ON w.user_id = u.id
-         WHERE w.status = 'pending'
+         WHERE w.status = 'pending' AND u.id != 1 AND u.role_id != 2
          ORDER BY w.requested_at ASC"
     );
     $withdrawals_stmt->execute();
@@ -41,7 +41,7 @@ try {
          LEFT JOIN loan_guarantors lg ON l.id = lg.loan_id
          LEFT JOIN users gu ON lg.guarantor_id = gu.id
          LEFT JOIN loan_collateral lc ON l.id = lc.loan_id
-         WHERE l.status = 'pending'
+         WHERE l.status = 'pending' AND u.id != 1 AND u.role_id != 2
          ORDER BY l.requested_at ASC"
     );
     $loans_stmt->execute();

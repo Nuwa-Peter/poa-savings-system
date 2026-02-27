@@ -9,7 +9,7 @@ require_once 'templates/header.php';
 // --- Fetch Data for Reports ---
 $loan_performance_data = [];
 try {
-    // 1. Loan Performance Report
+    // 1. Loan Performance Report (Excluding root and chairman)
     $loan_stmt = $pdo->query(
         "SELECT
             l.status,
@@ -17,17 +17,20 @@ try {
             SUM(l.amount) as total_amount,
             SUM(l.balance) as total_balance
          FROM loans l
+         JOIN users u ON l.user_id = u.id
+         WHERE u.id != 1 AND u.role_id != 2
          GROUP BY l.status"
     );
     $loan_performance_data = $loan_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. Savings Growth Report (Excluding root ID 1)
+    // 2. Savings Growth Report (Excluding root and chairman)
     $savings_growth_stmt = $pdo->query(
         "SELECT
-            DATE_FORMAT(created_at, '%Y-%m') as month,
-            SUM(amount) as total_savings
-         FROM savings
-         WHERE user_id != 1
+            DATE_FORMAT(s.created_at, '%Y-%m') as month,
+            SUM(s.amount) as total_savings
+         FROM savings s
+         JOIN users u ON s.user_id = u.id
+         WHERE u.id != 1 AND u.role_id != 2
          GROUP BY month
          ORDER BY month ASC"
     );
@@ -52,7 +55,7 @@ try {
          FROM users u
          LEFT JOIN savings s ON u.id = s.user_id
          LEFT JOIN loans l ON u.id = l.user_id
-         WHERE u.role_id = 5 AND u.id != 1
+         WHERE u.role_id = 5 AND u.id != 1 AND u.role_id != 2
          GROUP BY u.id
          ORDER BY total_saved DESC, savings_frequency DESC"
     );

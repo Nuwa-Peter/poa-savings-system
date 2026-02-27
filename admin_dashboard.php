@@ -32,9 +32,9 @@ $admin_personal_stats = [
 $admin_user_id = $_SESSION['user_id'];
 
 try {
-    // 1. System-wide stats (Excluding root user ID 1)
-    $system_stats['total_savings'] = $pdo->query("SELECT SUM(amount) FROM savings WHERE user_id != 1")->fetchColumn() ?: 0;
-    $system_stats['total_loan_balance'] = $pdo->query("SELECT SUM(balance) FROM loans WHERE status = 'approved' AND user_id != 1")->fetchColumn() ?: 0;
+    // 1. System-wide stats (Excluding root and chairman)
+    $system_stats['total_savings'] = $pdo->query("SELECT SUM(s.amount) FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
+    $system_stats['total_loan_balance'] = $pdo->query("SELECT SUM(l.balance) FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
 
     // 3. Pending Withdrawals Count
     $system_stats['pending_withdrawals'] = $pdo->query("SELECT COUNT(*) FROM withdrawals WHERE status = 'pending'")->fetchColumn() ?: 0;
@@ -53,7 +53,7 @@ try {
 
     // 5. Data for Society Cumulative Savings Chart (Each deposit)
     $society_savings_stmt = $pdo->query(
-        "SELECT amount, created_at FROM savings WHERE user_id != 1 ORDER BY created_at ASC"
+        "SELECT s.amount, s.created_at FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2 ORDER BY s.created_at ASC"
     );
     $society_savings_history = $society_savings_stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -90,7 +90,7 @@ try {
             COALESCE((SELECT SUM(amount) FROM savings WHERE user_id = u.id), 0) as total_saved,
             COALESCE((SELECT SUM(balance) FROM loans WHERE user_id = u.id AND status = 'approved'), 0) as loan_balance
         FROM users u
-        WHERE u.id != 1
+        WHERE u.id != 1 AND u.role_id != 2
         ORDER BY total_saved DESC
     ");
     $member_comp_data = $member_comp_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -206,7 +206,7 @@ try {
             <h3 class="text-sm font-bold text-slate-800 px-1">Recent Disbursements</h3>
             <?php
             try {
-                $md_stmt = $pdo->query("SELECT l.amount, l.approved_at, u.first_name, u.surname FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' ORDER BY l.approved_at DESC LIMIT 3");
+                $md_stmt = $pdo->query("SELECT l.amount, l.approved_at, u.first_name, u.surname FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2 ORDER BY l.approved_at DESC LIMIT 3");
                 $md_recent = $md_stmt->fetchAll();
                 foreach ($md_recent as $d):
             ?>
@@ -230,7 +230,7 @@ try {
             <?php
             // Fetch recent savings again for mobile to ensure we have them if the block above didn't run (it should have, but being explicit)
             try {
-                $m_stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 ORDER BY s.created_at DESC LIMIT 5");
+                $m_stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2 ORDER BY s.created_at DESC LIMIT 5");
                 $m_recent = $m_stmt->fetchAll();
                 foreach ($m_recent as $saving):
             ?>
@@ -375,7 +375,7 @@ try {
                 <tbody class="text-gray-600 text-sm">
                     <?php
                     try {
-                        $disbursements_stmt = $pdo->query("SELECT l.amount, l.approved_at, u.first_name, u.surname FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' ORDER BY l.approved_at DESC LIMIT 5");
+                        $disbursements_stmt = $pdo->query("SELECT l.amount, l.approved_at, u.first_name, u.surname FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2 ORDER BY l.approved_at DESC LIMIT 5");
                         $disbursements = $disbursements_stmt->fetchAll();
                         if (count($disbursements) > 0):
                             foreach ($disbursements as $d):
@@ -416,8 +416,8 @@ try {
                     <?php
                     $recent_savings = [];
                     try {
-                        // Exclude root user (ID 1)
-                        $stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 ORDER BY s.created_at DESC LIMIT 10");
+                        // Exclude root and chairman
+                        $stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2 ORDER BY s.created_at DESC LIMIT 10");
                         $recent_savings = $stmt->fetchAll();
                     } catch (PDOException $e) {
                         echo '<tr><td colspan="4" class="py-4 text-center text-red-500">Could not fetch savings.</td></tr>';
