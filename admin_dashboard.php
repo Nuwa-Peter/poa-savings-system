@@ -82,6 +82,29 @@ try {
         $personal_cumulative_values[] = $personal_running_total;
     }
 
+    // 7. Member-wise Financial Comparison Data
+    $member_comp_stmt = $pdo->query("
+        SELECT
+            u.first_name,
+            u.surname,
+            COALESCE((SELECT SUM(amount) FROM savings WHERE user_id = u.id), 0) as total_saved,
+            COALESCE((SELECT SUM(balance) FROM loans WHERE user_id = u.id AND status = 'approved'), 0) as loan_balance
+        FROM users u
+        WHERE u.id != 1
+        ORDER BY total_saved DESC
+    ");
+    $member_comp_data = $member_comp_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $member_names = [];
+    $member_savings = [];
+    $member_loans = [];
+
+    foreach ($member_comp_data as $row) {
+        $member_names[] = $row['first_name'] . ' ' . $row['surname'];
+        $member_savings[] = (float)$row['total_saved'];
+        $member_loans[] = (float)$row['loan_balance'];
+    }
+
 } catch (PDOException $e) {
     $db_error = "Database error: " . $e->getMessage();
 }
@@ -293,11 +316,17 @@ try {
     </div>
 
     <!-- Secondary Analytics -->
-    <div class="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-        <div class="lg:col-start-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <h3 class="text-lg font-bold text-slate-800 mb-4 text-center">Debt vs Savings</h3>
-            <div class="h-64 flex justify-center">
+            <div class="h-80 flex justify-center">
                 <canvas id="liquidityChart"></canvas>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="text-lg font-bold text-slate-800 mb-4 text-center">Member Savings vs Loans</h3>
+            <div class="h-80">
+                <canvas id="memberComparisonChart"></canvas>
             </div>
         </div>
     </div>
@@ -524,6 +553,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     data: [<?php echo $system_stats['total_savings']; ?>, <?php echo $system_stats['total_loan_balance']; ?>],
                     backgroundColor: ['rgba(79, 70, 229, 0.8)', 'rgba(244, 63, 94, 0.8)'],
+                    hoverOffset: 15,
                     borderWidth: 0
                 }]
             },
@@ -531,7 +561,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': UGX ' + context.parsed.toLocaleString();
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -554,6 +591,54 @@ document.addEventListener('DOMContentLoaded', function () {
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false }
+                }
+            }
+        });
+    }
+
+    const memberCompCtx = document.getElementById('memberComparisonChart').getContext('2d');
+    if (memberCompCtx) {
+        new Chart(memberCompCtx, {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($member_names); ?>,
+                datasets: [
+                    {
+                        label: 'Total Savings',
+                        data: <?php echo json_encode($member_savings); ?>,
+                        backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Loan Balance',
+                        data: <?php echo json_encode($member_loans); ?>,
+                        backgroundColor: 'rgba(244, 63, 94, 0.7)',
+                        borderColor: 'rgba(244, 63, 94, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) { return value.toLocaleString(); }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': UGX ' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
                 }
             }
         });
