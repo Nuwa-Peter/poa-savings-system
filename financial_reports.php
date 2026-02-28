@@ -15,12 +15,12 @@ try {
     $total_savings = $pdo->query("SELECT SUM(s.amount) FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
     $total_subs = $pdo->query("SELECT SUM(sp.amount_paid) FROM subscription_payments sp JOIN users u ON sp.user_id = u.id WHERE u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
     $total_repayments = $pdo->query("SELECT SUM(lp.amount) FROM loan_payments lp JOIN loans l ON lp.loan_id = l.id JOIN users u ON l.user_id = u.id WHERE u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
-    $total_withdrawals = $pdo->query("SELECT SUM(w.amount) FROM withdrawals w JOIN users u ON w.user_id = u.id WHERE w.status = 'approved' AND u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
+    // Note: total_savings already has withdrawals subtracted via automated negative entries in the savings table.
     $total_expenses = $pdo->query("SELECT SUM(amount) FROM expenses")->fetchColumn() ?: 0;
     $total_invested = $pdo->query("SELECT SUM(amount_invested) FROM investments")->fetchColumn() ?: 0;
     $total_loans_disbursed = $pdo->query("SELECT SUM(amount) FROM loans WHERE status = 'approved'")->fetchColumn() ?: 0;
 
-    $cash_in_hand = ($total_savings + $total_subs + $total_repayments) - ($total_withdrawals + $total_expenses + $total_invested + $total_loans_disbursed);
+    $cash_in_hand = ($total_savings + $total_subs + $total_repayments) - ($total_expenses + $total_invested + $total_loans_disbursed);
 
     // 2. Loans Outstanding
     $loans_outstanding = $pdo->query("SELECT SUM(l.balance) FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
@@ -32,7 +32,9 @@ try {
 
     // --- LIABILITIES ---
     // 1. Member Savings
-    $member_savings = $total_savings - $total_withdrawals;
+    // Since we now deduct withdrawals from the savings table via automated negative entries,
+    // the total_savings figure already reflects the net balance. We no longer subtract total_withdrawals.
+    $member_savings = $total_savings;
 
     // 2. Share Capital
     $share_capital = $pdo->query("SELECT SUM(sc.amount) FROM share_capital sc JOIN users u ON sc.user_id = u.id WHERE u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;

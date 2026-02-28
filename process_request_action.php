@@ -131,6 +131,22 @@ try {
     // Execute the common update for withdrawals or the rejection for loans
     if ($request_type === 'withdrawal' || ($request_type === 'loan' && $action === 'reject')) {
         $update_stmt->execute([$action, $admin_user_id, $request_id]);
+
+        // If a withdrawal is approved, deduct the amount from the savings table
+        if ($request_type === 'withdrawal' && $action === 'approve') {
+            $fetch_withdrawal_stmt = $pdo->prepare("SELECT user_id, amount FROM withdrawals WHERE id = ?");
+            $fetch_withdrawal_stmt->execute([$request_id]);
+            $w_data = $fetch_withdrawal_stmt->fetch();
+
+            if ($w_data) {
+                $deduct_stmt = $pdo->prepare(
+                    "INSERT INTO savings (user_id, amount, description, verified_by_user_id, created_at) VALUES (?, ?, ?, ?, NOW())"
+                );
+                // We insert a negative amount to deduct from the running total
+                $deduction_amount = -1 * abs($w_data['amount']);
+                $deduct_stmt->execute([$w_data['user_id'], $deduction_amount, "Withdrawal Approval #{$request_id}", $admin_user_id]);
+            }
+        }
     }
 
     $rows_affected = $update_stmt->rowCount();

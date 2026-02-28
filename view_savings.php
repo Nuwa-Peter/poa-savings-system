@@ -26,7 +26,7 @@ try {
     if ($view_mode === 'history') {
         // Detailed History View
         if ($selected_member_id !== 'all' && is_numeric($selected_member_id)) {
-            $sql = "SELECT s.id, s.amount, s.created_at, u.first_name, u.surname
+            $sql = "SELECT s.id, s.amount, s.description, s.created_at, u.first_name, u.surname
                     FROM savings s
                     JOIN users u ON s.user_id = u.id
                     WHERE s.user_id = ?
@@ -34,7 +34,7 @@ try {
             $savings_stmt = $pdo->prepare($sql);
             $savings_stmt->execute([$selected_member_id]);
         } else {
-            $sql = "SELECT s.id, s.amount, s.created_at, u.first_name, u.surname
+            $sql = "SELECT s.id, s.amount, s.description, s.created_at, u.first_name, u.surname
                     FROM savings s
                     JOIN users u ON s.user_id = u.id
                     WHERE u.id != 1 AND u.role_id != 2
@@ -147,6 +147,9 @@ try {
                         <tr>
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                 <span class="font-semibold text-gray-900"><?php echo htmlspecialchars($saving['first_name'] . ' ' . $saving['surname']); ?></span>
+                                <?php if ($view_mode === 'history' && $saving['amount'] < 0): ?>
+                                    <span class="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 uppercase">Deduction</span>
+                                <?php endif; ?>
                             </td>
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right font-bold text-gray-900">
                                 <?php echo number_format($view_mode === 'history' ? $saving['amount'] : $saving['total_saved'], 0); ?>
