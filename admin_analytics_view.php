@@ -22,14 +22,14 @@ try {
     $growth_values = json_encode(array_column($member_growth_data, 'new_members'));
 
 
-    // --- Data for Financial Summary Chart (Excluding root and chairman) ---
-    $total_savings_stmt = $pdo->query("SELECT SUM(s.amount) FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2");
+    // --- Data for Financial Summary Chart (Including all money) ---
+    $total_savings_stmt = $pdo->query("SELECT SUM(amount) FROM savings");
     $total_savings = $total_savings_stmt->fetchColumn() ?: 0;
 
-    $total_loans_disbursed_stmt = $pdo->query("SELECT SUM(l.amount) FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2");
+    $total_loans_disbursed_stmt = $pdo->query("SELECT SUM(amount) FROM loans WHERE status = 'approved'");
     $total_loans_disbursed = $total_loans_disbursed_stmt->fetchColumn() ?: 0;
 
-    $total_loan_balance_stmt = $pdo->query("SELECT SUM(l.balance) FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2");
+    $total_loan_balance_stmt = $pdo->query("SELECT SUM(balance) FROM loans WHERE status = 'approved'");
     $total_loan_balance = $total_loan_balance_stmt->fetchColumn() ?: 0;
 
     $financial_summary_data = json_encode([$total_savings, $total_loans_disbursed, $total_loan_balance]);

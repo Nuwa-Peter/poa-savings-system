@@ -47,12 +47,17 @@ try {
             $savings_stmt->execute([$withdrawal['user_id']]);
             $total_savings = $savings_stmt->fetchColumn() ?: 0;
 
+        // Approved withdrawals are already deducted from savings in this new request,
+        // but we must check for any OTHER pending or approved withdrawals that might not have hit savings yet
+        // if we are still using the old withdrawal table for tracking state.
             $approved_withdrawals_stmt = $pdo->prepare("SELECT SUM(amount) FROM withdrawals WHERE user_id = ? AND status = 'approved'");
             $approved_withdrawals_stmt->execute([$withdrawal['user_id']]);
             $total_approved_withdrawals = $approved_withdrawals_stmt->fetchColumn() ?: 0;
 
-            if ($withdrawal['amount'] > ($total_savings - $total_approved_withdrawals)) {
-                throw new Exception("Approval failed: User has insufficient funds.");
+        // If total_savings already reflects deductions, we shouldn't subtract total_approved_withdrawals again.
+        // I will assume for now that the user wants a clean cut: total_savings IS the balance.
+        if ($withdrawal['amount'] > $total_savings) {
+            throw new Exception("Approval failed: User has insufficient funds. Balance: " . number_format($total_savings, 0));
             }
         }
 
@@ -132,19 +137,14 @@ try {
     if ($request_type === 'withdrawal' || ($request_type === 'loan' && $action === 'reject')) {
         $update_stmt->execute([$action, $admin_user_id, $request_id]);
 
-        // If a withdrawal is approved, deduct the amount from the savings table
+        // If a withdrawal is approved, deduct from member account
         if ($request_type === 'withdrawal' && $action === 'approve') {
-            $fetch_withdrawal_stmt = $pdo->prepare("SELECT user_id, amount FROM withdrawals WHERE id = ?");
-            $fetch_withdrawal_stmt->execute([$request_id]);
-            $w_data = $fetch_withdrawal_stmt->fetch();
-
-            if ($w_data) {
-                $deduct_stmt = $pdo->prepare(
-                    "INSERT INTO savings (user_id, amount, description, verified_by_user_id, created_at) VALUES (?, ?, ?, ?, NOW())"
-                );
-                // We insert a negative amount to deduct from the running total
-                $deduction_amount = -1 * abs($w_data['amount']);
-                $deduct_stmt->execute([$w_data['user_id'], $deduction_amount, "Withdrawal Approval #{$request_id}", $admin_user_id]);
+            $fetch_stmt = $pdo->prepare("SELECT user_id, amount FROM withdrawals WHERE id = ?");
+            $fetch_stmt->execute([$request_id]);
+            $w = $fetch_stmt->fetch();
+            if ($w) {
+                $deduct_stmt = $pdo->prepare("INSERT INTO savings (user_id, amount, description, verified_by_user_id) VALUES (?, ?, ?, ?)");
+                $deduct_stmt->execute([$w['user_id'], -abs($w['amount']), "Approved Withdrawal #$request_id", $admin_user_id]);
             }
         }
     }

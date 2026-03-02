@@ -32,9 +32,9 @@ $admin_personal_stats = [
 $admin_user_id = $_SESSION['user_id'];
 
 try {
-    // 1. System-wide stats (Excluding root and chairman)
-    $system_stats['total_savings'] = $pdo->query("SELECT SUM(s.amount) FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
-    $system_stats['total_loan_balance'] = $pdo->query("SELECT SUM(l.balance) FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
+    // 1. System-wide stats (Including all money in the system)
+    $system_stats['total_savings'] = $pdo->query("SELECT SUM(amount) FROM savings")->fetchColumn() ?: 0;
+    $system_stats['total_loan_balance'] = $pdo->query("SELECT SUM(balance) FROM loans WHERE status = 'approved'")->fetchColumn() ?: 0;
 
     // 3. Pending Withdrawals Count
     $system_stats['pending_withdrawals'] = $pdo->query("SELECT COUNT(*) FROM withdrawals WHERE status = 'pending'")->fetchColumn() ?: 0;
@@ -53,7 +53,7 @@ try {
 
     // 5. Data for Society Cumulative Savings Chart (Each deposit)
     $society_savings_stmt = $pdo->query(
-        "SELECT s.amount, s.created_at FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2 ORDER BY s.created_at ASC"
+        "SELECT amount, created_at FROM savings ORDER BY created_at ASC"
     );
     $society_savings_history = $society_savings_stmt->fetchAll(PDO::FETCH_ASSOC);
 

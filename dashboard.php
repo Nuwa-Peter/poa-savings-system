@@ -135,7 +135,7 @@ try {
     // --- Fetch all transaction types for the history list ---
     $transactions = [];
 
-    // 1. Savings & Automated Deductions
+    // 1. Savings & Withdrawals (Deductions)
     $savings_records = $pdo->prepare("SELECT amount, description, created_at FROM savings WHERE user_id = ?");
     $savings_records->execute([$user_id]);
     foreach ($savings_records->fetchAll() as $row) {

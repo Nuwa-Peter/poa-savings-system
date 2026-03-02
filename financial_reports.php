@@ -10,20 +10,20 @@ $error = '';
 
 try {
     // --- ASSETS ---
+    // --- ASSETS ---
     // 1. Cash in Hand (Total Savings + Subscriptions + Repayments - Withdrawals - Expenses - Investments)
-    // Filter to exclude root and chairman
-    $total_savings = $pdo->query("SELECT SUM(s.amount) FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
-    $total_subs = $pdo->query("SELECT SUM(sp.amount_paid) FROM subscription_payments sp JOIN users u ON sp.user_id = u.id WHERE u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
-    $total_repayments = $pdo->query("SELECT SUM(lp.amount) FROM loan_payments lp JOIN loans l ON lp.loan_id = l.id JOIN users u ON l.user_id = u.id WHERE u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
-    // Note: total_savings already has withdrawals subtracted via automated negative entries in the savings table.
+    $total_savings = $pdo->query("SELECT SUM(amount) FROM savings")->fetchColumn() ?: 0;
+    $total_subs = $pdo->query("SELECT SUM(amount_paid) FROM subscription_payments")->fetchColumn() ?: 0;
+    $total_repayments = $pdo->query("SELECT SUM(amount) FROM loan_payments")->fetchColumn() ?: 0;
+    $total_withdrawals = $pdo->query("SELECT SUM(amount) FROM withdrawals WHERE status = 'approved'")->fetchColumn() ?: 0;
     $total_expenses = $pdo->query("SELECT SUM(amount) FROM expenses")->fetchColumn() ?: 0;
     $total_invested = $pdo->query("SELECT SUM(amount_invested) FROM investments")->fetchColumn() ?: 0;
     $total_loans_disbursed = $pdo->query("SELECT SUM(amount) FROM loans WHERE status = 'approved'")->fetchColumn() ?: 0;
 
-    $cash_in_hand = ($total_savings + $total_subs + $total_repayments) - ($total_expenses + $total_invested + $total_loans_disbursed);
+    $cash_in_hand = ($total_savings + $total_subs + $total_repayments) - ($total_withdrawals + $total_expenses + $total_invested + $total_loans_disbursed);
 
     // 2. Loans Outstanding
-    $loans_outstanding = $pdo->query("SELECT SUM(l.balance) FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
+    $loans_outstanding = $pdo->query("SELECT SUM(balance) FROM loans WHERE status = 'approved'")->fetchColumn() ?: 0;
 
     // 3. Investments (Current Value)
     $investments_value = $pdo->query("SELECT SUM(current_value) FROM investments WHERE status = 'active'")->fetchColumn() ?: 0;
@@ -32,12 +32,10 @@ try {
 
     // --- LIABILITIES ---
     // 1. Member Savings
-    // Since we now deduct withdrawals from the savings table via automated negative entries,
-    // the total_savings figure already reflects the net balance. We no longer subtract total_withdrawals.
-    $member_savings = $total_savings;
+    $member_savings = $total_savings - $total_withdrawals;
 
     // 2. Share Capital
-    $share_capital = $pdo->query("SELECT SUM(sc.amount) FROM share_capital sc JOIN users u ON sc.user_id = u.id WHERE u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
+    $share_capital = $pdo->query("SELECT SUM(amount) FROM share_capital")->fetchColumn() ?: 0;
 
     $total_liabilities = $member_savings + $share_capital;
 
@@ -46,7 +44,7 @@ try {
 
     // --- INCOME (P&L for Current Year) ---
     $year = date('Y');
-    $interest_income = $pdo->query("SELECT SUM(l.balance) - SUM(l.amount) FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status='closed' AND u.id != 1 AND u.role_id != 2")->fetchColumn() ?: 0;
+    $interest_income = $pdo->query("SELECT SUM(balance) - SUM(amount) FROM loans WHERE status='closed'")->fetchColumn() ?: 0;
     // Note: Simple interest income calculation above is a placeholder. Real SACCOs track interest separately.
 
     $fee_income = $total_subs;

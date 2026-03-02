@@ -108,6 +108,10 @@ try {
                                         <button type="submit" name="action" value="approve" class="text-sm bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded">Approve</button>
                                         <button type="submit" name="action" value="reject" class="text-sm bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded">Reject</button>
                                     </form>
+                                    <form action="process_clear_loan.php" method="POST" class="inline ml-2" onsubmit="return confirm('Are you sure you want to PERMANENTLY CLEAR and REMOVE this loan? This will delete the loan record.');">
+                                        <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
+                                        <button type="submit" class="text-xs bg-slate-800 hover:bg-black text-white py-1 px-2 rounded opacity-50 hover:opacity-100 transition-opacity">Clear & Remove</button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

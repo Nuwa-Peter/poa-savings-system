@@ -12,8 +12,8 @@ $savings_by_user = [];
 $db_error = '';
 
 try {
-    // 1. Fetch total savings across the entire system (Excluding root and chairman)
-    $total_stmt = $pdo->query("SELECT SUM(s.amount) as total FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2");
+    // 1. Fetch total savings across the entire system (Including all money)
+    $total_stmt = $pdo->query("SELECT SUM(amount) as total FROM savings");
     $total_system_savings = $total_stmt->fetchColumn() ?? 0;
 
     // 2. Fetch savings grouped by user (Excluding root and chairman)
