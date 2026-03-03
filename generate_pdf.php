@@ -2,7 +2,13 @@
 require_once 'includes/auth_check.php';
 require_once 'config/db_connect.php';
 // Ensure dependencies are loaded
-require_once 'vendor/autoload.php';
+if (file_exists('vendor/autoload.php')) {
+    require_once 'vendor/autoload.php';
+}
+
+if (!class_exists('TCPDF')) {
+    die("Error: TCPDF library not found. Please run 'composer install' to install dependencies.");
+}
 
 // All logged-in users can generate their own statements
 check_permissions([1, 2, 3, 4, 5]); // Assuming 5 roles exist
