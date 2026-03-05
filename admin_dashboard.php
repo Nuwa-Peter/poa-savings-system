@@ -139,6 +139,35 @@ try {
         </div>
     <?php endif; ?>
 
+    <!-- Quick Actions (Desktop) -->
+    <div class="hidden lg:block mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
+        <div class="flex flex-wrap gap-3">
+            <a href="manage_requests.php" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm hover:shadow-indigo-200">
+                <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                <span>Manage Requests</span>
+            </a>
+            <a href="add_member.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                <i data-lucide="user-plus" class="w-4 h-4 text-indigo-600"></i>
+                <span>Add Member</span>
+            </a>
+            <a href="add_saving.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i>
+                <span>Add Saving</span>
+            </a>
+            <a href="view_savings.php?view_mode=history" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                <i data-lucide="edit-3" class="w-4 h-4 text-orange-600"></i>
+                <span>Rectify Savings</span>
+            </a>
+            <?php if (in_array($_SESSION['role_id'], [1, 2])): ?>
+                <a href="apply_interest.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
+                    <i data-lucide="percent" class="w-4 h-4 text-orange-600"></i>
+                    <span>Apply Interest</span>
+                </a>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <!-- Mobile Admin Dashboard View -->
     <div id="mobile-admin-dashboard" class="lg:hidden space-y-6 -mt-4 pb-20">
         <!-- Mobile Header -->
@@ -331,34 +360,6 @@ try {
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="hidden lg:block mt-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <h3 class="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
-        <div class="flex flex-wrap gap-3">
-            <a href="manage_requests.php" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm hover:shadow-indigo-200">
-                <i data-lucide="clipboard-list" class="w-4 h-4"></i>
-                <span>Manage Requests</span>
-            </a>
-            <a href="add_member.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
-                <i data-lucide="user-plus" class="w-4 h-4 text-indigo-600"></i>
-                <span>Add Member</span>
-            </a>
-            <a href="add_saving.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
-                <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-600"></i>
-                <span>Add Saving</span>
-            </a>
-            <a href="view_savings.php?view_mode=history" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
-                <i data-lucide="edit-3" class="w-4 h-4 text-orange-600"></i>
-                <span>Rectify Savings</span>
-            </a>
-            <?php if (in_array($_SESSION['role_id'], [1, 2])): ?>
-                <a href="apply_interest.php" class="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold py-2.5 px-5 rounded-xl transition-all shadow-sm">
-                    <i data-lucide="percent" class="w-4 h-4 text-orange-600"></i>
-                    <span>Apply Interest</span>
-                </a>
-            <?php endif; ?>
-        </div>
-    </div>
 
     <!-- Recent Loan Disbursements -->
     <div class="hidden lg:block mt-8 bg-white p-6 rounded-lg shadow-md">
