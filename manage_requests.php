@@ -12,7 +12,7 @@ try {
         "SELECT w.id, u.username, u.account_no, w.amount, w.requested_at
          FROM withdrawals w
          JOIN users u ON w.user_id = u.id
-         WHERE w.status = 'pending' AND u.id != 1 AND u.role_id != 2
+         WHERE w.status = 'pending'
          ORDER BY w.requested_at ASC"
     );
     $withdrawals_stmt->execute();
@@ -41,7 +41,7 @@ try {
          LEFT JOIN loan_guarantors lg ON l.id = lg.loan_id
          LEFT JOIN users gu ON lg.guarantor_id = gu.id
          LEFT JOIN loan_collateral lc ON l.id = lc.loan_id
-         WHERE l.status = 'pending' AND u.id != 1 AND u.role_id != 2
+         WHERE l.status = 'pending'
          ORDER BY l.requested_at ASC"
     );
     $loans_stmt->execute();
@@ -108,10 +108,13 @@ try {
                                         <button type="submit" name="action" value="approve" class="text-sm bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded">Approve</button>
                                         <button type="submit" name="action" value="reject" class="text-sm bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded">Reject</button>
                                     </form>
-                                    <form action="process_clear_loan.php" method="POST" class="inline ml-2" onsubmit="return confirm('Are you sure you want to PERMANENTLY CLEAR and REMOVE this loan? This will delete the loan record.');">
-                                        <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
-                                        <button type="submit" class="text-xs bg-slate-800 hover:bg-black text-white py-1 px-2 rounded opacity-50 hover:opacity-100 transition-opacity">Clear & Remove</button>
-                                    </form>
+                                    <?php if (in_array($_SESSION['role_id'], [1, 2])): ?>
+                                        <form action="process_clear_loan.php" method="POST" class="inline ml-2" onsubmit="return confirm('Are you sure you want to PERMANENTLY REMOVE this request?');">
+                                            <input type="hidden" name="request_id" value="<?php echo $withdrawal['id']; ?>">
+                                            <input type="hidden" name="request_type" value="withdrawal">
+                                            <button type="submit" class="text-xs bg-slate-800 hover:bg-black text-white py-1 px-2 rounded opacity-50 hover:opacity-100 transition-opacity">Remove</button>
+                                        </form>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -188,6 +191,12 @@ try {
                                         </button>
                                         <button type="submit" name="action" value="reject" class="text-sm bg-red-500 hover:bg-red-700 text-white py-1 px-3 rounded">Reject</button>
                                     </form>
+                                    <?php if (in_array($_SESSION['role_id'], [1, 2])): ?>
+                                        <form action="process_clear_loan.php" method="POST" class="inline ml-2" onsubmit="return confirm('Are you sure you want to PERMANENTLY REMOVE this loan request?');">
+                                            <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
+                                            <button type="submit" class="text-xs bg-slate-800 hover:bg-black text-white py-1 px-2 rounded opacity-50 hover:opacity-100 transition-opacity">Remove</button>
+                                        </form>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

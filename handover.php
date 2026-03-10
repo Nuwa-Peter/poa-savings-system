@@ -11,7 +11,7 @@ $error = '';
 
 try {
     // Fetch all members (role_id 5) who are not root or chairman
-    $stmt = $pdo->prepare("SELECT id, first_name, surname FROM users WHERE role_id = 5 AND id != 1 AND role_id != 2 AND status = 'active' ORDER BY first_name ASC");
+    $stmt = $pdo->prepare("SELECT id, first_name, surname FROM users WHERE role_id = 5 AND status = 'active' ORDER BY first_name ASC");
     $stmt->execute();
     $eligible_successors = $stmt->fetchAll();
 } catch (PDOException $e) {

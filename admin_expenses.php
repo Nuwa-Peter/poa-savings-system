@@ -35,7 +35,6 @@ try {
         SELECT e.*, u.username as recorded_by
         FROM expenses e
         JOIN users u ON e.admin_id = u.id
-        WHERE u.id != 1 AND u.role_id != 2
         ORDER BY e.date_incurred DESC
         LIMIT 100
     ");

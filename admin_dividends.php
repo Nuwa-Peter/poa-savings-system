@@ -15,7 +15,7 @@ try {
         SELECT u.id, u.first_name, u.surname, u.account_no, COALESCE(SUM(s.amount), 0) as total_savings
         FROM users u
         LEFT JOIN savings s ON u.id = s.user_id
-        WHERE u.status = 'active' AND u.id != 1 AND u.role_id != 2
+        WHERE u.status = 'active'
         GROUP BY u.id
         ORDER BY u.first_name ASC
     ");
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['distribute'])) {
                 SELECT u.id, u.first_name, u.surname, u.account_no, COALESCE(SUM(s.amount), 0) as total_savings
                 FROM users u
                 LEFT JOIN savings s ON u.id = s.user_id
-                WHERE u.status = 'active' AND u.id != 1 AND u.role_id != 2
+                WHERE u.status = 'active'
                 GROUP BY u.id
                 ORDER BY u.first_name ASC
             ");

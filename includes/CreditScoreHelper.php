@@ -97,7 +97,7 @@ class CreditScoreHelper {
 
     public function recalculateAllScores() {
         try {
-            $stmt = $this->pdo->query("SELECT id FROM users WHERE id != 1 AND role_id != 2");
+            $stmt = $this->pdo->query("SELECT id FROM users");
             $users = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
             $count = 0;

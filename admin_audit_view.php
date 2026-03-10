@@ -24,11 +24,10 @@ try {
     $total_logs = $total_logs_stmt->fetchColumn();
     $total_pages = ceil($total_logs / $limit);
 
-    // Fetch logs with user information, sorted and paginated (Excluding root and chairman)
+    // Fetch logs with user information, sorted and paginated
     $sql = "SELECT l.id as log_id, l.action, l.timestamp, u.username
             FROM logs l
             JOIN users u ON l.user_id = u.id
-            WHERE u.id != 1 AND u.role_id != 2
             ORDER BY {$sort_column} {$sort_order}
             LIMIT :limit OFFSET :offset";
     $stmt = $pdo->prepare($sql);

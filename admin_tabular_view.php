@@ -21,23 +21,20 @@ try {
         case 'withdrawals':
             $valid_columns = ['id', 'username', 'amount', 'status', 'requested_at', 'processed_at'];
             $sort_column = in_array($sort_column, $valid_columns) ? $sort_column : 'id';
-            // Exclude root and chairman
-            $sql = "SELECT w.id, u.username, w.amount, w.status, w.requested_at, w.processed_at FROM withdrawals w JOIN users u ON w.user_id = u.id WHERE u.id != 1 AND u.role_id != 2 ORDER BY {$sort_column} {$sort_order_sql}";
+            $sql = "SELECT w.id, u.username, w.amount, w.status, w.requested_at, w.processed_at FROM withdrawals w JOIN users u ON w.user_id = u.id ORDER BY {$sort_column} {$sort_order_sql}";
             $columns = ['ID', 'User', 'Amount', 'Status', 'Requested', 'Processed'];
             break;
         case 'loans':
             $valid_columns = ['id', 'username', 'amount', 'balance', 'status', 'requested_at', 'approved_at'];
             $sort_column = in_array($sort_column, $valid_columns) ? $sort_column : 'id';
-            // Exclude root and chairman
-            $sql = "SELECT l.id, u.username, l.amount, l.balance, l.status, l.requested_at, l.approved_at FROM loans l JOIN users u ON l.user_id = u.id WHERE u.id != 1 AND u.role_id != 2 ORDER BY {$sort_column} {$sort_order_sql}";
+            $sql = "SELECT l.id, u.username, l.amount, l.balance, l.status, l.requested_at, l.approved_at FROM loans l JOIN users u ON l.user_id = u.id ORDER BY {$sort_column} {$sort_order_sql}";
             $columns = ['ID', 'User', 'Amount', 'Balance', 'Status', 'Requested', 'Approved'];
             break;
         case 'savings':
         default:
             $valid_columns = ['id', 'username', 'amount', 'created_at'];
             $sort_column = in_array($sort_column, $valid_columns) ? $sort_column : 'id';
-            // Exclude root and chairman
-            $sql = "SELECT s.id, u.username, s.amount, s.created_at FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2 ORDER BY {$sort_column} {$sort_order_sql}";
+            $sql = "SELECT s.id, u.username, s.amount, s.created_at FROM savings s JOIN users u ON s.user_id = u.id ORDER BY {$sort_column} {$sort_order_sql}";
             $columns = ['ID', 'User', 'Amount', 'Date'];
             break;
     }

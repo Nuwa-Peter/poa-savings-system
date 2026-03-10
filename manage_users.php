@@ -55,7 +55,6 @@ try {
     $stmt = $pdo->query(
         "SELECT id, username, account_no, email, role_id
          FROM users
-         WHERE id != 1 AND role_id != 2
          ORDER BY username ASC"
     );
     $users = $stmt->fetchAll();

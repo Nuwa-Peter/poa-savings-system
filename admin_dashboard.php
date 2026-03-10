@@ -90,7 +90,6 @@ try {
             COALESCE((SELECT SUM(amount) FROM savings WHERE user_id = u.id), 0) as total_saved,
             COALESCE((SELECT SUM(balance) FROM loans WHERE user_id = u.id AND status = 'approved'), 0) as loan_balance
         FROM users u
-        WHERE u.id != 1 AND u.role_id != 2
         ORDER BY total_saved DESC
     ");
     $member_comp_data = $member_comp_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -113,31 +112,6 @@ try {
 
 <div class="container mx-auto mt-10 px-4 lg:px-0">
     <h2 class="text-3xl font-bold mb-6 text-gray-800 hidden lg:block">Administrator Dashboard</h2>
-
-    <?php if (!$interest_run_this_month && in_array($_SESSION['role_id'], [1, 2])): ?>
-        <div class="p-4 mb-6 text-sm text-yellow-700 bg-yellow-100 rounded-lg shadow-md" role="alert">
-            <span class="font-medium">Action Required!</span> The monthly loan interest script has not been run for the current month.
-            <a href="apply_interest.php" class="font-bold underline ml-2">Run it now</a>.
-        </div>
-    <?php endif; ?>
-
-    <?php if (isset($db_error)): ?>
-        <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-            <span class="font-medium">Database Error!</span> <?php echo htmlspecialchars($db_error); ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if (isset($_GET['success'])): ?>
-        <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-            <span class="font-medium">Success!</span> <?php echo htmlspecialchars($_GET['success']); ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if (isset($_GET['error'])): ?>
-        <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-            <span class="font-medium">Error!</span> <?php echo htmlspecialchars($_GET['error']); ?>
-        </div>
-    <?php endif; ?>
 
     <!-- Quick Actions (Desktop) -->
     <div class="hidden lg:block mb-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -167,6 +141,31 @@ try {
             <?php endif; ?>
         </div>
     </div>
+
+    <?php if (!$interest_run_this_month && in_array($_SESSION['role_id'], [1, 2])): ?>
+        <div class="p-4 mb-6 text-sm text-yellow-700 bg-yellow-100 rounded-lg shadow-md" role="alert">
+            <span class="font-medium">Action Required!</span> The monthly loan interest script has not been run for the current month.
+            <a href="apply_interest.php" class="font-bold underline ml-2">Run it now</a>.
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($db_error)): ?>
+        <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            <span class="font-medium">Database Error!</span> <?php echo htmlspecialchars($db_error); ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['success'])): ?>
+        <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+            <span class="font-medium">Success!</span> <?php echo htmlspecialchars($_GET['success']); ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['error'])): ?>
+        <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            <span class="font-medium">Error!</span> <?php echo htmlspecialchars($_GET['error']); ?>
+        </div>
+    <?php endif; ?>
 
     <!-- Mobile Admin Dashboard View -->
     <div id="mobile-admin-dashboard" class="lg:hidden space-y-6 -mt-4 pb-20">
@@ -235,7 +234,7 @@ try {
             <h3 class="text-sm font-bold text-slate-800 px-1">Recent Disbursements</h3>
             <?php
             try {
-                $md_stmt = $pdo->query("SELECT l.amount, l.approved_at, u.first_name, u.surname FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2 ORDER BY l.approved_at DESC LIMIT 3");
+                $md_stmt = $pdo->query("SELECT l.amount, l.approved_at, u.first_name, u.surname FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' ORDER BY l.approved_at DESC LIMIT 3");
                 $md_recent = $md_stmt->fetchAll();
                 foreach ($md_recent as $d):
             ?>
@@ -259,7 +258,7 @@ try {
             <?php
             // Fetch recent savings again for mobile to ensure we have them if the block above didn't run (it should have, but being explicit)
             try {
-                $m_stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2 ORDER BY s.created_at DESC LIMIT 5");
+                $m_stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id ORDER BY s.created_at DESC LIMIT 5");
                 $m_recent = $m_stmt->fetchAll();
                 foreach ($m_recent as $saving):
             ?>
@@ -376,7 +375,7 @@ try {
                 <tbody class="text-gray-600 text-sm">
                     <?php
                     try {
-                        $disbursements_stmt = $pdo->query("SELECT l.amount, l.approved_at, u.first_name, u.surname FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' AND u.id != 1 AND u.role_id != 2 ORDER BY l.approved_at DESC LIMIT 5");
+                        $disbursements_stmt = $pdo->query("SELECT l.amount, l.approved_at, u.first_name, u.surname FROM loans l JOIN users u ON l.user_id = u.id WHERE l.status = 'approved' ORDER BY l.approved_at DESC LIMIT 5");
                         $disbursements = $disbursements_stmt->fetchAll();
                         if (count($disbursements) > 0):
                             foreach ($disbursements as $d):
@@ -417,8 +416,7 @@ try {
                     <?php
                     $recent_savings = [];
                     try {
-                        // Exclude root and chairman
-                        $stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id WHERE u.id != 1 AND u.role_id != 2 ORDER BY s.created_at DESC LIMIT 10");
+                        $stmt = $pdo->query("SELECT s.id, s.amount, s.created_at, u.first_name, u.surname FROM savings s JOIN users u ON s.user_id = u.id ORDER BY s.created_at DESC LIMIT 10");
                         $recent_savings = $stmt->fetchAll();
                     } catch (PDOException $e) {
                         echo '<tr><td colspan="4" class="py-4 text-center text-red-500">Could not fetch savings.</td></tr>';

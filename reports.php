@@ -1,6 +1,6 @@
 <?php
 require_once 'includes/auth_check.php';
-// Only admins with reporting privileges can access this page
+// Only Root (1), Chairman (2), and Treasurer (4) can access this page
 check_permissions([1, 2, 4]);
 
 require_once 'config/db_connect.php';
@@ -51,7 +51,6 @@ try {
          FROM users u
          LEFT JOIN savings s ON u.id = s.user_id
          LEFT JOIN loans l ON u.id = l.user_id
-         WHERE u.id != 1 AND u.role_id != 2
          GROUP BY u.id
          ORDER BY total_saved DESC, savings_frequency DESC"
     );

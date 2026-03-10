@@ -21,7 +21,6 @@ try {
             $sql = "SELECT u.first_name, u.surname, s.amount, s.created_at
                     FROM savings s
                     JOIN users u ON s.user_id = u.id
-                    WHERE u.id != 1 AND u.role_id != 2
                     ORDER BY s.created_at DESC";
             $stmt = $pdo->query($sql);
         }
@@ -40,7 +39,6 @@ try {
             $sql = "SELECT u.first_name, u.surname, COALESCE(SUM(s.amount), 0) as total_saved
                     FROM users u
                     LEFT JOIN savings s ON u.id = s.user_id
-                    WHERE u.id != 1 AND u.role_id != 2
                     GROUP BY u.id
                     ORDER BY total_saved DESC";
             $stmt = $pdo->query($sql);

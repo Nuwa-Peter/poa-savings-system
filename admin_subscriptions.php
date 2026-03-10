@@ -42,7 +42,7 @@ try {
         FROM users u
         CROSS JOIN subscriptions s
         LEFT JOIN subscription_payments sp ON u.id = sp.user_id AND s.id = sp.subscription_id AND sp.month = ? AND sp.year = ?
-        WHERE u.status = 'active' AND u.id != 1 AND u.role_id != 2 AND s.is_mandatory = 1
+        WHERE u.status = 'active' AND s.is_mandatory = 1
         ORDER BY u.first_name ASC
     ");
     $status_stmt->execute([$month, $year]);

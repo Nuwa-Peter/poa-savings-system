@@ -11,7 +11,7 @@ try {
     $member_growth_stmt = $pdo->prepare(
         "SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(id) as new_members
          FROM users
-         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH) AND id != 1 AND role_id != 2
+         WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
          GROUP BY month
          ORDER BY month ASC"
     );

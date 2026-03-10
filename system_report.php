@@ -16,12 +16,11 @@ try {
     $total_stmt = $pdo->query("SELECT SUM(amount) as total FROM savings");
     $total_system_savings = $total_stmt->fetchColumn() ?? 0;
 
-    // 2. Fetch savings grouped by user (Excluding root and chairman)
+    // 2. Fetch savings grouped by user
     $user_savings_stmt = $pdo->query(
         "SELECT u.id, u.username, u.account_no, SUM(s.amount) as total_saved
          FROM users u
          JOIN savings s ON u.id = s.user_id
-         WHERE u.id != 1 AND u.role_id != 2 -- Exclude system users from report
          GROUP BY u.id, u.username, u.account_no
          ORDER BY total_saved DESC"
     );

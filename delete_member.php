@@ -12,7 +12,7 @@ $error = '';
 if ($member_id) {
     try {
         // Exclude root and chairman
-        $stmt = $pdo->prepare("SELECT id, first_name, surname FROM users WHERE id = ? AND id != 1 AND role_id != 2 AND status = 'active'");
+        $stmt = $pdo->prepare("SELECT id, first_name, surname FROM users WHERE id = ? AND status = 'active'");
         $stmt->execute([$member_id]);
         $member = $stmt->fetch();
         if (!$member) {

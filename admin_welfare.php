@@ -19,7 +19,6 @@ try {
         SELECT wc.amount, wc.description, wc.created_at, u.username, u.first_name, u.surname
         FROM welfare_contributions wc
         JOIN users u ON wc.user_id = u.id
-        WHERE u.id != 1 AND u.role_id != 2
         ORDER BY wc.created_at DESC
         LIMIT 50
     ");

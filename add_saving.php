@@ -8,7 +8,7 @@ require_once 'templates/header.php';
 
 // Fetch all users to populate the dropdown, excluding root and chairman
 try {
-    $stmt = $pdo->query("SELECT id, first_name, surname, account_no FROM users WHERE id != 1 AND role_id != 2 AND status = 'active' ORDER BY first_name ASC");
+    $stmt = $pdo->query("SELECT id, first_name, surname, account_no FROM users WHERE status = 'active' ORDER BY first_name ASC");
     $users = $stmt->fetchAll();
 } catch (PDOException $e) {
     $users = [];
