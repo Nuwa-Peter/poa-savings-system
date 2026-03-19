@@ -26,6 +26,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['role_id'] = $user['role_id'];
                     $_SESSION['last_activity'] = time();
 
+                    // --- Device and Browser Logging ---
+                    require_once 'includes/device_info.php';
+                    $device = getDeviceInfo();
+                    $screen_size = $_POST['screen_size'] ?? 'Unknown';
+                    $log_msg = "Successful login. Device: {$device['os']}, Browser: {$device['browser']}, Screen: {$screen_size}";
+
+                    $log_stmt = $pdo->prepare("INSERT INTO logs (user_id, action) VALUES (?, ?)");
+                    $log_stmt->execute([$user['id'], $log_msg]);
+
                     // Redirect to dashboard
                     header('Location: dashboard.php');
                     exit;
@@ -74,7 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="login.php" class="space-y-6">
+        <form method="POST" action="login.php" class="space-y-6" id="login-form">
+            <input type="hidden" name="screen_size" id="screen_size_input">
             <div>
                 <label for="identifier" class="block text-sm font-medium text-gray-700">Username, Email, or Phone</label>
                 <input type="text" name="identifier" id="identifier" required
@@ -111,6 +121,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
     <script>
+        // Capture Screen Size
+        document.getElementById('screen_size_input').value = `${window.screen.width}x${window.screen.height}`;
+
         const showPasswordCheckbox = document.getElementById('show-password');
         const passwordInput = document.getElementById('password');
 

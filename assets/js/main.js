@@ -36,7 +36,37 @@ document.addEventListener('DOMContentLoaded', function () {
     // 4. Initialize Interactive Features
     initInteractiveTables();
     initCurrencyMasking();
+    initGraphicOptimizations();
 });
+
+/**
+ * High-DPI and Graphics Optimization
+ */
+function initGraphicOptimizations() {
+    // Detect Device Pixel Ratio (Retina/High-DPI)
+    const dpr = window.devicePixelRatio || 1;
+
+    // Global Chart.js configuration for sharper charts
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.devicePixelRatio = dpr;
+        Chart.defaults.font.family = "'Inter', sans-serif";
+
+        // OS specific font overrides if needed
+        if (document.body.classList.contains('ios')) {
+            Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Inter', sans-serif";
+        }
+    }
+
+    // Adjust UI based on orientation/size
+    window.addEventListener('resize', () => {
+        const width = window.innerWidth;
+        if (width < 380) {
+            document.body.classList.add('ultra-mobile');
+        } else {
+            document.body.classList.remove('ultra-mobile');
+        }
+    });
+}
 
 /**
  * Toast Notification System

@@ -192,6 +192,12 @@ try {
 
         <!-- Mobile Quick Actions Grid -->
         <div class="grid grid-cols-4 gap-4 px-2">
+            <a href="dashboard.php?view=personal" class="flex flex-col items-center gap-2 group">
+                <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100 group-active:scale-95 transition-transform">
+                    <i data-lucide="user-check" class="w-6 h-6"></i>
+                </div>
+                <span class="text-[11px] font-bold text-slate-600 text-center leading-tight">My A/C</span>
+            </a>
             <a href="manage_requests.php" class="flex flex-col items-center gap-2 group">
                 <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100 group-active:scale-95 transition-transform">
                     <i data-lucide="clipboard-list" class="w-6 h-6"></i>
@@ -216,6 +222,24 @@ try {
                 </div>
                 <span class="text-[11px] font-bold text-slate-600">Rectify</span>
             </a>
+        </div>
+
+        <!-- Mobile Admin Personal Stats -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 mx-1">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-bold text-slate-800">My Personal Savings</h3>
+                <a href="dashboard.php?view=personal" class="text-[10px] font-bold text-indigo-600 uppercase">View History</a>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-indigo-50/50 p-3 rounded-2xl">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">My Savings</p>
+                    <p class="text-lg font-bold text-indigo-700"><?php echo number_format($admin_personal_stats['total_savings'], 0); ?></p>
+                </div>
+                <div class="bg-rose-50/50 p-3 rounded-2xl">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">My Loans</p>
+                    <p class="text-lg font-bold text-rose-700"><?php echo number_format($admin_personal_stats['loan_balance'], 0); ?></p>
+                </div>
+            </div>
         </div>
 
         <!-- System Liquidity Mini Chart -->

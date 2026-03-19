@@ -89,3 +89,36 @@ header {
 #sidebar-overlay.show {
     display: block;
 }
+
+/* OS-Specific Graphics Enhancements */
+body.android {
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Roboto', 'Inter', sans-serif;
+}
+
+body.ios {
+    cursor: pointer;
+    -webkit-overflow-scrolling: touch;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+}
+
+/* Optimize Mobile Visuals */
+@media (max-width: 640px) {
+    .card, .bg-white {
+        border-radius: 1.5rem; /* Smoother corners for mobile */
+    }
+    button, a.btn {
+        min-height: 44px; /* Apple/Google Touch Target Standard */
+    }
+}
+
+body.windows .sidebar {
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+
+/* High Resolution / Large Screens */
+@media (min-width: 1536px) {
+    .container {
+        max-width: 1400px;
+    }
+}

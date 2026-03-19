@@ -29,7 +29,14 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
     <script src="assets/js/main.js" defer></script>
     <script src="assets/js/theme.js" defer></script>
 </head>
-<body class="bg-slate-50 flex">
+<?php
+require_once 'includes/device_info.php';
+$device = getDeviceInfo();
+$body_class = "bg-slate-50 flex ";
+$body_class .= strtolower(str_replace(' ', '-', $device['os'])) . " ";
+$body_class .= strtolower(str_replace(' ', '-', $device['browser']));
+?>
+<body class="<?php echo $body_class; ?>">
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2"></div>
 
