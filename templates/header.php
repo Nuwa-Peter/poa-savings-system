@@ -79,6 +79,10 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                     <span class="px-4 text-[10px] text-gray-500 font-bold uppercase tracking-wider">Society Overview</span>
                 </li>
                 <li><a href="dashboard.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard</span></a></li>
+                <?php if (in_array($role_id, [1, 2, 3, 4])): ?>
+                    <li><a href="dashboard.php?view=personal" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="user-check" class="w-4 h-4 text-emerald-400"></i><span>My Personal Account</span></a></li>
+                <?php endif; ?>
+                <li><a href="view_member.php?id=<?php echo $_SESSION['user_id']; ?>" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="user" class="w-4 h-4 text-indigo-400"></i><span>My Member Profile</span></a></li>
                 <li><a href="about.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="help-circle" class="w-4 h-4 text-indigo-400"></i><span>About & Help</span></a></li>
                 <?php if (in_array($role_id, [1, 2])): ?>
                     <li><a href="member_directory.php" class="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-white/10 transition-colors"><i data-lucide="users-2" class="w-4 h-4 text-blue-400"></i><span>Member Directory</span></a></li>

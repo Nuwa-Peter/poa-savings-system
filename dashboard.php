@@ -2,9 +2,10 @@
 require_once 'includes/auth_check.php';
 check_permissions([1, 2, 3, 4, 5]);
 
-// --- Redirect administrators to the admin dashboard ---
+// --- Redirect administrators to the admin dashboard (unless viewing personal) ---
 $user_role = $_SESSION['role_id'] ?? 0;
-if (in_array($user_role, [1, 2, 3, 4])) {
+$view_mode = $_GET['view'] ?? '';
+if (in_array($user_role, [1, 2, 3, 4]) && $view_mode !== 'personal') {
     $query_string = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
     header('Location: admin_dashboard.php' . $query_string);
     exit;
