@@ -1,0 +1,28 @@
+/* styles.css */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .bottom-nav {
+        display: flex;
+    }
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 769px) {
+    .sidebar {
+        transform: translateX(0);
+    }
+    .bottom-nav {
+        display: none;
+    }
+    .main-content {
+        margin-left: 16rem; /* 256px */
+    }
+}
