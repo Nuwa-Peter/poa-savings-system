@@ -12,7 +12,7 @@ $new_password = '';
 
 // Fetch all users to populate the dropdown
 try {
-    $users_stmt = $pdo->query("SELECT id, username, email FROM users ORDER BY username ASC");
+    $users_stmt = $pdo->query("SELECT id, first_name, surname, email FROM users WHERE status = 'active' AND id != 1 ORDER BY first_name ASC");
     $users = $users_stmt->fetchAll();
 } catch (PDOException $e) {
     $users = [];
@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option value="">-- Select a User --</option>
                     <?php foreach ($users as $user): ?>
                         <option value="<?php echo $user['id']; ?>">
-                            <?php echo htmlspecialchars($user['username']) . ' (' . htmlspecialchars($user['email']) . ')'; ?>
+                            <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['surname']) . ' (' . htmlspecialchars($user['email']) . ')'; ?>
                         </option>
                     <?php endforeach; ?>
                 </select>

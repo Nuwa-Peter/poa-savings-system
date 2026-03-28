@@ -10,42 +10,6 @@ $profile_success = '';
 $profile_error = '';
 $password_success = '';
 $password_error = '';
-$avatar_success = '';
-$avatar_error = '';
-
-// Handle Avatar Upload
-if (isset($_POST['update_avatar'])) {
-    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == 0) {
-        $allowed_types = ['image/png', 'image/jpeg', 'image/gif'];
-        $max_size = 2 * 1024 * 1024; // 2MB
-
-        if (in_array($_FILES['avatar']['type'], $allowed_types) && $_FILES['avatar']['size'] <= $max_size) {
-            // Sanitize and create a unique filename
-            $file_extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
-            $safe_filename = uniqid('avatar_', true) . '.' . $file_extension;
-            $upload_path = 'assets/uploads/avatars/' . $safe_filename;
-
-            if (move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_path)) {
-                try {
-                    $stmt = $pdo->prepare("UPDATE users SET avatar = ? WHERE id = ?");
-                    if ($stmt->execute([$upload_path, $user_id])) {
-                        $avatar_success = "Avatar updated successfully.";
-                    } else {
-                        $avatar_error = "Database update failed. Please try again.";
-                    }
-                } catch (PDOException $e) {
-                    $avatar_error = "Database error: " . $e->getMessage();
-                }
-            } else {
-                $avatar_error = "Failed to move uploaded file.";
-            }
-        } else {
-            $avatar_error = "Invalid file type or size. Max 2MB, PNG, JPG, GIF allowed.";
-        }
-    } else {
-        $avatar_error = "Please select a file to upload.";
-    }
-}
 
 // Handle Profile Information Update
 if (isset($_POST['update_profile'])) {
@@ -131,32 +95,39 @@ try {
 <div class="max-w-4xl mx-auto">
     <h2 class="text-3xl font-bold mb-6 text-gray-800">Settings</h2>
 
-    <!-- Avatar Upload Form -->
+    <!-- Avatar Upload Section -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h3 class="text-xl font-semibold text-gray-700 mb-4">Update Profile Picture</h3>
+        <div id="avatar-success" class="hidden p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg"></div>
+        <div id="avatar-error" class="hidden p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"></div>
 
-        <?php if ($avatar_success): ?>
-            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-                <?php echo htmlspecialchars($avatar_success); ?>
-            </div>
-        <?php endif; ?>
-        <?php if ($avatar_error): ?>
-            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-                <?php echo htmlspecialchars($avatar_error); ?>
-            </div>
-        <?php endif; ?>
+        <div class="flex items-center space-x-4">
+            <input type="file" id="upload-avatar-input" class="hidden" accept="image/*">
+            <button id="upload-avatar-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Upload Photo
+            </button>
+            <button id="take-photo-btn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Take Photo
+            </button>
+        </div>
+    </div>
 
-        <form action="settings.php" method="POST" enctype="multipart/form-data">
-            <div class="mb-4">
-                <label for="avatar" class="block text-gray-700 text-sm font-bold mb-2">Choose a new photo:</label>
-                <input type="file" name="avatar" id="avatar" accept="image/png, image/jpeg, image/gif" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+    <!-- Avatar Cropping Modal -->
+    <div id="avatar-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+            <h3 class="text-xl font-semibold mb-4">Crop Your Photo</h3>
+            <div id="camera-container" class="hidden">
+                <video id="camera-stream" autoplay class="w-full h-auto"></video>
+                <button id="capture-btn" class="mt-4 bg-gray-800 text-white py-2 px-4 rounded">Capture</button>
             </div>
-            <div class="flex items-center justify-end">
-                <button type="submit" name="update_avatar" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Upload Photo
-                </button>
+            <div id="cropper-container" class="hidden">
+                <img id="image-to-crop" class="max-w-full">
             </div>
-        </form>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button id="cancel-crop-btn" class="text-gray-600">Cancel</button>
+                <button id="confirm-crop-btn" class="bg-blue-600 text-white py-2 px-4 rounded">Confirm & Upload</button>
+            </div>
+        </div>
     </div>
 
     <!-- Profile Information Form -->
@@ -230,8 +201,202 @@ try {
             </div>
         </form>
     </div>
+
+    <!-- Biometric Authentication Section -->
+    <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Biometric Login (Fingerprint/Face ID)</h3>
+        <p class="text-gray-600 mb-4">Register your device to log in securely without a password.</p>
+        <div id="webauthn-success" class="hidden p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg"></div>
+        <div id="webauthn-error" class="hidden p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"></div>
+        <button id="register-biometric-btn" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded">
+            Register This Device
+        </button>
+    </div>
 </div>
 
 <?php
 require_once 'templates/footer.php';
 ?>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- WebAuthn Registration ---
+    const registerBtn = document.getElementById('register-biometric-btn');
+    const webauthnSuccess = document.getElementById('webauthn-success');
+    const webauthnError = document.getElementById('webauthn-error');
+
+    if (registerBtn) {
+        registerBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('webauthn_register_start.php');
+                const createArgs = await response.json();
+
+                if (createArgs.error) {
+                    throw new Error(createArgs.error);
+                }
+
+                // Convert base64url to ArrayBuffer
+                createArgs.challenge = bufferDecode(createArgs.challenge);
+                createArgs.user.id = bufferDecode(createArgs.user.id);
+
+                const newCredential = await navigator.credentials.create({
+                    publicKey: createArgs
+                });
+
+                const formData = new FormData();
+                formData.append('clientDataJSON', bufferEncode(newCredential.response.clientDataJSON));
+                formData.append('attestationObject', bufferEncode(newCredential.response.attestationObject));
+
+                const finishResponse = await fetch('webauthn_register_finish.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await finishResponse.json();
+
+                if (result.success) {
+                    webauthnSuccess.textContent = result.message;
+                    webauthnSuccess.classList.remove('hidden');
+                    webauthnError.classList.add('hidden');
+                } else {
+                    throw new Error(result.message);
+                }
+
+            } catch (err) {
+                webauthnError.textContent = 'Registration failed: ' + err.message;
+                webauthnError.classList.remove('hidden');
+                webauthnSuccess.classList.add('hidden');
+            }
+        });
+    }
+
+    // --- Avatar Cropping ---
+    const modal = document.getElementById('avatar-modal');
+    const uploadBtn = document.getElementById('upload-avatar-btn');
+    const uploadInput = document.getElementById('upload-avatar-input');
+    const takePhotoBtn = document.getElementById('take-photo-btn');
+    const cancelBtn = document.getElementById('cancel-crop-btn');
+    const confirmBtn = document.getElementById('confirm-crop-btn');
+    const imageToCrop = document.getElementById('image-to-crop');
+    const cropperContainer = document.getElementById('cropper-container');
+    const cameraContainer = document.getElementById('camera-container');
+    const video = document.getElementById('camera-stream');
+    const captureBtn = document.getElementById('capture-btn');
+    const avatarSuccess = document.getElementById('avatar-success');
+    const avatarError = document.getElementById('avatar-error');
+
+    let cropper;
+    let stream;
+
+    function showModal() {
+        modal.classList.remove('hidden');
+    }
+
+    function hideModal() {
+        modal.classList.add('hidden');
+        if (cropper) {
+            cropper.destroy();
+        }
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        cameraContainer.classList.add('hidden');
+        cropperContainer.classList.add('hidden');
+    }
+
+    uploadBtn.addEventListener('click', () => {
+        uploadInput.click();
+    });
+
+    uploadInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                imageToCrop.src = event.target.result;
+                cropperContainer.classList.remove('hidden');
+                cameraContainer.classList.add('hidden');
+                showModal();
+                cropper = new Cropper(imageToCrop, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    autoCropArea: 0.8
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    takePhotoBtn.addEventListener('click', async () => {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            cameraContainer.classList.remove('hidden');
+            cropperContainer.classList.add('hidden');
+            showModal();
+        } catch (err) {
+            avatarError.textContent = 'Could not access the camera. Please ensure you have a camera and have granted permission.';
+            avatarError.classList.remove('hidden');
+        }
+    });
+
+    captureBtn.addEventListener('click', () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        imageToCrop.src = canvas.toDataURL('image/jpeg');
+
+        cameraContainer.classList.add('hidden');
+        cropperContainer.classList.remove('hidden');
+
+        stream.getTracks().forEach(track => track.stop());
+
+        cropper = new Cropper(imageToCrop, {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 0.8
+        });
+    });
+
+    cancelBtn.addEventListener('click', hideModal);
+
+    confirmBtn.addEventListener('click', () => {
+        if (cropper) {
+            cropper.getCroppedCanvas({
+                width: 512,
+                height: 512,
+                imageSmoothingQuality: 'high'
+            }).toBlob((blob) => {
+                const formData = new FormData();
+                formData.append('avatar', blob, 'avatar.jpg');
+
+                fetch('upload_avatar.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        avatarSuccess.textContent = data.message;
+                        avatarSuccess.classList.remove('hidden');
+                        avatarError.classList.add('hidden');
+                        // Optionally, refresh the avatar image on the page
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        avatarError.textContent = data.message;
+                        avatarError.classList.remove('hidden');
+                        avatarSuccess.classList.add('hidden');
+                    }
+                })
+                .catch(error => {
+                    avatarError.textContent = 'An unexpected error occurred.';
+                    avatarError.classList.remove('hidden');
+                })
+                .finally(() => {
+                    hideModal();
+                });
+            }, 'image/jpeg');
+        }
+    });
+});
+</script>

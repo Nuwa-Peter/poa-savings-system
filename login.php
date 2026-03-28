@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - POA Savings</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="assets/js/main.js" defer></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center h-screen">
     <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
@@ -83,11 +84,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </button>
             </div>
         </form>
+        <div class="mt-4 text-center">
+            <button type="button" id="login-biometric-btn" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded w-full">
+                Login with Fingerprint/Face
+            </button>
+        </div>
         <div class="text-sm text-center">
             <a href="forgot_password.php" class="font-medium text-indigo-600 hover:text-indigo-500">
                 Forgot your password?
             </a>
         </div>
     </div>
+    <script>
+        document.getElementById('login-biometric-btn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('webauthn_login_start.php');
+                const getArgs = await response.json();
+
+                if (getArgs.error) {
+                    throw new Error(getArgs.error);
+                }
+
+                getArgs.challenge = bufferDecode(getArgs.challenge);
+                getArgs.allowCredentials.forEach((cred) => {
+                    cred.id = bufferDecode(cred.id);
+                });
+
+                const credential = await navigator.credentials.get({
+                    publicKey: getArgs
+                });
+
+                const formData = new FormData();
+                formData.append('id', credential.id);
+                formData.append('clientDataJSON', bufferEncode(credential.response.clientDataJSON));
+                formData.append('authenticatorData', bufferEncode(credential.response.authenticatorData));
+                formData.append('signature', bufferEncode(credential.response.signature));
+                formData.append('userHandle', bufferEncode(credential.response.userHandle));
+
+                const finishResponse = await fetch('webauthn_login_finish.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await finishResponse.json();
+
+                if (result.success) {
+                    window.location.href = 'dashboard.php';
+                } else {
+                    throw new Error(result.message);
+                }
+
+            } catch (err) {
+                alert('Login failed: ' + err.message);
+            }
+        });
+    </script>
 </body>
 </html>

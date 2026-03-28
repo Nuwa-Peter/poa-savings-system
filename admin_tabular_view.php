@@ -52,7 +52,7 @@ function sort_link($column, $text, $current_tab, $current_column, $current_order
 ?>
 
 <div class="container mx-auto mt-10 p-4">
-    <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-6">Tabular Data View</h1>
+    <h1 class="text-3xl font-bold mb-6" style="color: var(--text-primary);">Tabular Data View</h1>
     <p class="text-gray-600 dark:text-gray-400 mb-6">A raw data view of the core financial records in the system.</p>
 
     <!-- Tab Navigation -->

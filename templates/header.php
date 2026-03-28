@@ -16,6 +16,8 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <link rel="stylesheet" href="assets/vendor/cropperjs/cropper.min.css">
+    <script src="assets/vendor/cropperjs/cropper.min.js" defer></script>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/theme.css">
     <script src="assets/js/main.js" defer></script>
@@ -43,27 +45,6 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
             $notify_stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
             $notify_stmt->execute([$user_id]);
             $unread_notifications_count = $notify_stmt->fetchColumn();
-
-            // --- Check if interest needs to be run (for top-level admins) ---
-            $show_interest_alert = false;
-            if (in_array($role_id, [1, 2])) {
-                $interest_log_stmt = $pdo->prepare(
-                    "SELECT timestamp FROM logs WHERE action LIKE '%Admin ran interest script%' ORDER BY timestamp DESC LIMIT 1"
-                );
-                $interest_log_stmt->execute();
-                $last_run_timestamp = $interest_log_stmt->fetchColumn();
-
-                if ($last_run_timestamp) {
-                    $last_run_month = date('Y-m', strtotime($last_run_timestamp));
-                    $current_month = date('Y-m');
-                    if ($last_run_month !== $current_month) {
-                        $show_interest_alert = true;
-                    }
-                } else {
-                    // If it has never been run, show the alert
-                    $show_interest_alert = true;
-                }
-            }
 
         } catch (PDOException $e) {
             $user_avatar = null; // Default on error
@@ -94,7 +75,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                     <li class="pt-4">
                         <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Admin Controls</span>
                     </li>
-                    <li><a href="add_user.php" class="block py-2 px-4 rounded hover:bg-gray-700">Add User</a></li>
+                    <li><a href="add_member.php" class="block py-2 px-4 rounded hover:bg-gray-700">Add Member</a></li>
                     <li><a href="add_saving.php" class="block py-2 px-4 rounded hover:bg-gray-700">Add Saving</a></li>
                     <li><a href="manage_requests.php" class="block py-2 px-4 rounded hover:bg-gray-700">Manage Requests</a></li>
                      <?php if (in_array($role_id, [1, 2])): ?>
@@ -107,6 +88,7 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                         <span class="px-4 text-xs text-gray-400 font-semibold uppercase">Reports & Logs</span>
                     </li>
                     <li><a href="reports.php" class="block py-2 px-4 rounded hover:bg-gray-700">System Reports</a></li>
+                    <li><a href="view_savings.php" class="block py-2 px-4 rounded hover:bg-gray-700">View Savings</a></li>
                 <?php endif; ?>
 
                 <?php if (in_array($role_id, [1, 2])): ?>
@@ -139,7 +121,11 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
             </button>
 
-            <h1 class="text-xl font-bold text-gray-800">POA Savings and Credit Society</h1>
+            <?php
+            $role_names = [1 => 'Root', 2 => 'Chairman', 3 => 'Secretary', 4 => 'Treasurer', 5 => 'Member'];
+            $role_name = $role_names[$_SESSION['role_id']] ?? 'Guest';
+            ?>
+            <h1 class="text-xl font-bold" style="color: var(--text-primary);"><?php echo htmlspecialchars($role_name); ?> of POA Savings and Credit Society</h1>
 
             <!-- Theme Toggle and User Avatar -->
             <div class="flex items-center space-x-4">
@@ -161,22 +147,13 @@ $role_id = $_SESSION['role_id'] ?? 0; // Default to 0 if not logged in
 
                 <!-- User Avatar & Dropdown -->
                 <a href="settings.php" class="relative">
-                     <?php display_avatar($user_details['avatar'], $user_details['username'], $user_details['first_name'], $user_details['surname']); ?>
+                     <?php
+                     if ($user_details) {
+                         display_avatar($user_details['avatar'], $user_details['username'], $user_details['first_name'], $user_details['surname']);
+                     }
+                     ?>
                 </a>
             </div>
         </header>
         <main class="p-6">
-            <?php if ($show_interest_alert): ?>
-            <div id="interest-alert" class="relative mb-6 rounded-lg border-s-4 border-yellow-500 bg-yellow-50 p-4">
-                <div class="flex items-center gap-2 text-yellow-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5">
-                        <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
-                    </svg>
-                    <strong class="block font-medium"> Action Required </strong>
-                </div>
-                <p class="mt-2 text-sm text-yellow-700">The monthly loan interest has not been applied for the current month. Please run the script to ensure all loan balances are up to date.</p>
-                <a href="apply_interest.php" class="mt-2 inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 text-sm rounded">Apply Interest Now</a>
-                <button onclick="document.getElementById('interest-alert').style.display='none'" class="absolute top-2 right-2 text-yellow-800">&times;</button>
-            </div>
-            <?php endif; ?>
     <?php endif; ?>
