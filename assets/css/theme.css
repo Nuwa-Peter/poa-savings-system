@@ -1,49 +1,126 @@
 /* assets/css/theme.css */
 
-/* Light Theme (Default) */
-body.light-theme {
-    --bg-color: #f3f4f6;
-    --text-color: #1f2937;
-    --sidebar-bg: #1f2937;
-    --sidebar-text: #ffffff;
-    --header-bg: #ffffff;
-    --card-bg: #ffffff;
-    --link-hover-bg: #374151;
+/*
+  This file defines the color palette for both light and dark themes
+  using CSS variables. The theme-switching JavaScript toggles the
+  `dark-theme` class on the `<body>` element, which swaps the variables.
+*/
+
+:root {
+    /* Light Theme (Default) */
+    --bg-primary: #f9fafb;      /* Light gray page background */
+    --bg-secondary: #ffffff;    /* Card, header, modal backgrounds */
+    --bg-sidebar: #1f2937;      /* Dark gray for the sidebar */
+    --bg-hover: #4b5563;        /* Sidebar link hover */
+    --bg-muted: #f3f4f6;        /* Muted backgrounds, e.g., table headers */
+
+    --text-primary: #111827;    /* Main text color (almost black) */
+    --text-secondary: #6b7280;  /* Lighter text for subtitles, placeholders */
+    --text-sidebar: #ffffff;    /* Text in the sidebar */
+    --text-link: #3b82f6;       /* Hyperlinks */
+
+    --border-color: #e5e7eb;    /* Borders for cards, tables */
 }
 
-/* Dark Theme */
 body.dark-theme {
-    --bg-color: #1f2937;
-    --text-color: #f3f4f6;
-    --sidebar-bg: #111827;
-    --sidebar-text: #ffffff;
-    --header-bg: #1f2937;
-    --card-bg: #374151;
-    --link-hover-bg: #4b5563;
+    /* Dark Theme Overrides */
+    --bg-primary: #111827;      /* Dark blue-gray page background */
+    --bg-secondary: #1f2937;    /* Card, header, modal backgrounds */
+    --bg-sidebar: #0d1117;      /* Almost black for the sidebar */
+    --bg-hover: #374151;        /* Sidebar link hover */
+    --bg-muted: #374151;        /* Muted backgrounds */
+
+    --text-primary: #f9fafb;    /* Main text color (almost white) */
+    --text-secondary: #9ca3af;  /* Lighter text for subtitles */
+    --text-sidebar: #ffffff;
+    --text-link: #60a5fa;
+
+    --border-color: #374151;    /* Borders for cards, tables */
 }
+
+/* --- Global Style Application --- */
 
 body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
 }
 
+/* --- Component Overrides --- */
+/* Override common Tailwind classes */
+
+.bg-white { background-color: var(--bg-secondary); }
+.bg-gray-50 { background-color: var(--bg-muted); }
+.bg-gray-100 { background-color: var(--bg-primary); }
+
+.text-gray-500 { color: var(--text-secondary); }
+.text-gray-600 { color: var(--text-secondary); }
+.text-gray-700 { color: var(--text-primary); }
+.text-gray-800 { color: var(--text-primary); }
+.text-gray-900 { color: var(--text-primary); }
+
+.border-gray-200 { border-color: var(--border-color); }
+.border-gray-300 { border-color: var(--border-color); }
+
+/* --- Specific Component Styling --- */
+
+/* Sidebar */
 .sidebar {
-    background-color: var(--sidebar-bg);
-    color: var(--sidebar-text);
+    background-color: var(--bg-sidebar);
+    color: var(--text-sidebar);
 }
-
 .sidebar a:hover {
-    background-color: var(--link-hover-bg);
+    background-color: var(--bg-hover);
+}
+.sidebar .border-gray-700 {
+    border-color: var(--bg-hover);
 }
 
+/* Header */
 .main-content header {
-    background-color: var(--header-bg);
+    background-color: var(--bg-secondary);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+body.dark-theme .main-content header {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
-.bg-white {
-    background-color: var(--card-bg);
+/* Cards */
+.shadow-md {
+     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+body.dark-theme .shadow-md {
+    box-shadow: none; /* Or a lighter shadow if preferred */
 }
 
-.text-gray-800 {
-    color: var(--text-color);
+/* Forms */
+input, select {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+input:focus, select:focus {
+    --tw-ring-color: var(--text-link);
+}
+label {
+    color: var(--text-primary);
+}
+select option {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+/* Calendar */
+body.dark-theme .fc-daygrid-day-number, body.dark-theme .fc-col-header-cell-cushion {
+    color: var(--text-primary);
+}
+body.dark-theme .fc-day-today {
+    background-color: rgba(79, 70, 229, 0.2) !important;
+}
+
+/* Tables */
+.table th, .table td {
+    border-color: var(--border-color);
+}
+.table thead {
+    background-color: var(--bg-muted);
 }

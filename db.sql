@@ -24,6 +24,104 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `withdrawals`
+--
+
+CREATE TABLE `withdrawals` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `processed_at` timestamp NULL DEFAULT NULL,
+  `processed_by_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `processed_by_user_id` (`processed_by_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- AUTO_INCREMENT for table `withdrawals`
+--
+ALTER TABLE `withdrawals`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `loans`
+--
+
+CREATE TABLE `loans` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `balance` decimal(10,2) NOT NULL,
+  `interest_rate` decimal(4,2) NOT NULL DEFAULT 2.00,
+  `status` enum('pending','approved','rejected','paid') NOT NULL DEFAULT 'pending',
+  `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `approved_at` timestamp NULL DEFAULT NULL,
+  `approved_by_user_id` int(11) DEFAULT NULL,
+  `due_date` date DEFAULT NULL,
+  `last_interest_applied_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `approved_by_user_id` (`approved_by_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- AUTO_INCREMENT for table `loans`
+--
+ALTER TABLE `loans`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `loan_payments`
+--
+
+CREATE TABLE `loan_payments` (
+  `id` int(11) NOT NULL,
+  `loan_id` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `paid_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `loan_id` (`loan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- AUTO_INCREMENT for table `loan_payments`
+--
+ALTER TABLE `loan_payments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `loan_guarantors`
+--
+
+CREATE TABLE `loan_guarantors` (
+  `id` int(11) NOT NULL,
+  `loan_id` int(11) NOT NULL,
+  `guarantor_id` int(11) NOT NULL,
+  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `responded_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `loan_guarantor_unique` (`loan_id`,`guarantor_id`),
+  KEY `guarantor_id` (`guarantor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- AUTO_INCREMENT for table `loan_guarantors`
+--
+ALTER TABLE `loan_guarantors`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `logs`
 --
 
@@ -72,6 +170,8 @@ CREATE TABLE `savings` (
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `account_no` varchar(255) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `surname` varchar(100) NOT NULL,
   `username` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
@@ -145,24 +245,16 @@ ALTER TABLE `users`
 --
 
 CREATE TABLE `password_resets` (
-  `id` int(11) NOT NULL,
-  `email` varchar(255) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
   `token` varchar(255) NOT NULL,
   `expires_at` datetime NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `password_resets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Indexes for table `password_resets`
---
-ALTER TABLE `password_resets`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT for table `password_resets`
---
-ALTER TABLE `password_resets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

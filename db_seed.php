@@ -12,14 +12,23 @@ require_once 'config/db_connect.php';
 try {
     echo "Starting database seeding...\n";
 
-    // 1. Truncate the users table to ensure a clean slate
-    $pdo->exec("TRUNCATE TABLE users");
-    echo "Users table truncated.\n";
+    // 1. Temporarily disable foreign key checks to allow truncation
+    $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
+    echo "Foreign key checks disabled.\n";
 
-    // 2. Start a transaction for the INSERT statements
+    // 2. Truncate tables to ensure a clean slate
+    $pdo->exec("TRUNCATE TABLE users");
+    $pdo->exec("TRUNCATE TABLE password_resets");
+    echo "Users and password_resets tables truncated.\n";
+
+    // 3. Re-enable foreign key checks
+    $pdo->exec("SET FOREIGN_KEY_CHECKS=1");
+    echo "Foreign key checks enabled.\n";
+
+    // 4. Start a transaction for the INSERT statements
     $pdo->beginTransaction();
 
-    // 3. Define the users to be created
+    // 5. Define the users to be created
     $default_password = 'password';
     $hashed_password = password_hash($default_password, PASSWORD_DEFAULT);
 
@@ -33,6 +42,8 @@ try {
         [
             'id' => 1,
             'account_no' => 'POA00000',
+            'first_name' => 'Root',
+            'surname' => 'User',
             'username' => 'root',
             'email' => 'root@poa.dev',
             'password' => $hashed_password,
@@ -41,6 +52,8 @@ try {
         [
             'id' => 2,
             'account_no' => 'POA00001',
+            'first_name' => 'Chairman',
+            'surname' => 'Admin',
             'username' => 'chairman',
             'email' => 'chairman@poa.dev',
             'password' => $hashed_password,
@@ -48,10 +61,10 @@ try {
         ],
     ];
 
-    // 3. Prepare the SQL statement
+    // 6. Prepare the SQL statement
     $stmt = $pdo->prepare(
-        "INSERT INTO users (id, account_no, username, email, password, role_id)
-         VALUES (:id, :account_no, :username, :email, :password, :role_id)"
+        "INSERT INTO users (id, account_no, first_name, surname, username, email, password, role_id)
+         VALUES (:id, :account_no, :first_name, :surname, :username, :email, :password, :role_id)"
     );
 
     // 4. Insert each user
