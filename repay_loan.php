@@ -54,11 +54,11 @@ try {
                 <div class="space-y-4">
                     <div>
                         <p class="text-sm text-gray-500">Original Amount</p>
-                        <p class="text-lg font-semibold"><?php echo number_format($active_loan['amount'], 2); ?> UGX</p>
+                        <p class="text-lg font-semibold"><?php echo number_format($active_loan['amount'], 0); ?> UGX</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Outstanding Balance</p>
-                        <p class="text-2xl font-bold text-red-600"><?php echo number_format($active_loan['balance'], 2); ?> UGX</p>
+                        <p class="text-2xl font-bold text-red-600"><?php echo number_format($active_loan['balance'], 0); ?> UGX</p>
                     </div>
                      <div>
                         <p class="text-sm text-gray-500">Due Date</p>
@@ -95,7 +95,7 @@ try {
                             <?php foreach ($payment_history as $payment): ?>
                                 <li class="flex justify-between items-center border-b pb-2">
                                     <div>
-                                        <p class="font-semibold text-green-600"><?php echo number_format($payment['amount'], 2); ?> UGX</p>
+                                        <p class="font-semibold text-green-600"><?php echo number_format($payment['amount'], 0); ?> UGX</p>
                                         <p class="text-xs text-gray-500"><?php echo date('M j, Y, g:i a', strtotime($payment['paid_at'])); ?></p>
                                     </div>
                                 </li>

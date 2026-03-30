@@ -47,7 +47,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - POA Savings</title>
+    <link rel="icon" href="assets/images/poa_light.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
     <script src="assets/js/main.js" defer></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center h-screen">
@@ -77,6 +83,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                        class="block w-full px-3 py-2 mt-1 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             </div>
 
+            <div class="flex items-center">
+                <input id="show-password" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                <label for="show-password" class="ml-2 block text-sm text-gray-900">Show Password</label>
+            </div>
+
             <div>
                 <button type="submit"
                         class="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -96,6 +107,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
     <script>
+        const showPasswordCheckbox = document.getElementById('show-password');
+        const passwordInput = document.getElementById('password');
+
+        showPasswordCheckbox.addEventListener('change', function() {
+            passwordInput.type = this.checked ? 'text' : 'password';
+        });
+
         document.getElementById('login-biometric-btn').addEventListener('click', async () => {
             try {
                 const response = await fetch('webauthn_login_start.php');

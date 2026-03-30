@@ -64,7 +64,7 @@ try {
                         <?php foreach ($guarantor_requests as $request): ?>
                             <tr class="border-b border-gray-200">
                                 <td class="px-5 py-4"><?php echo htmlspecialchars($request['borrower_name']); ?></td>
-                                <td class="px-5 py-4"><?php echo number_format($request['amount'], 2); ?> UGX</td>
+                                <td class="px-5 py-4"><?php echo number_format($request['amount'], 0); ?> UGX</td>
                                 <td class="px-5 py-4"><?php echo date('M j, Y, g:i a', strtotime($request['requested_at'])); ?></td>
                                 <td class="px-5 py-4">
                                     <form action="process_guarantor_action.php" method="POST" class="inline-flex space-x-2">

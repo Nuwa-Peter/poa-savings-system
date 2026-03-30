@@ -43,6 +43,7 @@ body.dark-theme {
 body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
 }
 
 /* --- Component Overrides --- */

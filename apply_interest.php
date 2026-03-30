@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $processed_loans++;
                 }
             }
-             $success_message = "Successfully applied interest to {$processed_loans} loan(s). Total interest added: " . number_format($total_interest_applied, 2) . " UGX.";
+             $success_message = "Successfully applied interest to {$processed_loans} loan(s). Total interest added: " . number_format($total_interest_applied, 0) . " UGX.";
         }
 
         // Log the bulk action

@@ -76,8 +76,8 @@ try {
                 </div>
             </li>
             <li class="mt-2">
-                <strong>Your Current Loan Limit:</strong> <?php echo number_format($loan_limit, 2); ?> UGX
-                <p class="text-xs">(This is 50% of your total savings of <?php echo number_format($total_savings, 2); ?> UGX)</p>
+                <strong>Your Current Loan Limit:</strong> <?php echo number_format($loan_limit, 0); ?> UGX
+                <p class="text-xs">(This is 50% of your total savings of <?php echo number_format($total_savings, 0); ?> UGX)</p>
             </li>
         </ul>
         <p class="mt-4">Once you have made at least <strong>3 savings</strong> this month, the loan application form will become available here.</p>
@@ -85,7 +85,7 @@ try {
     <?php else: ?>
     <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
         <p class="font-bold">Loan Terms</p>
-        <p class="mt-2">A <strong>2% monthly interest rate</strong> applies to the outstanding balance. Your loan limit is <strong>50%</strong> of your total savings, which is currently <strong><?php echo number_format($loan_limit, 2); ?> UGX</strong>.</p>
+        <p class="mt-2">A <strong>2% monthly interest rate</strong> applies to the outstanding balance. Your loan limit is <strong>50%</strong> of your total savings, which is currently <strong><?php echo number_format($loan_limit, 0); ?> UGX</strong>.</p>
     </div>
     <?php endif; ?>
 

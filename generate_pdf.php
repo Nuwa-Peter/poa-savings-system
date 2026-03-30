@@ -95,7 +95,7 @@ if (count($savings) > 0) {
         $html .= '<tr>';
         $html .= '<td width="10%">' . $count++ . '</td>';
         $html .= '<td width="50%">' . date('Y-m-d H:i:s', strtotime($saving['created_at'])) . '</td>';
-        $html .= '<td width="40%" align="right">$' . number_format($saving['amount'], 2) . '</td>';
+        $html .= '<td width="40%" align="right">$' . number_format($saving['amount'], 0) . '</td>';
         $html .= '</tr>';
         $total_savings += $saving['amount'];
     }
@@ -108,7 +108,7 @@ $html .= '
     <tfoot>
         <tr style="background-color:#f0f0f0;">
             <td colspan="2" align="right"><b>Total Savings:</b></td>
-            <td align="right"><b>$' . number_format($total_savings, 2) . '</b></td>
+            <td align="right"><b>$' . number_format($total_savings, 0) . '</b></td>
         </tr>
     </tfoot>
 </table>';

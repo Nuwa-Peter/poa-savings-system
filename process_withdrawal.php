@@ -38,7 +38,7 @@ try {
     $available_balance = $total_savings - $total_withdrawals;
 
     if ($amount > $available_balance) {
-        header('Location: withdraw.php?error=' . urlencode('Insufficient funds. Your available balance is ' . number_format($available_balance, 2)));
+        header('Location: withdraw.php?error=' . urlencode('Insufficient funds. Your available balance is ' . number_format($available_balance, 0)));
         exit;
     }
 
@@ -52,7 +52,7 @@ try {
     $insert_stmt->execute([$user_id, $amount]);
 
     // Log the action
-    $log_action = "User requested a withdrawal of " . number_format($amount, 2);
+    $log_action = "User requested a withdrawal of " . number_format($amount, 0);
     $log_stmt = $pdo->prepare("INSERT INTO logs (user_id, action) VALUES (?, ?)");
     $log_stmt->execute([$user_id, $log_action]);
 

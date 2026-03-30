@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$user_id, $amount, $verifier_id]);
 
         // Insert into notifications table
-        $message = "Your account has been credited with UGX " . number_format($amount, 2);
+        $message = "Your account has been credited with UGX " . number_format($amount, 0);
         $notify_stmt = $pdo->prepare('INSERT INTO notifications (user_id, message) VALUES (?, ?)');
         $notify_stmt->execute([$user_id, $message]);
 

@@ -88,7 +88,7 @@ try {
                         <?php foreach ($pending_withdrawals as $withdrawal): ?>
                             <tr class="border-b border-gray-200">
                                 <td class="px-5 py-4"><?php echo htmlspecialchars($withdrawal['username'] . ' (' . $withdrawal['account_no'] . ')'); ?></td>
-                                <td class="px-5 py-4"><?php echo number_format($withdrawal['amount'], 2); ?> UGX</td>
+                                <td class="px-5 py-4"><?php echo number_format($withdrawal['amount'], 0); ?> UGX</td>
                                 <td class="px-5 py-4"><?php echo date('M j, Y, g:i a', strtotime($withdrawal['requested_at'])); ?></td>
                                 <td class="px-5 py-4">
                                     <form action="process_request_action.php" method="POST" class="inline-flex space-x-2">
@@ -132,7 +132,7 @@ try {
                                     <p><?php echo htmlspecialchars($loan['username']); ?></p>
                                     <p class="text-xs text-gray-500"><?php echo htmlspecialchars($loan['account_no']); ?></p>
                                 </td>
-                                <td class="px-5 py-4"><?php echo number_format($loan['amount'], 2); ?> UGX</td>
+                                <td class="px-5 py-4"><?php echo number_format($loan['amount'], 0); ?> UGX</td>
                                 <td class="px-5 py-4"><?php echo htmlspecialchars($loan['guarantor_name'] ?? 'N/A'); ?></td>
                                 <td class="px-5 py-4">
                                     <span class="px-2 py-1 font-semibold leading-tight text-xs rounded-full <?php

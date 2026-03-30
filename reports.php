@@ -21,12 +21,13 @@ try {
     );
     $loan_performance_data = $loan_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 2. Savings Growth Report
+    // 2. Savings Growth Report (Excluding root ID 1)
     $savings_growth_stmt = $pdo->query(
         "SELECT
             DATE_FORMAT(created_at, '%Y-%m') as month,
             SUM(amount) as total_savings
          FROM savings
+         WHERE user_id != 1
          GROUP BY month
          ORDER BY month ASC"
     );
@@ -51,7 +52,7 @@ try {
          FROM users u
          LEFT JOIN savings s ON u.id = s.user_id
          LEFT JOIN loans l ON u.id = l.user_id
-         WHERE u.role_id = 5
+         WHERE u.role_id = 5 AND u.id != 1
          GROUP BY u.id
          ORDER BY total_saved DESC, savings_frequency DESC"
     );
@@ -93,8 +94,8 @@ try {
                             <tr class="border-b border-gray-200">
                                 <td class="px-5 py-4 capitalize font-semibold"><?php echo htmlspecialchars($row['status']); ?></td>
                                 <td class="px-5 py-4 text-center"><?php echo $row['count']; ?></td>
-                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_amount'], 2); ?> UGX</td>
-                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_balance'], 2); ?> UGX</td>
+                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_amount'], 0); ?> UGX</td>
+                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_balance'], 0); ?> UGX</td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -137,7 +138,7 @@ try {
                                     <p><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['surname']); ?></p>
                                     <p class="text-xs text-gray-500"><?php echo htmlspecialchars($row['account_no']); ?></p>
                                 </td>
-                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_saved'], 2); ?></td>
+                                <td class="px-5 py-4 text-right"><?php echo number_format($row['total_saved'], 0); ?></td>
                                 <td class="px-5 py-4 text-center"><?php echo $row['savings_frequency']; ?></td>
                                 <td class="px-5 py-4 text-center"><?php echo $row['loans_taken']; ?></td>
                             </tr>

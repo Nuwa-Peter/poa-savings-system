@@ -53,12 +53,12 @@ try {
     }
 
     // 4. Log the repayment action
-    $log_action = "User made a loan repayment of " . number_format($amount, 2) . " UGX for loan #" . $loan_id;
+    $log_action = "User made a loan repayment of " . number_format($amount, 0) . " UGX for loan #" . $loan_id;
     $log_stmt = $pdo->prepare("INSERT INTO logs (user_id, action) VALUES (?, ?)");
     $log_stmt->execute([$user_id, $log_action]);
 
     // 5. Create a notification for the user
-    $notification_message = "Thank you for your payment of " . number_format($amount, 2) . " UGX. Your new loan balance is " . number_format($new_balance, 2) . " UGX.";
+    $notification_message = "Thank you for your payment of " . number_format($amount, 0) . " UGX. Your new loan balance is " . number_format($new_balance, 0) . " UGX.";
     if ($new_balance <= 0) {
         $notification_message = "Congratulations! You have fully paid off your loan.";
     }
@@ -67,7 +67,7 @@ try {
 
     $pdo->commit();
 
-    $success_message = "Your payment of " . number_format($amount, 2) . " UGX was successful.";
+    $success_message = "Your payment of " . number_format($amount, 0) . " UGX was successful.";
     header('Location: ' . $redirect_url . '?success=' . urlencode($success_message));
     exit;
 
