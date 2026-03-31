@@ -1,1 +1,2 @@
-php_server.log\n/uploads/
+*.log
+/uploads/

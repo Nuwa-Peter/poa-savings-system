@@ -10,6 +10,42 @@ $profile_success = '';
 $profile_error = '';
 $password_success = '';
 $password_error = '';
+$avatar_success = '';
+$avatar_error = '';
+
+// Handle Avatar Upload
+if (isset($_POST['update_avatar'])) {
+    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == 0) {
+        $allowed_types = ['image/png', 'image/jpeg', 'image/gif'];
+        $max_size = 2 * 1024 * 1024; // 2MB
+
+        if (in_array($_FILES['avatar']['type'], $allowed_types) && $_FILES['avatar']['size'] <= $max_size) {
+            // Sanitize and create a unique filename
+            $file_extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+            $safe_filename = uniqid('avatar_', true) . '.' . $file_extension;
+            $upload_path = 'assets/uploads/avatars/' . $safe_filename;
+
+            if (move_uploaded_file($_FILES['avatar']['tmp_name'], $upload_path)) {
+                try {
+                    $stmt = $pdo->prepare("UPDATE users SET avatar = ? WHERE id = ?");
+                    if ($stmt->execute([$upload_path, $user_id])) {
+                        $avatar_success = "Avatar updated successfully.";
+                    } else {
+                        $avatar_error = "Database update failed. Please try again.";
+                    }
+                } catch (PDOException $e) {
+                    $avatar_error = "Database error: " . $e->getMessage();
+                }
+            } else {
+                $avatar_error = "Failed to move uploaded file.";
+            }
+        } else {
+            $avatar_error = "Invalid file type or size. Max 2MB, PNG, JPG, GIF allowed.";
+        }
+    } else {
+        $avatar_error = "Please select a file to upload.";
+    }
+}
 
 // Handle Profile Information Update
 if (isset($_POST['update_profile'])) {
@@ -95,18 +131,46 @@ try {
 <div class="max-w-4xl mx-auto">
     <h2 class="text-3xl font-bold mb-6 text-gray-800">Settings</h2>
 
+    <!-- Avatar Upload Form -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Update Profile Picture</h3>
+
+        <?php if ($avatar_success): ?>
+            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+                <?php echo htmlspecialchars($avatar_success); ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($avatar_error): ?>
+            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+                <?php echo htmlspecialchars($avatar_error); ?>
+            </div>
+        <?php endif; ?>
+
+        <form action="settings.php" method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label for="avatar" class="block text-gray-700 text-sm font-bold mb-2">Choose a new photo:</label>
+                <input type="file" name="avatar" id="avatar" accept="image/png, image/jpeg, image/gif" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="flex items-center justify-end">
+                <button type="submit" name="update_avatar" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    Upload Photo
+                </button>
+            </div>
+        </form>
+    </div>
+
     <!-- Profile Information Form -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h3 class="text-xl font-semibold text-gray-700 mb-4">Update Profile Information</h3>
 
-        <?php if ($success_message): ?>
+        <?php if ($profile_success): ?>
             <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
-                <?php echo htmlspecialchars($success_message); ?>
+                <?php echo htmlspecialchars($profile_success); ?>
             </div>
         <?php endif; ?>
-        <?php if ($error_message): ?>
+        <?php if ($profile_error): ?>
             <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
-                <?php echo htmlspecialchars($error_message); ?>
+                <?php echo htmlspecialchars($profile_error); ?>
             </div>
         <?php endif; ?>
 
@@ -121,7 +185,7 @@ try {
             </div>
             <div class="mb-6">
                 <label for="phone" class="block text-gray-700 text-sm font-bold mb-2">Phone:</label>
-                <input type="text" name="phone" id="phone" value="<?php echo htmlspecialchars($user['phone']); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <input type="text" name="phone" id="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
             </div>
             <div class="flex items-center justify-end">
                 <button type="submit" name="update_profile" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
