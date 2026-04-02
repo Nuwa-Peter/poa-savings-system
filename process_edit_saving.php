@@ -6,24 +6,32 @@ require_once 'config/db_connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $saving_id = $_POST['saving_id'] ?? null;
-    $old_amount = $_POST['old_amount'] ?? 0;
-    $new_amount = $_POST['new_amount'] ?? 0;
+    $raw_old_amount = $_POST['old_amount'] ?? 0;
+    $raw_new_amount = $_POST['new_amount'] ?? '';
     $reason = trim($_POST['reason'] ?? '');
     $admin_id = $_SESSION['user_id'];
 
     // Validation
-    if (empty($saving_id) || empty($new_amount) || empty($reason)) {
+    if (empty($saving_id) || $raw_new_amount === '' || $reason === '') {
         header("Location: edit_saving.php?id={$saving_id}&error=Missing required fields.");
         exit;
     }
 
-    if (!is_numeric($new_amount) || $new_amount < 0) {
+    $old_amount = round(str_replace(',', '', $raw_old_amount));
+    $new_amount = round(str_replace(',', '', $raw_new_amount));
+
+    if (!is_numeric($new_amount) || (float)$new_amount < 0) {
         header("Location: edit_saving.php?id={$saving_id}&error=Invalid amount.");
         exit;
     }
 
     try {
         $pdo->beginTransaction();
+
+        // 0. Fetch user_id for redirection
+        $stmt = $pdo->prepare("SELECT user_id FROM savings WHERE id = ?");
+        $stmt->execute([$saving_id]);
+        $saving_user_id = $stmt->fetchColumn();
 
         // 1. Update the saving record
         $stmt = $pdo->prepare("UPDATE savings SET amount = ? WHERE id = ?");
@@ -42,13 +50,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->commit();
 
-        header("Location: dashboard.php?success=Saving updated successfully.");
+        header("Location: view_savings.php?member_id={$saving_user_id}&view_mode=history&success=Saving updated successfully.");
         exit;
 
-    } catch (PDOException $e) {
-        $pdo->rollBack();
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         // Redirect with a generic error; specific errors could be logged for the admin
-        header("Location: edit_saving.php?id={$saving_id}&error=Database error occurred.");
+        header("Location: edit_saving.php?id={$saving_id}&error=" . urlencode("Error: " . $e->getMessage()));
         exit;
     }
 } else {

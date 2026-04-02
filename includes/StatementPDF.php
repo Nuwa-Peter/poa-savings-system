@@ -2,6 +2,10 @@
 // Ensure TCPDF is available
 require_once __DIR__ . '/../vendor/autoload.php';
 
+if (!class_exists('TCPDF') && file_exists(__DIR__ . '/../vendor/tecnickcom/tcpdf/tcpdf.php')) {
+    require_once __DIR__ . '/../vendor/tecnickcom/tcpdf/tcpdf.php';
+}
+
 class StatementPDF extends TCPDF {
     private $userName;
     private $accountNumber;

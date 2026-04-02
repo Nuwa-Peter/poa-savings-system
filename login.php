@@ -52,11 +52,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/theme.css">
     <script src="assets/js/main.js" defer></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<body class="bg-slate-50 flex items-center justify-center h-screen">
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2"></div>
     <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
         <div class="text-center">
             <img class="mx-auto h-20 w-auto" src="assets/images/poa_light.png" alt="POA Savings Logo">
@@ -153,7 +156,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
             } catch (err) {
-                alert('Login failed: ' + err.message);
+                if (typeof showToast === 'function') {
+                    showToast('Login failed: ' + err.message, 'error');
+                } else {
+                    alert('Login failed: ' + err.message);
+                }
             }
         });
     </script>

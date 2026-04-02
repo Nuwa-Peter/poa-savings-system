@@ -34,17 +34,23 @@ try {
     // ... rest of the file remains the same
 ```
 
-**Step 3: Import Database Structure and Seed Initial Users**
-Run the following two commands from your terminal.
+**Step 3: Run Database Migrations and Seed Initial Users**
+Run the following commands from your terminal to set up your database schema and initial data.
 
-1.  **Import the database structure:**
+1.  **Install dependencies:**
     ```bash
-    ddev import-db --file=db.sql
+    ddev composer install
     ```
-2.  **Seed the database with initial users:** This command runs our secure PHP seeding script to create the `root` and `chairman` users with correct passwords.
+2.  **Run Migrations:** This will create the necessary tables using Phinx.
+    ```bash
+    ddev exec vendor/bin/phinx migrate
+    ```
+3.  **Seed the database:** This command runs our secure PHP seeding script to create the `root` and `chairman` users with correct passwords.
     ```bash
     ddev exec php db_seed.php
     ```
+
+> **Note:** The `db.sql` file is obsolete and should not be used for new installations. Always use migrations.
 
 **Step 4: Launch the Application**
 Your system is now fully configured and ready to run. Use the following command to open the application in your default web browser:
@@ -80,3 +86,44 @@ ddev mysql -e "INSERT INTO users ... VALUES ("...", "$2y$10$...");"
 -   **View live application logs:** `ddev logs -f`
 -   **Get project details (URL, etc.):** `ddev describe`
 -   **Delete the project containers and database:** `ddev delete` (use with care)
+
+## Database Migrations with Phinx
+
+We use Phinx to manage database schema changes. This ensures that everyone has the same database structure without losing any existing data.
+
+### 1. Pre-Migration Safety (Snapshot)
+Before running any migrations on a database with important information, it is highly recommended to take a snapshot:
+```bash
+ddev snapshot --name pre_migration_$(date +%Y%m%d_%H%M%S)
+```
+
+### 2. Running Migrations
+To apply any new schema changes, you can use our helper script which automatically takes a snapshot for safety before migrating:
+```bash
+./db_migrate.sh
+```
+
+Alternatively, you can run the command directly:
+```bash
+ddev exec vendor/bin/phinx migrate
+```
+Phinx will automatically keep track of which migrations have already been run and only apply new ones.
+
+### 3. Checking Migration Status
+To see which migrations have been applied and which are pending:
+```bash
+ddev exec vendor/bin/phinx status
+```
+
+### 4. Rolling Back
+If a migration causes issues, you can undo the last one with:
+```bash
+ddev exec vendor/bin/phinx rollback
+```
+
+### 5. Creating a New Migration
+If you need to change the database schema, create a new migration file:
+```bash
+ddev exec vendor/bin/phinx create MyNewMigrationName
+```
+Then edit the generated file in `db/migrations/`.

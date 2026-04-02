@@ -1,10 +1,8 @@
 <?php
 require_once 'includes/auth_check.php';
 require_once 'config/db_connect.php';
-// For QR Code generation
-require_once 'lib/phpqrcode/qrlib.php';
-// For PDF Generation
-require_once 'lib/tcpdf/tcpdf.php';
+// Ensure autoloader is available for TCPDF
+require_once 'vendor/autoload.php';
 
 // All logged-in users can generate their own statements
 check_permissions([1, 2, 3, 4, 5]); // Assuming 5 roles exist

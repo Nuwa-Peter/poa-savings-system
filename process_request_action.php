@@ -65,16 +65,51 @@ try {
 
         if ($action === 'approve') {
             $approved_amount = $_POST['approved_amount'] ?? 0;
+            // Strip commas from masked input
+            $approved_amount = str_replace(',', '', $approved_amount);
             if (!is_numeric($approved_amount) || $approved_amount <= 0) {
                 throw new Exception("Invalid approved amount specified.");
             }
 
-             // Set due date to 1 month from approval and set interest clock
-            $due_date = date('Y-m-d', strtotime('+1 month'));
-            $update_stmt = $pdo->prepare(
-                "UPDATE loans SET amount = ?, balance = ?, status = ?, approved_at = NOW(), approved_by_user_id = ?, due_date = ?, last_interest_applied_at = NOW() WHERE id = ? AND status = 'pending'"
-            );
-            $update_stmt->execute([$approved_amount, $approved_amount, $action, $admin_user_id, $due_date, $request_id]);
+            // Fetch current approval status
+            $loan_status_stmt = $pdo->prepare("SELECT secretary_approval, chairman_approval FROM loans WHERE id = ?");
+            $loan_status_stmt->execute([$request_id]);
+            $loan_approvals = $loan_status_stmt->fetch();
+
+            $role_id = $_SESSION['role_id'];
+            $is_final_approval = false;
+
+            if ($role_id == 3) { // Secretary
+                $update_stmt = $pdo->prepare(
+                    "UPDATE loans SET secretary_approval = 1, secretary_id = ? WHERE id = ? AND status = 'pending'"
+                );
+                $update_stmt->execute([$admin_user_id, $request_id]);
+                $success_message = "Secretary approval recorded. Pending Chairman approval.";
+            } elseif ($role_id == 2 || $role_id == 1) { // Chairman or Root
+                // Chairman can approve if Secretary has approved, or if they choose to bypass (Root)
+                // For now, let's require Secretary approval unless it's Root
+                if (!$loan_approvals['secretary_approval'] && $role_id != 1) {
+                    throw new Exception("Chairman approval requires prior Secretary approval.");
+                }
+
+                $is_final_approval = true;
+                $due_date = date('Y-m-d', strtotime('+1 month'));
+                $update_stmt = $pdo->prepare(
+                    "UPDATE loans SET amount = ?, balance = ?, status = 'approved', chairman_approval = 1, chairman_id = ?, approved_at = NOW(), approved_by_user_id = ?, due_date = ?, last_interest_applied_at = NOW() WHERE id = ? AND status = 'pending'"
+                );
+                $update_stmt->execute([$approved_amount, $approved_amount, $admin_user_id, $admin_user_id, $due_date, $request_id]);
+                $success_message = "Loan fully approved.";
+            } else {
+                throw new Exception("Unauthorized role for loan approval.");
+            }
+
+            // If it's not the final approval, we don't want the common notification logic to trigger yet or we want it to be specific
+            if (!$is_final_approval) {
+                 $pdo->commit();
+                 header('Location: ' . $redirect_url . '?success=' . urlencode($success_message));
+                 exit;
+            }
+
         } else {
             // Standard rejection
             $update_stmt = $pdo->prepare(

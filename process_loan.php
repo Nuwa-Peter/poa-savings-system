@@ -12,8 +12,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $user_id = $_SESSION['user_id'];
-$amount = $_POST['amount'] ?? 0;
+$raw_amount = $_POST['amount'] ?? 0;
+$amount = round(str_replace(',', '', $raw_amount ?: 0));
 $guarantor_id = $_POST['guarantor_id'] ?? null;
+$collateral_description = trim($_POST['collateral_description'] ?? '');
+$collateral_value = round(str_replace(',', '', $_POST['collateral_value'] ?? 0));
 
 // --- Basic Validation ---
 if (!is_numeric($amount) || $amount <= 0) {
@@ -23,6 +26,11 @@ if (!is_numeric($amount) || $amount <= 0) {
 
 if (!$guarantor_id || !is_numeric($guarantor_id) || $guarantor_id == $user_id) {
     header('Location: request_loan.php?error=' . urlencode('Invalid guarantor selected.'));
+    exit;
+}
+
+if (empty($collateral_description) || $collateral_value <= 0) {
+    header('Location: request_loan.php?error=' . urlencode('Please provide valid collateral details.'));
     exit;
 }
 
@@ -68,13 +76,19 @@ try {
     $insert_loan_stmt->execute([$user_id, $amount, $amount]);
     $loan_id = $pdo->lastInsertId();
 
-    // 2. Create the pending guarantor request.
+    // 2. Insert collateral details
+    $insert_collateral_stmt = $pdo->prepare(
+        "INSERT INTO loan_collateral (loan_id, description, estimated_value) VALUES (?, ?, ?)"
+    );
+    $insert_collateral_stmt->execute([$loan_id, $collateral_description, $collateral_value]);
+
+    // 3. Create the pending guarantor request.
     $insert_guarantor_stmt = $pdo->prepare(
         "INSERT INTO loan_guarantors (loan_id, guarantor_id, status) VALUES (?, ?, 'pending')"
     );
     $insert_guarantor_stmt->execute([$loan_id, $guarantor_id]);
 
-    // 3. Create a notification for the guarantor.
+    // 4. Create a notification for the guarantor.
     $borrower_stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
     $borrower_stmt->execute([$user_id]);
     $borrower_username = $borrower_stmt->fetchColumn();
@@ -83,8 +97,8 @@ try {
     $notify_stmt = $pdo->prepare("INSERT INTO notifications (user_id, message) VALUES (?, ?)");
     $notify_stmt->execute([$guarantor_id, $notification_message]);
 
-    // 4. Log the action for audit purposes.
-    $log_action = "User requested a loan of " . number_format($amount, 0) . " with guarantor ID " . $guarantor_id;
+    // 5. Log the action for audit purposes.
+    $log_action = "User requested a loan of " . number_format($amount, 0) . " with guarantor ID " . $guarantor_id . " and collateral: " . $collateral_description;
     $log_stmt = $pdo->prepare("INSERT INTO logs (user_id, action) VALUES (?, ?)");
     $log_stmt->execute([$user_id, $log_action]);
 

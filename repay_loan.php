@@ -74,7 +74,7 @@ try {
                     <input type="hidden" name="current_balance" value="<?php echo $active_loan['balance']; ?>">
                     <div>
                         <label for="amount" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Payment Amount: <span class="text-red-500">*</span></label>
-                        <input type="number" step="0.01" name="amount" id="amount" required class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" inputmode="numeric" data-type="currency" name="amount" id="amount" required class="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div class="flex justify-end">
                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">

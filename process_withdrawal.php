@@ -13,7 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Get form data
-$amount = $_POST['amount'] ?? 0;
+$raw_amount = $_POST['amount'] ?? 0;
+$amount = round(str_replace(',', '', $raw_amount ?: 0));
 $user_id = $_SESSION['user_id'];
 
 // --- Validation ---
@@ -35,7 +36,12 @@ try {
     $withdrawal_stmt->execute([$user_id]);
     $total_withdrawals = $withdrawal_stmt->fetchColumn() ?: 0;
 
-    $available_balance = $total_savings - $total_withdrawals;
+    // Calculate total active fixed deposits (locked funds)
+    $fd_stmt = $pdo->prepare("SELECT SUM(amount) as total_fd FROM fixed_deposits WHERE user_id = ? AND status = 'active'");
+    $fd_stmt->execute([$user_id]);
+    $total_fd = $fd_stmt->fetchColumn() ?: 0;
+
+    $available_balance = $total_savings - $total_withdrawals - $total_fd;
 
     if ($amount > $available_balance) {
         header('Location: withdraw.php?error=' . urlencode('Insufficient funds. Your available balance is ' . number_format($available_balance, 0)));
